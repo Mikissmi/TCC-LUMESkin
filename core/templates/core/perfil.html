@@ -1,0 +1,490 @@
+{% extends 'core/index.html' %}
+
+{% block content %}
+<div class="perfil-cabecalho">
+    <p class="perfil-breadcrumb">Conta &rsaquo; Perfil e configurações</p>
+    <h2>Perfil e configurações</h2>
+</div>
+
+{% if messages %}
+<div class="perfil-mensagens">
+    {% for mensagem in messages %}
+    <p class="perfil-mensagem perfil-mensagem-{{ mensagem.level_tag }}" role="status">{{ mensagem }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="perfil-card-topo">
+    <div class="perfil-avatar" aria-hidden="true">{{ iniciais }}</div>
+
+    <div class="perfil-identificacao">
+        <h3>{{ request.user.nome_usuario|default:'Usuário' }}</h3>
+        <p class="perfil-email">{{ request.user.email }} &middot; membro desde {{ request.user.data_cadastro|date:"F"|lower }} de {{ request.user.data_cadastro|date:"Y" }}</p>
+        {% if perfil %}
+        <div class="perfil-badges">
+            <span class="pill-badge pill-roxo">Skin Score <strong>{{ perfil.porcentagem_saude }}/100</strong></span>
+            <span class="pill-badge pill-azul">Fototipo <strong>{{ perfil.fototipo|default:'--' }}</strong></span>
+        </div>
+        {% endif %}
+    </div>
+
+    <a href="{% url 'scanner' %}" class="btn-perfil-editar">Fazer novo scan</a>
+</div>
+
+<div class="perfil-layout">
+    <div class="perfil-lateral">
+        <nav class="perfil-tabs" id="perfil-tabs" role="tablist" aria-label="Seções da conta">
+            <button type="button" class="perfil-tab {% if aba_ativa == 'resumo' %}active{% endif %}" data-tab="resumo" role="tab" aria-selected="{% if aba_ativa == 'resumo' %}true{% else %}false{% endif %}">Resumo da pele</button>
+            <button type="button" class="perfil-tab {% if aba_ativa == 'dados' %}active{% endif %}" data-tab="dados" role="tab" aria-selected="{% if aba_ativa == 'dados' %}true{% else %}false{% endif %}">Dados pessoais</button>
+            <button type="button" class="perfil-tab {% if aba_ativa == 'pele' %}active{% endif %}" data-tab="pele" role="tab" aria-selected="{% if aba_ativa == 'pele' %}true{% else %}false{% endif %}">Perfil de pele</button>
+            <button type="button" class="perfil-tab {% if aba_ativa == 'seguranca' %}active{% endif %}" data-tab="seguranca" role="tab" aria-selected="{% if aba_ativa == 'seguranca' %}true{% else %}false{% endif %}">Segurança</button>
+            <button type="button" class="perfil-tab {% if aba_ativa == 'privacidade' %}active{% endif %}" data-tab="privacidade" role="tab" aria-selected="{% if aba_ativa == 'privacidade' %}true{% else %}false{% endif %}">Privacidade e dados</button>
+        </nav>
+
+        <form method="POST" action="{% url 'logout' %}" class="perfil-logout">
+            {% csrf_token %}
+            <button type="submit" class="btn-perfil-sair">Sair da conta</button>
+        </form>
+    </div>
+
+    <div class="perfil-conteudo">
+
+        <!-- ================= RESUMO DA PELE ================= -->
+        <div class="perfil-painel" data-painel="resumo" role="tabpanel" {% if aba_ativa != 'resumo' %}hidden{% endif %}>
+            <h3>Resumo da pele</h3>
+
+            {% if perfil %}
+            <div class="resumo-topo">
+                <div class="circulo-saude" style="--score-fill: {{ perfil.porcentagem_saude }}%; --score-color: {% if perfil.porcentagem_saude >= 85 %}#10b981{% elif perfil.porcentagem_saude >= 70 %}#0d7cb3{% elif perfil.porcentagem_saude >= 50 %}#a46fd2{% else %}#e35d6a{% endif %};">
+                    <h2>{{ perfil.porcentagem_saude }}%</h2>
+                    <span>Score Atual</span>
+                </div>
+                <div class="resumo-info">
+                    <div class="perfil-item-label">Pele {{ perfil.tipo_pele }}</div>
+                    <p>Fototipo {{ perfil.fototipo|default:'--' }} &middot; Objetivo: {{ objetivo_rotulo|default:'Melhorar a pele' }}.</p>
+                    <div class="resumo-acoes">
+                        <a href="{% url 'scanner' %}" class="btn-perfil-secundario">Fazer novo scan</a>
+                        <a href="{% url 'produtos' %}" class="btn-perfil-secundario">Ver recomendações</a>
+                    </div>
+                </div>
+            </div>
+
+            {% if indicadores %}
+            <h4 class="resumo-subtitulo">Indicadores do último scan</h4>
+            <div class="resumo-indicadores">
+                {% for indicador in indicadores %}
+                <div class="resumo-indicador">
+                    <div class="indicador-cabecalho">
+                        <strong>{{ indicador.titulo }}</strong>
+                        {% if indicador.nota is None %}
+                        <span class="badge-indicador">Indisponível</span>
+                        {% else %}
+                        <span class="badge-indicador {{ indicador.classe_selo }}">{{ indicador.classificacao }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="barra-progresso" role="progressbar" aria-label="{{ indicador.titulo }}" aria-valuemin="0" aria-valuemax="100" {% if indicador.nota is not None %}aria-valuenow="{{ indicador.nota }}"{% endif %}>
+                        <div class="barra-preenchida" style="width: {% if indicador.nota is None %}0{% else %}{{ indicador.nota }}{% endif %}%;"></div>
+                    </div>
+                    <p class="indicador-descricao">{{ indicador.descricao }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="resumo-vazio">Você ainda não salvou nenhum scan. Faça o scanner de pele por IA para ver aqui os seus indicadores.</p>
+            {% endif %}
+
+            {% else %}
+            <p class="sem-perfil">Perfil não encontrado. <a href="{% url 'questionario' %}">Complete o questionário</a> para ver o resumo da sua pele.</p>
+            {% endif %}
+        </div>
+
+        <!-- ================= DADOS PESSOAIS ================= -->
+        <div class="perfil-painel" data-painel="dados" role="tabpanel" {% if aba_ativa != 'dados' %}hidden{% endif %}>
+            <h3>Dados pessoais</h3>
+
+            <form method="POST" action="{% url 'editar_dados_pessoais' %}" class="perfil-form-embutido" data-aviso-alteracoes>
+                {% csrf_token %}
+
+                <div class="campo-embutido">
+                    <label for="campo-nome">Nome</label>
+                    <input type="text" id="campo-nome" name="nome_usuario" value="{{ request.user.nome_usuario }}" maxlength="100" autocomplete="name" required>
+                </div>
+
+                <div class="campo-embutido">
+                    <label for="campo-email">E-mail</label>
+                    <input type="email" id="campo-email" value="{{ request.user.email }}" readonly>
+                    <p class="campo-ajuda">O e-mail é o seu acesso à conta e não pode ser alterado por aqui.</p>
+                </div>
+
+                {% if perfil %}
+                <div class="campo-embutido">
+                    <label for="campo-idade">Idade</label>
+                    <input type="number" id="campo-idade" name="idade" min="10" max="120" value="{{ perfil.idade }}" required>
+                </div>
+                {% endif %}
+
+                <div class="aviso-alteracoes" hidden>
+                    <span>Você tem alterações não salvas.</span>
+                    <button type="reset" class="btn-perfil-secundario">Descartar</button>
+                </div>
+
+                <div class="form-acoes">
+                    <button type="submit" class="btn">Salvar alterações</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ================= PERFIL DE PELE ================= -->
+        <div class="perfil-painel" data-painel="pele" role="tabpanel" {% if aba_ativa != 'pele' %}hidden{% endif %}>
+            <h3>Perfil de pele</h3>
+
+            {% if perfil %}
+            <form method="POST" action="{% url 'editar_perfil' %}" class="perfil-form-embutido" data-aviso-alteracoes>
+                {% csrf_token %}
+
+                <div class="campo-embutido">
+                    <fieldset class="campo-grupo">
+                        <legend>Tipo de pele</legend>
+                        <div class="opcoes-cartao">
+                            <label><input type="radio" name="tipo_pele" value="oleosa" {% if perfil.tipo_pele == 'oleosa' %}checked{% endif %}><span><strong>Oleosa</strong><small>brilho e poros</small></span></label>
+                            <label><input type="radio" name="tipo_pele" value="seca" {% if perfil.tipo_pele == 'seca' %}checked{% endif %}><span><strong>Seca</strong><small>repuxa ou descama</small></span></label>
+                            <label><input type="radio" name="tipo_pele" value="mista" {% if perfil.tipo_pele == 'mista' %}checked{% endif %}><span><strong>Mista</strong><small>zona T oleosa</small></span></label>
+                            <label><input type="radio" name="tipo_pele" value="normal" {% if perfil.tipo_pele == 'normal' %}checked{% endif %}><span><strong>Normal</strong><small>equilibrada</small></span></label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="campo-embutido">
+                    <label for="campo-objetivo">Objetivo principal</label>
+                    <select id="campo-objetivo" name="objetivo" required>
+                        {% for valor, texto in objetivos %}
+                        <option value="{{ valor }}" {% if objetivo_atual == valor %}selected{% endif %}>{{ texto }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="campo-embutido">
+                    <label for="alergias">Alergias e ingredientes a evitar</label>
+                    <!-- sem JS e um campo de texto separado por virgulas; com JS vira etiquetas removiveis -->
+                    <div class="campo-etiquetas" data-etiquetas>
+                        <input type="text" id="alergias" name="alergias" value="{{ alergias_lista|join:', ' }}" placeholder="Ex.: fragrância, parabenos (separe por vírgula)" maxlength="255">
+                    </div>
+                </div>
+
+                <!-- aparece so com o objetivo "Reduzir acne" (js abaixo). "Não sei" = vazio -->
+                <div class="campo-embutido" id="campo-tipo-acne" {% if objetivo_atual != 'reduzir acne' %}hidden{% endif %}>
+                    <label for="tipo_acne">Tipo de acne</label>
+                    <select id="tipo_acne" name="tipo_acne">
+                        <option value="" {% if not perfil.tipo_acne %}selected{% endif %}>Não sei</option>
+                        <option value="Comedonal" {% if perfil.tipo_acne == 'Comedonal' %}selected{% endif %}>Comedonal: cravos brancos e pretos</option>
+                        <option value="Inflamatória" {% if perfil.tipo_acne == 'Inflamatória' %}selected{% endif %}>Inflamatória: espinhas vermelhas, com pus</option>
+                        <option value="Nodular" {% if perfil.tipo_acne == 'Nodular' %}selected{% endif %}>Nodular: caroços duros e doloridos sob a pele</option>
+                        <option value="Cística" {% if perfil.tipo_acne == 'Cística' %}selected{% endif %}>Cística: bolsas grandes, profundas e dolorosas</option>
+                    </select>
+                </div>
+
+                <div class="campo-embutido">
+                    <fieldset class="campo-grupo">
+                        <legend>Sua pele é sensível?</legend>
+                        <div class="segmentado">
+                            <label><input type="radio" name="sensibilidade" value="sim" {% if perfil.sensibilidade %}checked{% endif %}><span>Sim</span></label>
+                            <label><input type="radio" name="sensibilidade" value="nao" {% if not perfil.sensibilidade %}checked{% endif %}><span>Não</span></label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="campo-embutido">
+                    <fieldset class="campo-grupo">
+                        <legend>Está grávida?</legend>
+                        <div class="segmentado">
+                            <label><input type="radio" name="gestante" value="sim" {% if perfil.gestante %}checked{% endif %}><span>Sim</span></label>
+                            <label><input type="radio" name="gestante" value="nao" {% if not perfil.gestante %}checked{% endif %}><span>Não</span></label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="campo-embutido">
+                    <fieldset class="campo-grupo">
+                        <legend>Textura preferida</legend>
+                        <div class="segmentado">
+                            <label><input type="radio" name="preferencia_produto" value="gel" {% if perfil.preferencia_produto == 'gel' %}checked{% endif %}><span>Gel</span></label>
+                            <label><input type="radio" name="preferencia_produto" value="creme" {% if perfil.preferencia_produto == 'creme' %}checked{% endif %}><span>Creme</span></label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="campo-embutido">
+                    <fieldset class="campo-grupo">
+                        <legend>Usa maquiagem todos os dias?</legend>
+                        <div class="segmentado">
+                            <label><input type="radio" name="usa_maquiagem_diariamente" value="sim" {% if perfil.usa_maquiagem_diariamente == 'sim' %}checked{% endif %}><span>Sim</span></label>
+                            <label><input type="radio" name="usa_maquiagem_diariamente" value="nao" {% if perfil.usa_maquiagem_diariamente == 'nao' %}checked{% endif %}><span>Não</span></label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="aviso-alteracoes" hidden>
+                    <span>Você tem alterações não salvas.</span>
+                    <button type="reset" class="btn-perfil-secundario">Descartar</button>
+                </div>
+
+                <div class="form-acoes">
+                    <button type="submit" class="btn">Salvar alterações</button>
+                </div>
+            </form>
+            <p class="campo-ajuda">Quer refazer todas as respostas? <a href="{% url 'questionario' %}">Refazer o questionário</a>.</p>
+            {% else %}
+            <p class="sem-perfil">Perfil não encontrado. <a href="{% url 'questionario' %}">Complete o questionário</a> para configurar o seu perfil de pele.</p>
+            {% endif %}
+        </div>
+
+        <!-- ================= SEGURANÇA ================= -->
+        <div class="perfil-painel" data-painel="seguranca" role="tabpanel" {% if aba_ativa != 'seguranca' %}hidden{% endif %}>
+            <h3>Segurança</h3>
+
+            <form method="POST" action="{% url 'alterar_senha' %}" class="perfil-form-embutido">
+                {% csrf_token %}
+
+                {% if form_senha.non_field_errors %}
+                <p class="campo-erro">{{ form_senha.non_field_errors|join:' ' }}</p>
+                {% endif %}
+
+                <div class="campo-embutido">
+                    <label for="{{ form_senha.old_password.id_for_label }}">Senha atual</label>
+                    <input type="password" id="{{ form_senha.old_password.id_for_label }}" name="old_password" autocomplete="current-password" required>
+                    {% for erro in form_senha.old_password.errors %}<p class="campo-erro">{{ erro }}</p>{% endfor %}
+                </div>
+
+                <div class="campo-embutido">
+                    <label for="{{ form_senha.new_password1.id_for_label }}">Nova senha</label>
+                    <input type="password" id="{{ form_senha.new_password1.id_for_label }}" name="new_password1" autocomplete="new-password" required>
+                    {% for erro in form_senha.new_password1.errors %}<p class="campo-erro">{{ erro }}</p>{% endfor %}
+                    <div class="campo-ajuda">{{ form_senha.new_password1.help_text|safe }}</div>
+                </div>
+
+                <div class="campo-embutido">
+                    <label for="{{ form_senha.new_password2.id_for_label }}">Confirmar nova senha</label>
+                    <input type="password" id="{{ form_senha.new_password2.id_for_label }}" name="new_password2" autocomplete="new-password" required>
+                    {% for erro in form_senha.new_password2.errors %}<p class="campo-erro">{{ erro }}</p>{% endfor %}
+                </div>
+
+                <div class="form-acoes">
+                    <button type="submit" class="btn">Alterar senha</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ================= PRIVACIDADE E DADOS ================= -->
+        <div class="perfil-painel" data-painel="privacidade" role="tabpanel" {% if aba_ativa != 'privacidade' %}hidden{% endif %}>
+            <h3>Privacidade e dados</h3>
+
+            <div class="perfil-item">
+                <div>
+                    <span class="perfil-item-label">Política de Privacidade</span>
+                    <p>Saiba como o LUME Skin coleta, usa e protege os seus dados pessoais.</p>
+                </div>
+                <a href="{% url 'politica_privacidade' %}" class="btn-perfil-secundario">Ver política de privacidade</a>
+            </div> 
+
+            <div class="perfil-item">
+                <div>
+                    <span class="perfil-item-label">Termos de Uso</span>
+                    <p>Leia os Termos de Uso do LUME Skin, que regem o seu acesso e uso do aplicativo.</p>
+                </div>
+                <a href="{% url 'termosdeuso' %}" class="btn-perfil-secundario">Ver termos de uso</a>
+            </div>
+
+            <div class="perfil-item">
+                <div>
+                    <span class="perfil-item-label">Imagem do último scan</span>
+                    {% if perfil and perfil.foto_rosto %}
+                    <img src="{{ perfil.foto_rosto }}" alt="Imagem do último scan guardada na sua conta" class="privacidade-miniatura">
+                    <p>Guardada na sua conta junto com os resultados da análise. Você pode apagá-la quando quiser.</p>
+                    {% else %}
+                    <p>Nenhuma imagem de scan guardada na sua conta.</p>
+                    {% endif %}
+                </div>
+                {% if perfil and perfil.foto_rosto %}
+                <form method="POST" action="{% url 'apagar_foto_perfil' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-perfil-secundario">Apagar imagem</button>
+                </form>
+                {% endif %}
+            </div>
+
+            <div class="perfil-item">
+                <div>
+                    <span class="perfil-item-label">Exportar meus dados</span>
+                    <p>Baixe uma cópia do seu perfil, das respostas do questionário e da análise do último scan (arquivo JSON).</p>
+                </div>
+                <a href="{% url 'exportar_dados' %}" class="btn-perfil-secundario">Baixar dados</a>
+            </div>
+
+            <div class="zona-perigo">
+                <div>
+                    <strong>Excluir conta</strong>
+                    <p>Remove definitivamente a sua conta, o perfil e os resultados dos scans. Essa ação não pode ser desfeita.</p>
+                </div>
+                <button type="button" class="btn-perigo" id="abrir-excluir-conta">Excluir minha conta</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- confirmacao de exclusao: pede a senha e a palavra EXCLUIR -->
+<dialog id="dialogo-excluir-conta" class="dialogo-perfil" aria-labelledby="titulo-excluir-conta">
+    <form method="POST" action="{% url 'excluir_conta' %}" class="perfil-form-embutido">
+        {% csrf_token %}
+        <h3 id="titulo-excluir-conta">Excluir a sua conta?</h3>
+        <p class="campo-ajuda">Todos os seus dados serão apagados e não será possível recuperá-los.</p>
+
+        <div class="campo-embutido">
+            <label for="excluir-senha">Sua senha</label>
+            <input type="password" id="excluir-senha" name="senha" autocomplete="current-password" required>
+        </div>
+        <div class="campo-embutido">
+            <label for="excluir-confirmacao">Digite EXCLUIR para confirmar</label>
+            <input type="text" id="excluir-confirmacao" name="confirmacao" autocomplete="off" required>
+        </div>
+
+        <div class="form-acoes">
+            <button type="button" class="btn-perfil-secundario" id="cancelar-excluir-conta">Cancelar</button>
+            <button type="submit" class="btn-perigo btn-perigo-cheio">Excluir definitivamente</button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+(function () {
+    var abas = document.querySelectorAll('.perfil-tab');
+    var paineis = document.querySelectorAll('.perfil-painel');
+
+    function mudarAba(nome) {
+        abas.forEach(function (aba) {
+            var ativa = aba.getAttribute('data-tab') === nome;
+            aba.classList.toggle('active', ativa);
+            aba.setAttribute('aria-selected', ativa ? 'true' : 'false');
+        });
+        paineis.forEach(function (painel) {
+            painel.hidden = painel.getAttribute('data-painel') !== nome;
+        });
+        // guarda a aba na URL (um F5 volta pra mesma aba)
+        history.replaceState(null, '', '?aba=' + nome);
+    }
+    window.mudarAba = mudarAba;
+
+    abas.forEach(function (aba) {
+        aba.addEventListener('click', function () { mudarAba(aba.getAttribute('data-tab')); });
+    });
+
+    // avisa quando o formulario tem alteracoes nao salvas
+    document.querySelectorAll('form[data-aviso-alteracoes]').forEach(function (form) {
+        var aviso = form.querySelector('.aviso-alteracoes');
+        function mostrar() { aviso.hidden = false; }
+        form.addEventListener('input', mostrar);
+        form.addEventListener('change', mostrar);
+        form.addEventListener('reset', function () {
+            aviso.hidden = true;
+            // o reset do navegador roda depois deste evento; redesenha as etiquetas em seguida
+            setTimeout(function () { form.dispatchEvent(new CustomEvent('formulario-resetado')); }, 0);
+        });
+    });
+
+    // alergias como etiquetas removiveis (o campo de texto continua sendo o que vai no POST)
+    document.querySelectorAll('[data-etiquetas]').forEach(function (caixa) {
+        var campo = caixa.querySelector('input[name="alergias"]');
+        var rotulo = document.querySelector('label[for="' + campo.id + '"]');
+        var form = campo.form;
+        var itens = [];
+
+        var entrada = document.createElement('input');
+        entrada.type = 'text';
+        entrada.id = campo.id + '-nova';
+        entrada.placeholder = 'Digite e pressione Enter';
+        entrada.autocomplete = 'off';
+        entrada.className = 'etiquetas-entrada';
+
+        campo.type = 'hidden';
+        if (rotulo) { rotulo.htmlFor = entrada.id; }
+        caixa.classList.add('etiquetas-ativas');
+
+        function lerCampo() {
+            itens = campo.value.split(',').map(function (t) { return t.trim(); }).filter(Boolean);
+        }
+
+        function desenhar() {
+            caixa.querySelectorAll('.etiqueta').forEach(function (e) { e.remove(); });
+            itens.forEach(function (texto, indice) {
+                var etiqueta = document.createElement('span');
+                etiqueta.className = 'etiqueta';
+                etiqueta.textContent = texto;
+                var remover = document.createElement('button');
+                remover.type = 'button';
+                remover.className = 'etiqueta-remover';
+                remover.setAttribute('aria-label', 'Remover ' + texto);
+                remover.textContent = '×';
+                remover.addEventListener('click', function () {
+                    itens.splice(indice, 1);
+                    sincronizar();
+                });
+                etiqueta.appendChild(remover);
+                caixa.insertBefore(etiqueta, entrada);
+            });
+        }
+
+        function sincronizar() {
+            campo.value = itens.join(', ');
+            desenhar();
+            form.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        function adicionar() {
+            var texto = entrada.value.replace(/,/g, ' ').trim();
+            entrada.value = '';
+            if (texto && itens.indexOf(texto) === -1) {
+                itens.push(texto);
+                sincronizar();
+            }
+        }
+
+        entrada.addEventListener('keydown', function (evento) {
+            if (evento.key === 'Enter' || evento.key === ',') {
+                evento.preventDefault();
+                adicionar();
+            } else if (evento.key === 'Backspace' && !entrada.value && itens.length) {
+                itens.pop();
+                sincronizar();
+            }
+        });
+        entrada.addEventListener('blur', adicionar);
+
+        // (Enter nesse campo vira etiqueta: o keydown acima ja impede o envio do formulario)
+        caixa.appendChild(entrada);
+        form.addEventListener('formulario-resetado', function () { lerCampo(); desenhar(); });
+
+        lerCampo();
+        desenhar();
+    });
+
+    // tipo de acne so aparece quando o objetivo e "Reduzir acne" (fora disso volta para "Não sei")
+    var selectObjetivo = document.getElementById('campo-objetivo');
+    var campoTipoAcne = document.getElementById('campo-tipo-acne');
+    if (selectObjetivo && campoTipoAcne) {
+        selectObjetivo.addEventListener('change', function () {
+            var eAcne = selectObjetivo.value === 'reduzir acne';
+            campoTipoAcne.hidden = !eAcne;
+            if (!eAcne) { document.getElementById('tipo_acne').value = ''; }
+        });
+    }
+
+    // janela de confirmacao da exclusao de conta
+    var dialogo = document.getElementById('dialogo-excluir-conta');
+    var abrir = document.getElementById('abrir-excluir-conta');
+    var cancelar = document.getElementById('cancelar-excluir-conta');
+    if (dialogo && abrir) {
+        abrir.addEventListener('click', function () { dialogo.showModal(); });
+        cancelar.addEventListener('click', function () { dialogo.close(); });
+    }
+})();
+</script>
+{% endblock %}

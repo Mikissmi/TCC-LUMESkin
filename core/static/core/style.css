@@ -1,0 +1,3661 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* 1. Reset Global Completo */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Ajuste do body - as paginas usam ora class="app-body" ora class="body",
+   entao as duas ficam definidas aqui pra funcionar nos dois casos */
+body.app-body,
+body.body {
+    background: radial-gradient(circle at top right, rgba(164, 111, 210, 0.466), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(13, 124, 179, 0.418), transparent 50%);
+    background-color: #fcfcfc;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* 2. Container Principal (Força as duas colunas lado a lado) */
+.conteiner-texto {
+    display: flex;
+    max-width: 1140px;
+    width: 100%;
+    gap: 80px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 3. Lado Esquerdo - Branding */
+.secao-texto {
+    flex: 1;
+    max-width: 500px;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 32px;
+}
+
+.LUME-Skin_Logo {
+    width: 250px;
+}
+
+.main-titulo {
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #0b132a;
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+}
+
+.main-titulo .highlight {
+    color: #a46fd2;
+}
+
+.subtitulo {
+    margin-top: 12px;
+    color: #6c757d;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+}
+
+/* Grid de Features (Cards inferiores) */
+.cards-conteiner {
+    display: flex;
+    gap: 16px;
+}
+
+.card-scanner,
+.card-metas {
+    background: white;
+    padding: 16px;
+    border-radius: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    flex: 1;
+}
+
+.icone-scanner,
+.icone-metas {
+    background-color: #eeedff;
+    color: #a46fd2;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.icone-texto strong {
+    display: block;
+    font-size: 13px;
+    color: #0b132a;
+    margin-bottom: 4px;
+}
+
+.icone-texto p {
+    font-size: 11px;
+    color: #8a92a6;
+    line-height: 1.4;
+}
+
+/* 4. Lado Direito - Sessão de Autenticação */
+.secao-autenticacao {
+    flex: 1;
+    max-width: 430px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.card-autenticacao {
+    background: white;
+    width: 100%;
+    padding: 36px;
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+/* Abas Alternadoras */
+.conteiner-login-cadastro {
+    background-color: #f3f4f6;
+    padding: 4px;
+    border-radius: 12px;
+    display: flex;
+    margin-bottom: 32px;
+}
+
+.tab-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6c757d;
+    cursor: pointer;
+    border-radius: 9px;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: white;
+    color: #0b132a;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.form-titulo {
+    font-size: 22px;
+    color: #0b132a;
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.form-subtitulo {
+    font-size: 13px;
+    color: #6c757d;
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+/* Inputs do Formulário */
+.input-caixa {
+    margin-bottom: 20px;
+}
+
+.input-caixa label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.caixa-texto {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.caixa-texto input {
+    width: 100%;
+    padding: 14px 14px 14px 42px;
+    border: 1px solid #edf2f7;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.caixa-texto input:focus {
+    border-color: #c813ff;
+    background-color: white;
+    box-shadow: 0 0 0 4px rgba(255, 106, 19, 0.1);
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    color: #a0aec0;
+    font-size: 15px;
+}
+
+/* Botão Roxo Principal (login / cadastro) */
+.botao {
+    width: 100%;
+    background-color: #a46fd2;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 24px;
+    transition: background 0.2s;
+}
+
+.botao:hover {
+    background-color: #8a5fc0;
+}
+
+
+/* Mensagem de erro no login */
+
+.alerta-erro {
+    background: #fdecec;
+    color: #c53030;
+    border: 1px solid #f5b5b5;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    animation: alerta-sumir 0.4s ease 5s forwards;
+}
+
+@keyframes alerta-sumir {
+    to { opacity: 0; visibility: hidden; height: 0; padding: 0; margin: 0; border: 0; }
+}
+
+/* Mensagem de erro no login */
+.form-erro {
+    color: #e53e3e;
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+/* Termos de Uso inferiores */
+.terms-text {
+    font-size: 11px;
+    color: #a0aec0;
+    text-align: center;
+    margin-top: 24px;
+    line-height: 1.5;
+    max-width: 340px;
+}
+
+.terms-text a {
+    color: #9513ff;
+    text-decoration: none;
+}
+
+/* (nao e mais usado no questionario - apague se nenhuma outra pagina usar) */
+.termo-scanner {
+    font-size: 12px;
+    color: #a0aec0;
+    line-height: 1.5;
+    margin-top: 8px;
+}
+
+.termo-scanner a {
+    color: #a46fd2;
+}
+
+/* Helpers para alternância de formulários (login / registro) */
+.hide { display: none !important; }
+.form-login form { width: 100%; }
+.form-login .form-titulo { margin-top: 0; }
+
+/* 5. Responsividade Completa (Para telas menores) */
+@media (max-width: 900px) {
+    .conteiner-texto {
+        flex-direction: column;
+        gap: 40px;
+        padding: 20px 10px;
+    }
+    .secao-texto {
+        text-align: center;
+        max-width: 100%;
+    }
+    .logo-area {
+        justify-content: center;
+    }
+    .cards-conteiner {
+        flex-direction: column;
+    }
+}
+
+/* ==========================================================================
+   2. CABEÇALHO DA PÁGINA DO QUESTIONÁRIO
+   ========================================================================== */
+.pagina-questionario {
+    width: 100%;
+    max-width: 880px; /* largura confortavel pra grade de 2 colunas */
+    margin: 0 auto;
+}
+
+.pagina-questionario h1 {
+    font-size: 32px;
+    font-weight: 800;
+    text-align: center;
+    color: #0b132a;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+}
+
+.pagina-questionario > p {
+    font-size: 15px;
+    color: #6c757d;
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+/* Barra de progresso (fica visivel enquanto a pagina rola).
+   A barra em si usa .barra-progresso / .barra-preenchida do scanner. */
+.progresso-questionario {
+    position: sticky;
+    top: 12px;
+    z-index: 10;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.progresso-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #718096;
+}
+
+.progresso-topo strong {
+    color: #0b132a;
+}
+
+.progresso-pct {
+    color: #a46fd2;
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   3. BLOCOS DE PERGUNTAS (GRADE DE 2 COLUNAS)
+   ========================================================================== */
+.questionario-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.form-bloco {
+    background: #ffffff;
+    padding: 28px 32px;
+    border-radius: 28px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-bloco:hover {
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.04);
+}
+
+/* Cada card escolhe: largo (linha inteira, padrao) ou .bloco-meio (meia largura) */
+.questionario-form .form-bloco {
+    grid-column: 1 / -1;
+}
+
+.questionario-form .form-bloco.bloco-meio {
+    grid-column: span 1;
+}
+
+/* A barra de progresso e fixa no topo: reserva espaco quando o navegador rola ate
+   um campo (ex.: erro de validacao) pra ele nao ficar escondido atras da barra */
+.questionario-form input,
+.questionario-form select {
+    scroll-margin-top: 110px;
+}
+
+/* Títulos das perguntas (label de campo simples ou legend de grupo de radio) */
+.form-bloco label:first-child,
+.form-bloco legend.pergunta {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0b132a;
+    margin-bottom: 18px;
+}
+
+.form-bloco legend.pergunta {
+    width: 100%;
+    margin-bottom: 0;
+    padding: 0 0 18px; /* padding em vez de margin: mais previsivel em <legend> */
+}
+
+/* Pergunta 2.1: mantem a cor original (preto) que ela ja tinha */
+.form-bloco legend.pergunta-sub {
+    color: #000;
+}
+
+/* ==========================================================================
+   4. INPUTS, SELECTS E TEXTAREAS
+   ========================================================================== */
+.form-bloco input[type="text"],
+.form-bloco input[type="number"],
+.form-bloco select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #edf2f7;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.form-bloco input[type="text"]::placeholder,
+.form-bloco input[type="number"]::placeholder {
+    color: #607796;
+}
+
+.form-bloco input[type="text"]:focus,
+.form-bloco input[type="number"]:focus,
+.form-bloco select:focus {
+    border-color: #a46fd2;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(164, 111, 210, 0.1);
+}
+
+/* Campos condicionais (aparecem via JS) se ajustando abaixo do campo principal */
+.form-bloco input[name="descricaoalergia"],
+.form-bloco input[name="objetivo_outro"],
+.form-bloco #bloco-tipo-acne {
+    margin-top: 16px;
+}
+
+/* Garante que campos condicionais escondidos realmente sumam */
+.form-bloco [hidden] {
+    display: none !important;
+}
+
+/* ==========================================================================
+   5. GRUPOS DE SELEÇÃO (RADIO BUTTONS)
+   ========================================================================== */
+
+/* Grupos de radio sao <fieldset>: remove borda/padding padrao do navegador */
+.form-bloco fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Customização sutil das linhas de múltipla escolha */
+.radio-group label {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #4a5568 !important;
+    cursor: pointer;
+    background: #f8fafc;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid #edf2f7;
+    margin-bottom: 0 !important;
+    transition: all 0.2s ease;
+}
+
+.radio-group label:hover {
+    background: #f8edff;
+    border-color: rgba(164, 111, 210, 0.3);
+    color: #a46fd2 !important;
+}
+
+/* Estilização nativa do input radio para combinar com a marca */
+.radio-group input[type="radio"] {
+    accent-color: #a46fd2;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+/* Foco visivel para quem navega pelo teclado */
+.consentimento input[type="checkbox"]:focus-visible,
+.bloco-upload-foto input[type="file"]:focus-visible {
+    outline: 2px solid #a46fd2;
+    outline-offset: 2px;
+}
+
+/* Radio: o navegador ignora border-radius em radio nativo, entao o anel de foco
+   (teclado) vai na linha inteira da opcao, que tem cantos arredondados */
+.radio-group input[type="radio"]:focus-visible {
+    outline: none;
+}
+
+.radio-group label:has(input[type="radio"]:focus-visible) {
+    outline: 2px solid #a46fd2;
+    outline-offset: 2px;
+}
+
+/* ==========================================================================
+   6. BOTÃO DE ENVIO DO QUESTIONÁRIO (MANTENDO A IDENTIDADE)
+   ========================================================================== */
+.btn {
+    width: 100%;
+    background-color: #a46fd2;
+    color: #ffffff;
+    border: none;
+    padding: 16px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(164, 111, 210, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn:active {
+    transform: scale(0.99);
+}
+
+/* Adiciona a setinha dinâmica via pseudo-elemento simulando o ícone do modelo.
+   So se aplica ao botao de enviar o questionario - o .escolha abaixo desliga isso */
+.questionario-form .btn::after {
+    content: " →";
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Botao de enviar ocupa a linha inteira da grade */
+.questionario-form > .btn {
+    grid-column: 1 / -1;
+}
+
+/* ---- Upload da foto (pergunta 11): arquivo, erro, preview e consentimento ---- */
+.bloco-upload-foto {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.form-bloco .bloco-upload-foto label:first-child {
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    color: #59465f;
+}
+
+.foto-ajuda {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #4a5568;
+}
+
+.foto-erro {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #e53e3e;
+}
+
+.foto-preview {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 14px;
+    padding: 12px;
+    background: #ffffff;
+    border: 1px solid #edf2f7;
+    border-radius: 12px;
+}
+
+.foto-preview img {
+    width: 96px;
+    height: 96px;
+    flex-shrink: 0;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.foto-preview-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    font-size: 12px;
+    color: #4a5568;
+}
+
+.foto-preview-info strong {
+    font-size: 13px;
+    color: #0b132a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn-remover-foto {
+    align-self: flex-start;
+    margin-top: 6px;
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: 13px;
+    font-weight: 700;
+    color: #e35d6a;
+    cursor: pointer;
+}
+
+.btn-remover-foto:hover {
+    text-decoration: underline;
+}
+
+.btn-remover-foto:focus-visible {
+    outline: 2px solid #a46fd2;
+    outline-offset: 2px;
+}
+
+/* Reaproveita o .consentimento do scanner; so reforca contraste e clique */
+.bloco-upload-foto .consentimento {
+    color: #4a5568;
+    cursor: pointer;
+}
+
+
+#camera-video {
+    width: 100%;
+    max-width: 420px;
+    border-radius: 16px;
+    background: #000;
+    transform: scaleX(-1);   /* só espelha a prévia, a foto sai normal */
+    display: block;
+    margin: 12px 0;
+}
+
+#btn-abrir-camera { margin: 8px 0; }
+
+.btn:disabled,
+#input-foto:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.camera-botoes {
+    display: flex;
+    gap: 12px;
+}
+
+.camera-botoes .btn {
+    flex: 1;
+    width: auto;
+    margin: 0;
+}
+
+
+/* ==========================================================================
+   7. RESPONSIVIDADE DO QUESTIONARIO
+   ========================================================================== */
+@media (max-width: 700px) {
+    .questionario-form {
+        grid-template-columns: 1fr;
+    }
+
+    .questionario-form .form-bloco.bloco-meio {
+        grid-column: 1 / -1;
+    }
+
+    .form-bloco {
+        padding: 22px 20px;
+        border-radius: 22px;
+    }
+
+    .progresso-questionario {
+        top: 8px;
+        padding: 12px 16px;
+    }
+}
+
+@media (max-width: 600px) {
+    body.app-body,
+    body.body {
+        padding: 30px 16px;
+    }
+
+    .pagina-questionario h1 {
+        font-size: 26px;
+    }
+}
+
+/* ==========================================================================
+   8. ESTILOS DA TELA DE DASHBOARD
+   ========================================================================== */
+
+/* Ajuste específico para a área de conteúdo do dashboard */
+body.app-body:has(.sidebar),
+body.body:has(.sidebar) {
+    background-color: #f4f7f6;
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 0;
+}
+
+.main.content {
+    max-width: 1200px;
+    margin: 0 auto;
+    flex: 1;
+    padding: 40px;
+    min-width: 0; /* evita que o conteúdo estoure a largura da tela */
+}
+
+/* Barra lateral fixa (logo + menu) - fica parada no lugar quando a pagina rola */
+.sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: #ffffff;
+    border-right: 1px solid #edf2f7;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.LUMESkin_LogoIndex {
+    width: 210px;
+}
+
+.sidebar .logo h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0b132a;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.menu-item {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #718096;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.menu-item:hover {
+    background: #f8edff;
+    color: #a46fd2;
+}
+
+.menu-item.active {
+    background: #a46fd2;
+    color: #ffffff;
+}
+
+/* Rodapé da sidebar (perfil/configurações) - fica grudado embaixo */
+.sidebar-footer {
+    margin-top: auto;
+    border-top: 1px solid #edf2f7;
+    padding-top: 16px;
+}
+
+/* Barra de topo (dentro do conteúdo principal) */
+.topbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 24px;
+}
+
+.topbar .perfil {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #ffffff;
+    padding: 10px 18px;
+    border-radius: 999px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.topbar .nome-usuario {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0b132a;
+}
+
+/* Espaço entre a seção de cards de cima e a rotina de baixo */
+.dashboard-rotina {
+    margin-top: 24px;
+}
+
+/* Cabeçalho do Dashboard */
+.dashboard-cabecalho {
+    margin-bottom: 24px;
+}
+
+.dashboard-cabecalho p {
+    font-size: 14px;
+    color: #718096;
+    font-weight: 500;
+}
+
+/* Grid de duas colunas (Esquerda Larga, Direita Estreita) */
+.dashboard-secao {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    align-items: stretch; /* os dois cards de cima (Saude da Pele e Fototipo) sempre com a mesma altura */
+    
+}
+
+/* Estilo Base de todos os Cards */
+.card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015);
+    border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+/* CARD ESQUERDO: Saúde da Pele */
+.card-saude {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+/* Círculo de Score Dinâmico por Gradiente Cônico */
+.circulo-saude {
+    min-width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: conic-gradient(var(--score-color, #a46fd2) var(--score-fill, 0%), #f8f8f8 0);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+/* Miolo branco no centro, transformando a "pizza" em anel */
+.circulo-saude::before {
+    content: '';
+    position: absolute;
+    inset: 16px;
+    border-radius: 50%;
+    background: #ffffff;
+    z-index: 1;
+}
+
+/* Ajuste interno dos textos do círculo */
+.circulo-saude h2 {
+    font-size: 36px;
+    font-weight: 800;
+    color: #0b132a;
+    line-height: 1;
+    z-index: 2;
+}
+
+.circulo-saude span {
+    font-size: 11px;
+    color: #a0aec0;
+    font-weight: 600;
+    margin-top: 4px;
+    z-index: 2;
+}
+
+/* Informações do lado direito do círculo */
+.health-info {
+    flex: 1;
+}
+
+.health-info h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0b132a;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+/* Badge verde com o tipo de pele, dentro do card de saude
+   (usa .perfil, entao a regra e presa ao .health-info pra nao bater
+   com o card "Perfil Dermatologico" que tambem se chama .perfil) */
+.health-info h3 .perfil {
+    background-color: #e6f9f0;
+    color: #10b981;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.health-info p {
+    font-size: 14px;
+    color: #718096;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+/* Mini Grid interno com os metadados */
+.detalhes {
+    display: flex;
+    gap: 40px;
+    border-top: 1px solid #edf2f7;
+    padding-top: 20px;
+}
+
+.detalhes .preferencias {
+    display: block;
+    font-size: 11px;
+    color: #a0aec0;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.detalhes strong {
+    font-size: 15px;
+    color: #0b132a;
+    font-weight: 700;
+}
+
+/* CARD DIREITO: Perfil Dermatologico / Fototipo
+   (o card usa duas classes juntas: class="card perfil" - por isso o
+   seletor composto .card.perfil, pra nao confundir com o badge acima) */
+.card.perfil {
+    display: flex;
+    flex-direction: column;
+    padding: 24px 32px; /* menos espaco em cima/embaixo: o card cabe na altura do card Saude da Pele */
+}
+
+.card.perfil h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0b132a;
+    margin-bottom: 10px;
+}
+
+/* Fototipo: algarismo romano grande + "escala Fitzpatrick" ao lado */
+.fototipo-linha {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.fototipo-numero {
+    font-size: 32px;
+    font-weight: 800;
+    color: #7c4dbd;
+    line-height: 1;
+    letter-spacing: 2px;
+}
+
+.fototipo-linha small {
+    font-size: 14px;
+    color: #5a6478;
+    font-weight: 700;
+}
+
+/* Barra de 6 tons (I a VI); .atual = fototipo da pessoa, com contorno roxo e respiro branco */
+.fototipo-escala {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 10px;
+    padding: 4px;
+    list-style: none;
+}
+
+.fototipo-escala li {
+    flex: 1;
+    height: 12px;
+    border-radius: 999px;
+}
+
+.fototipo-escala li.atual {
+    outline: 2px solid #7c4dbd;
+    outline-offset: 2px;
+}
+
+.card.perfil p {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #5a6478;
+    margin-bottom: 0;
+}
+
+/* Telas medias: a coluna do Fototipo fica estreita e o texto ocupa mais linhas, entao o card fica mais compacto */
+@media (max-width: 1200px) {
+    .card.perfil {
+        padding: 18px 22px;
+    }
+
+    .fototipo-numero {
+        font-size: 28px;
+    }
+}
+
+/* ==========================================================================
+   9. RESPONSIVIDADE DO DASHBOARD
+   ========================================================================== */
+@media (max-width: 900px) {
+    body.app-body:has(.sidebar),
+    body.body:has(.sidebar) {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        min-width: 0;
+        height: auto;
+        position: static; /* no celular o menu vira uma barra normal, nao fixa */
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 16px;
+        border-right: none;
+        border-bottom: 1px solid #edf2f7;
+    }
+
+    .sidebar-footer {
+        margin-top: 0;
+        border-top: none;
+        padding-top: 0;
+    }
+
+    .menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .main.content {
+        padding: 20px;
+    }
+
+    .dashboard-secao {
+        grid-template-columns: 1fr; /* Vira uma coluna no celular */
+    }
+
+    .card-saude {
+        flex-direction: column;
+        text-align: center;
+        gap: 24px;
+    }
+
+    .detalhes {
+        justify-content: center;
+        gap: 24px;
+    }
+}
+
+/* ==========================================================================
+   WIDGET: Status de Hoje
+   ========================================================================== */
+.card-rotina-diaria {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    background: #ffffff;
+}
+
+/* titulo + contador + seletor Manha/Noite, e a barra de progresso logo abaixo */
+.status-topo {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.status-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.status-cabecalho h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0b132a;
+}
+
+.rotina-contador {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: #5f6e85;
+}
+
+/* Barra de progresso da rotina (roxo do app sobre um trilho cinza claro) */
+.rotina-progresso {
+    height: 6px;
+    border-radius: 999px;
+    background-color: #edf0f5;
+    overflow: hidden;
+}
+.rotina-progresso span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background-color: #7c4dbd;
+    transition: width 0.3s ease;
+}
+
+/* Seletor Manhã / Noite - usa .btn tambem, entao aqui reseta o que
+   o botao de enviar do questionario define (largura total, seta, etc.) */
+.escolha {
+    background-color: #f3f4f6;
+    padding: 3px;
+    border-radius: 10px;
+    display: flex;
+    gap: 2px;
+}
+
+.escolha .btn {
+    width: auto;
+    flex: none;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #a0aec0;
+    cursor: pointer;
+    border-radius: 8px;
+    margin-top: 0;
+    transition: all 0.2s ease;
+}
+
+.escolha .btn::after {
+    content: none;
+}
+
+.escolha .btn.ativo {
+    background: #ffffff;
+    color: #0b132a;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* Lista de Rotinas */
+.rotina-lista {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rotina-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 20px;
+    border-radius: 14px;
+    border: 1px solid #e6eaf1;
+    background-color: #ffffff;
+    cursor: pointer; /* o passo inteiro e clicavel (marca/desmarca como feito) */
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.rotina-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.rotina-details strong {
+    display: block;
+    font-size: 14px;
+    color: #0b132a;
+    font-weight: 600;
+}
+
+.rotina-details span {
+    font-size: 12px;
+    color: #5f6e85;
+}
+
+/* Bolinha de status de cada item da rotina (e um <button>: funciona com teclado e leitor de tela) */
+.rotina-item .status {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    padding: 0;
+    border-radius: 50%;
+    border: 2px solid #c5ccd9;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.rotina-item .status:focus-visible {
+    outline: 2px solid #7c4dbd;
+    outline-offset: 2px;
+}
+
+/* Tres estados do passo:
+   1. Pendente (os passos depois do proximo): branco, bolinha cinza */
+.rotina-item.pending:hover {
+    border-color: #c5ccd9;
+}
+
+/* 2. Proximo passo (azul claro, bolinha azul e botao "Marcar como feito") */
+.rotina-item.action-required {
+    background-color: #e7f4fb;
+    border-color: #cfe8f5;
+}
+.rotina-item.action-required .status {
+    border-color: #0d7cb3;
+}
+.rotina-botao {
+    flex: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background-color: #0d7cb3;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* 3. Feito (cinza bem claro, bolinha verde com check e titulo riscado) */
+.rotina-item.completed {
+    background-color: #fafbfd;
+    border-color: #f0f2f7;
+}
+.rotina-item.completed .status {
+    background-color: #0f8f66;
+    border-color: #0f8f66;
+    color: #ffffff;
+}
+.rotina-item.completed .rotina-details strong {
+    text-decoration: line-through;
+    color: #5a6478;
+}
+
+/* Celular: passo e botao um pouco menores para caberem lado a lado */
+@media (max-width: 480px) {
+    .status-cabecalho {
+        flex-wrap: wrap;
+    }
+    .rotina-item {
+        flex-wrap: wrap;
+        padding: 12px 14px;
+        gap: 10px;
+    }
+    /* o botao desce para uma linha propria, para o nome do produto nao ficar espremido */
+    .rotina-botao {
+        flex: 1 1 100%;
+        padding: 8px 10px;
+        text-align: center;
+    }
+}
+
+/* Produto da rotina: o texto e um link para a tela de detalhe */
+.rotina-details a {
+    color: #0d7cb3;
+    text-decoration: none;
+}
+.rotina-details a:hover,
+.rotina-details a:focus-visible {
+    text-decoration: underline;
+}
+
+/* Avisos da rotina (dentro do card, abaixo da lista). .destaque = ex.: acne nodular/cistica */
+.rotina-avisos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 20px;
+}
+.rotina-aviso {
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background-color: #eef2f7;
+    border: 1px solid #d5dde8;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #4a5568;
+}
+.rotina-aviso.destaque {
+    background-color: #fff5f5;
+    border-color: #fed7d7;
+    color: #c53030;
+    font-weight: 600;
+}
+
+.rotina-erro {
+    margin: 12px 0 0;
+    font-size: 12px;
+    color: #c53030;
+}
+
+/* Nota fixa FORA do card: pequena e mais transparente */
+.rotina-nota {
+    grid-column: 1 / -1;
+    margin: 14px 8px 0;
+    font-size: 11px;
+    line-height: 1.5;
+    color: #4a5568;
+    opacity: 0.65;
+}
+
+/* ==========================================================================
+   10. ESTILOS DA TELA DE SCANNER
+   ========================================================================== */
+
+.scanner-cabecalho {
+    margin-bottom: 24px;
+}
+
+.scanner-cabecalho h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0b132a;
+}
+
+.scanner-secao {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 24px;
+    align-items: start;
+    margin-bottom: 24px;
+}
+
+.card-camera {
+    padding: 24px;
+}
+
+.camera-preview {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background-color: #0b132a;
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.camera-preview video,
+.camera-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.camera-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(11, 19, 42, 0.55);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+}
+
+.camera-badge i {
+    display: inline-flex;
+    font-size: 8px;
+    color: #34d399;
+}
+
+.camera-badge.camera-badge-erro i {
+    color: #e35d6a;
+}
+
+.guia-oval {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 46%;
+    height: 78%;
+    border: 2px dashed rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.guia-oval[hidden] {
+    display: none;
+}
+
+/* Preview ao vivo espelhado (como em selfie); a foto capturada nao e espelhada */
+#video-camera {
+    transform: scaleX(-1);
+}
+
+.camera-controles {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.btn-controle,
+.btn-capturar {
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-controle {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 50%;
+    background: #f8fafc;
+    border: 1px solid #edf2f7;
+    color: #4a5568;
+    font-size: 16px;
+}
+
+.btn-controle:hover {
+    background: #f3ebfc;
+    color: #a46fd2;
+    border-color: rgba(164, 111, 210, 0.3);
+}
+
+.btn-capturar {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    border-radius: 50%;
+    background: #a46fd2;
+    color: #ffffff;
+    font-size: 22px;
+    box-shadow: 0 6px 20px rgba(164, 111, 210, 0.3);
+}
+
+.btn-capturar:hover:not(:disabled) {
+    background: #935dc0;
+}
+
+.btn-capturar:disabled,
+.btn-controle:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.scanner-status {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 13px;
+    color: #718096;
+    min-height: 18px;
+}
+
+.card-preparacao h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0b132a;
+    margin-bottom: 6px;
+}
+
+.card-preparacao > p {
+    font-size: 13px;
+    color: #718096;
+    margin-bottom: 20px;
+}
+
+.item-preparo {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+}
+
+.icone-preparo {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 10px;
+    background: #eef7fb;
+    color: #0d7cb3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.item-preparo strong {
+    display: block;
+    font-size: 13px;
+    color: #0b132a;
+    margin-bottom: 2px;
+}
+
+.item-preparo span {
+    font-size: 12px;
+    color: #718096;
+    line-height: 1.5;
+}
+
+.consentimento {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 12px;
+    color: #718096;
+    line-height: 1.5;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #edf2f7;
+}
+
+.consentimento input[type="checkbox"] {
+    margin-top: 3px;
+    accent-color: #a46fd2;
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    cursor: pointer;
+}
+
+.consentimento a {
+    color: #a46fd2;
+    font-weight: 600;
+}
+
+.resultados-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.resultados-cabecalho h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0b132a;
+}
+
+.btn-salvar-checkin {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #a46fd2;
+    color: #ffffff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(164, 111, 210, 0.25);
+    transition: background-color 0.2s ease;
+}
+
+.btn-salvar-checkin:hover:not(:disabled) {
+    background: #935dc0;
+}
+
+.btn-salvar-checkin:disabled {
+    background: #cbd5e0;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.resultados-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr;
+    grid-auto-rows: minmax(150px, auto);
+    gap: 20px;
+}
+
+.card-mapeamento {
+    grid-row: span 3;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-mapeamento h4,
+.card-score-geral .score-geral-label,
+.indicador-cabecalho strong {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0b132a;
+}
+
+.mapeamento-imagem {
+    flex: 1;
+    margin-top: 14px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #edf2f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-height: 200px;
+}
+
+.mapeamento-imagem img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.resultado-vazio {
+    font-size: 12px;
+    color: #a0aec0;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.card-score-geral {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+}
+
+.circulo-score-geral {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: conic-gradient(#a46fd2 var(--score-fill, 0%), #edf2f7 0);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Miolo branco no centro, transformando a "pizza" em anel (igual ao .circulo-saude do dashboard) */
+.circulo-score-geral::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border-radius: 50%;
+    background: #ffffff;
+    z-index: 1;
+}
+
+.circulo-score-geral strong {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0b132a;
+    line-height: 1;
+    position: relative;
+    z-index: 2;
+}
+
+.circulo-score-geral span {
+    font-size: 11px;
+    color: #a0aec0;
+    font-weight: 600;
+    position: relative;
+    z-index: 2;
+}
+
+.card-indicador {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+}
+
+.indicador-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Visual padrao = "regular" (roxo). Por isso nao existe .badge-regular:
+   seria identico a este estilo. */
+.badge-indicador {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #f3ebfc;
+    color: #a46fd2;
+}
+
+.badge-indicador.badge-otimo {
+    background: #e6f9f0;
+    color: #10b981;
+}
+
+.badge-indicador.badge-bom {
+    background: #e7f4fb;
+    color: #0d7cb3;
+}
+
+.badge-indicador.badge-atencao {
+    background: #fdecef;
+    color: #e35d6a;
+}
+
+.barra-progresso {
+    width: 100%;
+    height: 8px;
+    border-radius: 20px;
+    background: #edf2f7;
+    overflow: hidden;
+}
+
+.barra-preenchida {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #a46fd2, #0d7cb3);
+    transition: width 0.4s ease;
+}
+
+.indicador-descricao {
+    font-size: 12px;
+    color: #718096;
+    line-height: 1.4;
+}
+
+@media (max-width: 900px) {
+    .scanner-secao,
+    .resultados-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-mapeamento {
+        grid-row: auto;
+    }
+}
+
+/* ---- Icones SVG inline (herdam a cor e o tamanho do botao/area onde estao) ---- */
+.icone-svg {
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.icone-svg .preenchido {
+    fill: currentColor;
+    stroke: none;
+}
+
+/* ---- Estado "sem camera": explica o motivo e oferece a galeria dentro da propria caixa ---- */
+.camera-vazia {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    text-align: center;
+    color: #ffffff;
+    font-size: 28px; /* tamanho do icone */
+}
+
+.camera-vazia[hidden] {
+    display: none;
+}
+
+.camera-vazia strong {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.camera-vazia span {
+    max-width: 320px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #cbd5e0;
+}
+
+.btn-camera-vazia {
+    margin-top: 6px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 12px;
+    background: #a46fd2;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-camera-vazia:hover:not(:disabled) {
+    background: #935dc0;
+}
+
+.btn-camera-vazia:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-camera-vazia:focus-visible,
+.btn-controle:focus-visible,
+.btn-capturar:focus-visible,
+.btn-salvar-checkin:focus-visible {
+    outline: 2px solid #a46fd2;
+    outline-offset: 2px;
+}
+
+/* ---- Dica de consentimento + indicador de progresso da analise ---- */
+.scanner-dica {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 12px;
+    color: #718096;
+}
+
+.scanner-dica[hidden] {
+    display: none;
+}
+
+.scanner-progresso {
+    margin-top: 14px;
+}
+
+.scanner-progresso[hidden] {
+    display: none;
+}
+
+.barra-indeterminada {
+    width: 40%;
+    animation: scanner-vai-e-vem 1.2s ease-in-out infinite;
+}
+
+@keyframes scanner-vai-e-vem {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(250%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .barra-indeterminada {
+        width: 100%;
+        animation: none;
+    }
+}
+
+/* ==========================================================================
+   11. ESTILOS DA TELA DE RECOMENDAÇÕES DE PRODUTOS
+   (a grade e os cards de produto tambem servem a tela de especialistas)
+   ========================================================================== */
+
+.box-objetivo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 24px 32px;
+    margin: 24px 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015);
+    border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.box-objetivo p {
+    font-size: 14px;
+    color: #718096;
+}
+
+.box-objetivo strong {
+    color: #0b132a;
+}
+
+.botoes-refazer {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-secundario {
+    padding: 10px 16px;
+    border: 1px solid #edf2f7;
+    background: #f8fafc;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #4a5568;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-secundario:hover {
+    background: #f8edff;
+    border-color: rgba(164, 111, 210, 0.3);
+    color: #a46fd2;
+}
+
+.filtros-rotina {
+    margin-bottom: 12px;
+    margin-top: 50px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-filtro {
+    padding: 8px 16px;
+    border: 1px solid #edf2f7;
+    background: #ffffff;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #4a5568;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-filtro:hover {
+    border-color: rgba(164, 111, 210, 0.3);
+    color: #a46fd2;
+}
+
+.btn-filtro.ativo {
+    background: #a46fd2;
+    color: #ffffff;
+    border-color: #a46fd2;
+}
+
+/* Grade (produtos e especialistas) */
+.produtos-grid,
+.especialistas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    margin-top: 8px;
+}
+
+/* Card (produto e especialista) */
+.card-produto,
+.card-especialista {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 15px;
+    box-shadow: 0 5px 9px rgba(0, 0, 0, 0.06);
+    padding-bottom: 20px;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-produto:hover,
+.card-especialista:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Area da imagem (produto e especialista) */
+.produto-imagem,
+.especialista-imagem {
+    width: 100%;
+    height: 260px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px 15px 0 0;
+}
+
+.produto-imagem {
+    overflow: hidden;
+}
+
+.produto-imagem img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-produto h4,
+.card-especialista h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0b132a;
+    margin-top: 14px;
+    margin-bottom: 4px;
+    padding: 0 16px;
+}
+
+.produto-descricao,
+.especialista-descricao {
+    font-size: 13px;
+    color: #718096;
+    line-height: 1.4;
+    padding: 0 16px;
+}
+
+.sem-produtos,
+.sem-perfil {
+    font-size: 14px;
+    color: #718096;
+    grid-column: 1 / -1;
+}
+
+/* ==========================================================================
+   12. ESTILOS DA TELA DE ARTIGOS
+   ========================================================================== */
+
+.artigos-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 30px;
+    margin-top: 24px;
+}
+
+.card-artigo {
+    display: flex;
+    gap: 20px;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015);
+    border: 1px solid rgba(0, 0, 0, 0.02);
+    align-items: center;
+    box-sizing: border-box;
+    min-width: 0;
+    /* sem width: 45% */
+}
+
+.artigo-capa {
+    width: 90px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #edf2f7;
+    border-radius: 10px;
+    flex-shrink: 0;
+    overflow: hidden;          /* novo: a imagem respeita o arredondamento */
+}
+
+.artigo-capa img {             /* novo */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.artigo-capa svg {
+    width: 36px;
+    height: 36px;
+    color: #a0aec0;
+}
+
+.artigo-info {
+    flex: 1;
+    min-width: 0;              /* evita o texto vazar do card */
+    overflow-wrap: break-word;
+}
+.artigo-info h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0b132a;
+    margin-bottom: 4px;
+}
+
+.artigo-autor,
+.artigo-ano {
+    font-size: 13px;
+    color: #718096;
+}
+
+.artigo-resumo {
+    font-size: 13px;
+    color: #718096;
+    line-height: 1.5;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+}
+
+.card-artigo:hover .artigo-resumo {
+    max-height: 450px;
+    opacity: 1;
+    margin: 6px 0 12px;
+}
+
+.btn-ler {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 16px;
+    background: #a46fd2;
+    color: #ffffff;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.btn-ler:hover {
+    background: #8a5fc0;
+}
+
+@media (max-width: 600px) {
+    .artigos-lista { gap: 16px; }
+
+    .card-artigo {
+        padding: 16px;
+        gap: 14px;
+    }
+
+    .artigo-capa {
+        width: 80px;
+        height: 107px;         /* mantém a proporção 3:4 */
+    }
+
+    .artigo-info h4 { font-size: 14px; }
+}
+
+/* telas de toque não têm hover: mostra o resumo, limitado a 3 linhas */
+@media (hover: none) {
+    .artigo-resumo {
+        max-height: none;
+        opacity: 1;
+        margin: 6px 0 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+}
+
+
+/* ==========================================================================
+   13. ESTILOS DA TELA DE ESPECIALISTAS
+   (grade, card, titulo e descricao sao compartilhados com produtos - secao 11;
+   aqui ficam so as diferencas)
+   ========================================================================== */
+
+.especialista-imagem {
+    padding: 0;
+    background: none;
+    overflow: hidden;
+}
+
+.especialista-imagem img {
+    width: 100%;
+    height: auto;      /* a altura acompanha a proporção da foto */
+    display: block;
+    border-radius: 0;
+}
+
+.especialista-descricao {
+    margin-bottom: 12px;
+}
+
+
+/* ==========================================================================
+   14. CABEÇALHO PADRÃO COM BREADCRUMB (perfil, editar perfil, administradores)
+   ========================================================================== */
+
+.perfil-cabecalho {
+    margin-bottom: 24px;
+}
+
+.perfil-breadcrumb {
+    font-size: 12px;
+    font-weight: 600;
+    color: #a0aec0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+
+.perfil-breadcrumb a {
+    color: #a46fd2;
+    text-decoration: none;
+}
+
+.perfil-cabecalho h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0b132a;
+}
+
+/* ==========================================================================
+   15. ESTILOS DA TELA DE PERFIL
+   ========================================================================== */
+
+.perfil-card-topo {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 28px 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015);
+    border: 1px solid rgba(0, 0, 0, 0.02);
+    margin-bottom: 24px;
+}
+
+.perfil-avatar {
+    width: 76px;
+    height: 76px;
+    min-width: 76px;
+    border-radius: 50%;
+    background: #f3ebfc;
+    color: #5f3597; /* iniciais do nome: roxo escuro pra ter contraste no fundo claro */
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 0 0 4px #f8edff;
+}
+
+.perfil-avatar svg {
+    width: 34px;
+    height: 34px;
+}
+
+.perfil-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.perfil-identificacao {
+    flex: 1;
+}
+
+.perfil-identificacao h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0b132a;
+    margin-bottom: 2px;
+}
+
+.perfil-email {
+    font-size: 13px;
+    color: #718096;
+    margin-bottom: 12px;
+}
+
+.perfil-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #718096;
+    background: #f8fafc;
+    border: 1px solid #edf2f7;
+    padding: 6px 14px;
+    border-radius: 20px;
+}
+
+.pill-badge strong {
+    color: #0b132a;
+}
+
+.pill-badge.pill-roxo {
+    background: #f3ebfc;
+    border-color: rgba(164, 111, 210, 0.25);
+    color: #935dc0;
+}
+
+.pill-badge.pill-roxo strong {
+    color: #a46fd2;
+}
+
+.pill-badge.pill-azul {
+    background: #e7f4fb;
+    border-color: rgba(13, 124, 179, 0.2);
+    color: #0d7cb3;
+}
+
+.pill-badge.pill-azul strong {
+    color: #0d7cb3;
+}
+
+.btn-perfil-editar {
+    background: #a46fd2;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 12px 22px;
+    border-radius: 12px;
+    white-space: nowrap;
+    transition: background-color 0.2s ease;
+}
+
+.btn-perfil-editar:hover {
+    background: #935dc0;
+}
+
+.perfil-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.perfil-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015);
+    border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.perfil-tab {
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #4a5568;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.perfil-tab:hover {
+    background: #f8edff;
+    color: #a46fd2;
+}
+
+.perfil-tab.active {
+    background: #f3ebfc;
+    color: #a46fd2;
+}
+
+.perfil-conteudo {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.perfil-painel {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015);
+    border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.perfil-painel h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0b132a;
+    margin-bottom: 18px;
+}
+
+.perfil-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+    border-top: 1px solid #edf2f7;
+}
+
+.perfil-item:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+.perfil-item-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #a0aec0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+}
+
+.perfil-item p {
+    font-size: 14px;
+    color: #2d3748;
+}
+
+.tag-objetivo {
+    display: inline-block;
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0d7cb3;
+    background: #e7f4fb;
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+
+.btn-perfil-secundario {
+    background: #f8fafc;
+    color: #4a5568;
+    border: 1px solid #edf2f7;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 10px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-perfil-secundario:hover {
+    background: #f3ebfc;
+    color: #a46fd2;
+    border-color: rgba(164, 111, 210, 0.25);
+}
+
+.perfil-logout {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #edf2f7;
+}
+
+.btn-perfil-sair {
+    background: none;
+    border: none;
+    color: #e35d6a;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+}
+
+.btn-perfil-sair:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+    .perfil-card-topo {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .perfil-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .perfil-tabs {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .perfil-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+/* ==========================================================================
+   16. FORMULÁRIOS EMBUTIDOS (edição de perfil na aba "Preferências da
+   Conta" e criação/edição de artigos e especialistas em administradores)
+   ========================================================================== */
+
+.perfil-form-embutido {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.campo-embutido label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #a0aec0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+}
+
+.campo-embutido input[type="text"],
+.campo-embutido input[type="number"],
+.campo-embutido select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #edf2f7;
+    background-color: #f8fafc;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.campo-embutido input[type="text"]:disabled {
+    color: #a0aec0;
+    cursor: not-allowed;
+}
+
+.campo-embutido input[type="text"]:not(:disabled):focus,
+.campo-embutido input[type="number"]:focus,
+.campo-embutido select:focus {
+    border-color: #a46fd2;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(164, 111, 210, 0.1);
+    cursor: text;
+}
+
+.campo-embutido .radio-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.campo-embutido .radio-group label {
+    margin-bottom: 0;
+}
+
+.form-acoes {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+}
+
+.form-acoes .btn {
+    width: auto;
+    margin-top: 0;
+    padding: 12px 28px;
+}
+
+/* ==========================================================================
+   17. ESTILOS DO PAINEL DE ADMINISTRAÇÃO (artigos e especialistas)
+   ========================================================================== */
+
+.admin-secao {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015);
+    border: 1px solid rgba(0, 0, 0, 0.02);
+    margin-bottom: 24px;
+}
+
+.admin-secao-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.admin-secao-cabecalho h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0b132a;
+}
+
+.btn-admin-novo {
+    background: #a46fd2;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 10px;
+}
+
+.btn-admin-novo:hover {
+    background: #935dc0;
+}
+
+.admin-form-inline {
+    background: #f8fafc;
+    border: 1px solid #edf2f7;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.admin-form-inline-linha {
+    margin-bottom: 0;
+    white-space: normal;
+}
+
+.admin-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+}
+
+.admin-form-acoes-inline {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.admin-tabela td:has(.admin-form-inline) {
+    white-space: normal;
+    padding: 16px;
+}
+
+.admin-tabela-wrap {
+    overflow-x: auto;
+}
+
+.admin-tabela {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-tabela th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: #a0aec0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0 16px 12px;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.admin-tabela td {
+    font-size: 13px;
+    color: #2d3748;
+    padding: 14px 16px;
+    border-bottom: 1px solid #edf2f7;
+    white-space: nowrap;
+}
+
+.admin-tabela tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-tabela tbody tr:hover {
+    background: #f8fafc;
+}
+
+.admin-acoes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-acoes form {
+    display: inline;
+}
+
+.btn-admin-acao {
+    background: #f8fafc;
+    color: #0d7cb3;
+    border: 1px solid #edf2f7;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-admin-acao:hover {
+    background: #e7f4fb;
+    border-color: rgba(13, 124, 179, 0.2);
+}
+
+.btn-admin-acao.btn-admin-excluir {
+    color: #e35d6a;
+}
+
+.btn-admin-acao.btn-admin-excluir:hover {
+    background: #fdecef;
+    border-color: rgba(227, 93, 106, 0.2);
+}
+
+.admin-vazio {
+    color: #a0aec0;
+    text-align: center;
+    white-space: normal;
+}
+
+@media (max-width: 600px) {
+    .admin-secao-cabecalho {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}
+
+/* ==========================================================================
+   18. CARD DE PRODUTO: link clicavel + preco/avaliacao/fonte opcionais
+   ========================================================================== */
+
+.card-produto-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.produto-meta {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 0 16px;
+    flex-wrap: wrap;
+}
+
+.produto-fonte {
+    font-size: 12px;
+    color: #a0aec0;
+    margin-top: 6px;
+    padding: 0 16px;
+}
+
+.produto-fonte-vazia {
+    font-style: italic;
+}
+
+/* ==========================================================================
+   19. PÁGINA DE DETALHE DO PRODUTO
+   ========================================================================== */
+
+.produto-detalhe-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 24px;
+    align-items: start;
+    margin-top: 8px;
+}
+
+.produto-detalhe-imagem {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+}
+
+.produto-detalhe-imagem img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.produto-detalhe-marca {
+    font-size: 12px;
+    font-weight: 700;
+    color: #a46fd2;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.produto-detalhe-preco {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0b132a;
+    margin: 6px 0 14px;
+}
+
+.produto-detalhe-preco-vazio {
+    font-size: 16px;
+    font-weight: 600;
+    color: #a0aec0;
+}
+
+.produto-detalhe-badges {
+    margin-bottom: 12px;
+}
+
+.produto-detalhe-fonte {
+    font-size: 12px;
+    color: #718096;
+    margin-bottom: 20px;
+}
+
+.produto-detalhe-fonte-vazia {
+    color: #a0aec0;
+    font-style: italic;
+}
+
+.produto-detalhe-descricao {
+    font-size: 14px;
+    color: #718096;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.produto-detalhe-specs {
+    border-top: 1px solid #edf2f7;
+}
+
+.produto-detalhe-cta {
+    display: inline-block;
+    margin-top: 20px;
+}
+
+.produto-detalhe-voltar {
+    display: inline-block;
+    margin-top: 24px;
+}
+
+@media (max-width: 900px) {
+    .produto-detalhe-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================================
+   20. PERFIL E CONFIGURAÇÕES: abas Resumo, Dados, Perfil de pele, Segurança
+   e Privacidade (reaproveita os blocos das secoes 14, 15 e 16)
+   ========================================================================== */
+
+/* Coluna da esquerda: menu das abas + botao de sair embaixo */
+.perfil-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.perfil-lateral .perfil-logout {
+    margin-top: 0;
+    padding: 4px 16px 0;
+    border-top: none;
+}
+
+.perfil-tab:focus-visible,
+.btn-perfil-secundario:focus-visible,
+.btn-perigo:focus-visible,
+.btn-perfil-sair:focus-visible {
+    outline: 2px solid #a46fd2;
+    outline-offset: 2px;
+}
+
+/* Mensagens de sucesso/erro depois de salvar (django.contrib.messages) */
+.perfil-mensagens {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.perfil-mensagem {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: #e7f4fb;
+    color: #0a5e87;
+    border: 1px solid rgba(13, 124, 179, 0.2);
+}
+
+.perfil-mensagem-success {
+    background: #e6f9f0;
+    color: #0b6b4c;
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.perfil-mensagem-error {
+    background: #fdecef;
+    color: #b4343f;
+    border-color: rgba(227, 93, 106, 0.3);
+}
+
+/* ---- Aba "Resumo da pele" ---- */
+.resumo-topo {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.resumo-info p {
+    font-size: 14px;
+    color: #4a5568;
+    margin: 4px 0 16px;
+}
+
+.resumo-info .perfil-item-label {
+    font-size: 12px;
+}
+
+.resumo-acoes {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.resumo-acoes .btn-perfil-secundario {
+    display: inline-block;
+}
+
+.resumo-subtitulo {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0b132a;
+    margin-bottom: 14px;
+    padding-top: 22px;
+    border-top: 1px solid #edf2f7;
+}
+
+.resumo-indicadores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+}
+
+.resumo-indicador {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 18px;
+    border: 1px solid #edf2f7;
+    border-radius: 16px;
+    background: #f8fafc;
+}
+
+.resumo-indicador .indicador-cabecalho strong {
+    font-size: 14px;
+    color: #0b132a;
+}
+
+.resumo-vazio {
+    font-size: 14px;
+    color: #4a5568;
+    line-height: 1.6;
+    padding-top: 22px;
+    border-top: 1px solid #edf2f7;
+}
+
+/* ---- Formularios das abas ---- */
+.campo-ajuda {
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #4a5568;
+}
+
+.campo-ajuda ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.campo-ajuda a {
+    color: #7c4dbd;
+    font-weight: 600;
+}
+
+.campo-erro {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #b4343f;
+}
+
+.campo-embutido input[type="email"],
+.campo-embutido input[type="password"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #edf2f7;
+    background-color: #f8fafc;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.campo-embutido input[type="password"]:focus {
+    border-color: #a46fd2;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(164, 111, 210, 0.1);
+}
+
+/* e-mail e somente leitura: fica cinza e sem cursor de texto */
+.campo-embutido input[readonly] {
+    color: #718096;
+    cursor: not-allowed;
+}
+
+/* grupo de opcoes (fieldset): a legenda tem o mesmo visual dos rotulos */
+.campo-grupo {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+.campo-grupo legend {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #a0aec0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0;
+    margin-bottom: 8px;
+}
+
+/* Tipo de pele: cartoes de escolha (o radio fica escondido, o cartao e o clique) */
+.opcoes-cartao {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.campo-embutido .opcoes-cartao label {
+    position: relative;
+    display: block;
+    margin-bottom: 0;
+    font-size: 14px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #0b132a;
+    cursor: pointer;
+}
+
+.opcoes-cartao input[type="radio"],
+.segmentado input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.opcoes-cartao label > span {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 64px;
+    padding: 10px;
+    border: 1px solid #edf2f7;
+    border-radius: 14px;
+    background: #ffffff;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.opcoes-cartao label > span strong {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.opcoes-cartao label > span small {
+    font-size: 12px;
+    font-weight: 500;
+    color: #4a5568;
+}
+
+.opcoes-cartao label:hover > span {
+    background: #f8edff;
+    border-color: rgba(164, 111, 210, 0.3);
+}
+
+.opcoes-cartao input[type="radio"]:checked + span {
+    border: 2px solid #a46fd2;
+    background: #f3ebfc;
+    color: #5f3597;
+}
+
+.opcoes-cartao input[type="radio"]:checked + span small {
+    color: #5f3597;
+}
+
+.opcoes-cartao label:has(input[type="radio"]:focus-visible) > span,
+.segmentado label:has(input[type="radio"]:focus-visible) > span {
+    outline: 2px solid #a46fd2;
+    outline-offset: 2px;
+}
+
+/* Botoes lado a lado (Gel/Creme, Sim/Nao): mesmo visual do seletor Manha/Noite */
+.segmentado {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 13px;
+    background: #f3f4f6;
+}
+
+.campo-embutido .segmentado label {
+    position: relative;
+    flex: 1;
+    margin-bottom: 0;
+    font-size: 14px;
+    letter-spacing: 0;
+    text-transform: none;
+    cursor: pointer;
+}
+
+.segmentado label > span {
+    display: block;
+    padding: 10px 0;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: 600;
+    color: #4a5568;
+    transition: all 0.2s ease;
+}
+
+.segmentado input[type="radio"]:checked + span {
+    background: #ffffff;
+    color: #0b132a;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Alergias como etiquetas (so quando o JS esta ativo) */
+.campo-etiquetas.etiquetas-ativas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 6px 10px;
+    border: 1px solid #edf2f7;
+    background-color: #f8fafc;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.campo-etiquetas.etiquetas-ativas:focus-within {
+    border-color: #a46fd2;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(164, 111, 210, 0.1);
+}
+
+.etiqueta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 6px 5px 12px;
+    border-radius: 20px;
+    background: #f3ebfc;
+    color: #5f3597;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.etiqueta-remover {
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #5f3597;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.etiqueta-remover:hover {
+    background: rgba(164, 111, 210, 0.2);
+}
+
+.etiqueta-remover:focus-visible {
+    outline: 2px solid #a46fd2;
+}
+
+.campo-embutido .campo-etiquetas .etiquetas-entrada,
+.campo-embutido .campo-etiquetas .etiquetas-entrada:not(:disabled):focus {
+    flex: 1 1 140px;
+    min-width: 0;
+    width: auto;
+    padding: 6px 4px;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    outline: none; /* o foco aparece na caixa inteira (:focus-within), nao so no campo */
+    cursor: text;
+}
+
+/* Aviso de alteracoes nao salvas (aparece quando o formulario muda) */
+.aviso-alteracoes {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: #fff7e6;
+    border: 1px solid #f2d7a0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #7a4b00;
+}
+
+.aviso-alteracoes[hidden] {
+    display: none;
+}
+
+/* ---- Aba "Privacidade e dados" ---- */
+.privacidade-miniatura {
+    display: block;
+    overflow: hidden;
+    font-size: 12px;
+    width: 96px;
+    height: 96px;
+    margin: 8px 0;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid #edf2f7;
+}
+
+.perfil-item form {
+    margin: 0;
+}
+
+.perfil-item a.btn-perfil-secundario {
+    display: inline-block;
+}
+
+.zona-perigo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 8px;
+    padding: 20px 22px;
+    border: 1px solid #f0c9cd;
+    border-radius: 16px;
+}
+
+.zona-perigo > div {
+    flex: 1 1 280px;
+}
+
+.zona-perigo strong {
+    display: block;
+    font-size: 15px;
+    color: #b4343f;
+    margin-bottom: 4px;
+}
+
+.zona-perigo p {
+    max-width: 460px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #4a5568;
+}
+
+.btn-perigo {
+    background: #ffffff;
+    color: #b4343f;
+    border: 1px solid #e7a9af;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-perigo:hover {
+    background: #fdecef;
+}
+
+.btn-perigo-cheio {
+    background: #b4343f;
+    color: #ffffff;
+    border-color: #b4343f;
+}
+
+.btn-perigo-cheio:hover {
+    background: #96232e;
+}
+
+/* Janela de confirmacao (elemento <dialog> nativo) */
+.dialogo-perfil {
+    margin: auto; /* o reset global (* { margin: 0 }) tira o centralizado padrao do <dialog> */
+    width: min(440px, calc(100vw - 32px));
+    padding: 28px;
+    border: none;
+    border-radius: 24px;
+    box-shadow: 0 24px 60px rgba(11, 19, 42, 0.25);
+    color: #0b132a;
+}
+
+.dialogo-perfil::backdrop {
+    background: rgba(11, 19, 42, 0.5);
+}
+
+.dialogo-perfil h3 {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+@media (max-width: 900px) {
+    .perfil-lateral {
+        flex-direction: column;
+    }
+
+    .resumo-topo {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .resumo-acoes {
+        justify-content: center;
+    }
+
+    .perfil-tab {
+        white-space: nowrap;
+    }
+}
+
+/* Estilo das páginas (Termos de Uso e Política de Privacidade)*/
+.pagina {
+    --lume-roxo: #a46fd2;
+    --lume-azul: #0d7cb3;
+    --lume-texto: #2b2433;
+    --lume-suave: #6b6475;
+    --lume-fundo: #f7f2fc;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 16px 48px;
+    color: var(--lume-texto);
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+.pagina p { margin: 0 0 14px; }
+
+.pagina a {
+    color: var(--lume-azul);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.pagina a:hover { color: var(--lume-roxo); }
+
+/* Sumário */
+.sumario {
+    background: var(--lume-fundo);
+    border: 1px solid rgba(164, 111, 210, 0.25);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin: 0 0 28px;
+}
+.sumario strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--lume-roxo);
+}
+.sumario ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 6px 18px;
+    counter-reset: sumario;
+}
+.sumario li { counter-increment: sumario; }
+.sumario a {
+    display: block;
+    padding: 5px 8px;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    text-decoration: none;
+    color: var(--lume-texto);
+    transition: background 0.2s, color 0.2s;
+}
+.sumario a::before {
+    content: counter(sumario) ".";
+    display: inline-block;
+    min-width: 1.6em;
+    font-weight: 700;
+    color: var(--lume-roxo);
+}
+.sumario a:hover {
+    background: #fff;
+    color: var(--lume-azul);
+}
+
+/* Títulos de seção */
+.pagina h3 {
+    position: relative;
+    margin: 36px 0 14px;
+    padding: 2px 0 2px 16px;
+    font-size: 1.2rem;
+    line-height: 1.35;
+    color: var(--lume-texto);
+    scroll-margin-top: 90px;
+}
+
+/* Listas */
+.pagina ul,
+.pagina ol { margin: 0 0 16px; padding-left: 22px; }
+.pagina li { margin-bottom: 8px; }
+.pagina ul li::marker { color: var(--lume-roxo); }
+.pagina ol li::marker { color: var(--lume-roxo); font-weight: 700; }
+.pagina li > ul { margin-top: 8px; margin-bottom: 4px; }
+.pagina li > ul li::marker { color: var(--lume-azul); }
+
+/* Destaques */
+.aviso,
+.resumo {
+    border-radius: 16px;
+    padding: 4px 22px 14px;
+    margin: 28px 0 8px;
+}
+.aviso {
+    background: #fff7ed;
+    border: 1px solid #f6c8a0;
+}
+.aviso h3::before { background: #e9812c; }
+.aviso ul li::marker { color: #e9812c; }
+.resumo {
+    background: linear-gradient(135deg, rgba(164, 111, 210, 0.12), rgba(13, 124, 179, 0.1));
+    border: 1px solid rgba(164, 111, 210, 0.3);
+}
+
+/* Rodapé da página */
+.topo {
+    display: inline-block;
+    margin-top: 28px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--lume-roxo), var(--lume-azul));
+    color: #fff !important;
+    text-decoration: none !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.topo:hover { opacity: 0.9; color: #fff !important; }
+
+@media (max-width: 600px) {
+    .pagina-legal { font-size: 0.97rem; }
+    .pagina-legal h3 { font-size: 1.1rem; }
+    .aviso-legal, .resumo-legal { padding: 2px 16px 10px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+}
+
+
+/* ==========================================================================
+   20. CARD DO ÍNDICE UV (ao lado da rotina no dashboard)
+   ========================================================================== */
+
+.card-uv {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.card-uv h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0b132a;
+    margin-bottom: 8px;
+}
+
+.uv-valor {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.uv-valor strong {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1;
+    color: #0b132a;
+}
+
+/* Badge do nível (mesmo visual dos badges do scanner) */
+.uv-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: #edf2f7;
+    color: #718096;
+    text-transform: capitalize;
+}
+
+.uv-badge.uv-baixo      { background: #e6f9f0; color: #10b981; }
+.uv-badge.uv-moderado   { background: #fef7dc; color: #b7791f; }
+.uv-badge.uv-alto       { background: #ffecd9; color: #dd6b20; }
+.uv-badge.uv-muito-alto { background: #fdecef; color: #e35d6a; }
+.uv-badge.uv-extremo    { background: #f3ebfc; color: #a46fd2; }
+
+/* Barra do índice: verde (baixo) -> amarelo -> laranja -> vermelho -> roxo (extremo) */
+.uv-barra {
+    position: relative;
+    height: 10px;
+    border-radius: 20px;
+    margin: 22px 0 8px;
+    background: linear-gradient(
+        90deg,
+        #10b981 0%,
+        #84cc16 25%,
+        #facc15 42%,
+        #fb923c 62%,
+        #ef4444 82%,
+        #a46fd2 100%
+    );
+}
+
+.uv-marcador {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 3px solid #0b132a;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transform: translate(-50%, -50%);
+    transition: left 0.6s ease;
+}
+
+.uv-marcador[hidden] {
+    display: none;
+}
+
+.uv-escala {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    color: #a0aec0;
+}
+
+.uv-descricao {
+    margin-top: 14px;
+    font-size: 13px;
+    color: #718096;
+    line-height: 1.5;
+}
+
+.uv-local {
+    font-size: 12px;
+    font-weight: 600;
+    color: #a0aec0;
+}
+
+.uv-credito {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #a0aec0;
+}
+
+.uv-credito a {
+    color: #a46fd2;
+    text-decoration: none;
+}
+
+/* Rotina + UV lado a lado: evita que o conteúdo estoure a coluna */
+.dashboard-rotina.dashboard-secao > * {
+    min-width: 0;
+}
+
+.dashboard-rotina.dashboard-secao {
+    align-items: stretch;
+}

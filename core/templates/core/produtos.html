@@ -1,0 +1,43 @@
+{% extends 'core/index.html' %}
+{% load static %}
+
+{% block content %}
+    <h2>Recomendações personalizadas</h2>
+
+    {% if perfil %}
+        <p class="subtitulo">Com base no seu perfil, aqui estão algumas recomendações de produtos para a sua rotina de cuidados com a pele.</p>
+
+        <div class="box-objetivo">
+            <p>Seu objetivo: <strong>{{ objetivo_usuario }}</strong></p>
+            <div class="botoes-refazer">
+                <a href="{% url 'scanner' %}" class="btn-secundario">Refazer scanner</a>
+                <a href="{% url 'questionario' %}" class="btn-secundario">Refazer questionário</a>
+            </div>
+        </div>
+
+<div class="filtros-rotina">
+    <a href="?categoria=" class="btn-filtro {% if not filtro_ativo %}ativo{% endif %}">Rotina completa</a>
+    <a href="?categoria=limpeza" class="btn-filtro {% if filtro_ativo == 'limpeza' %}ativo{% endif %}">Limpeza</a>
+    <a href="?categoria=tratamento" class="btn-filtro {% if filtro_ativo == 'tratamento' %}ativo{% endif %}">Tratamento</a>
+    <a href="?categoria=protecao" class="btn-filtro {% if filtro_ativo == 'protecao' %}ativo{% endif %}">Proteção</a>
+</div>
+
+         <div class="produtos-grid">
+           {% for produto in produtos %}
+           <a href="{% url 'produto_detalhe' produto.id %}" style="text-decoration:none; color:inherit; display:block;">
+           <div class="card-produto">
+            <div class="produto-imagem">
+                <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}">
+            </div>
+            <h4>{{ produto.marca }} — {{ produto.nome }}</h4>
+            <p class="produto-descricao">{{ produto.descricao }}</p>
+        </div>
+        </a>
+    {% empty %}
+        <p class="sem-produtos">Nenhum produto encontrado.</p>
+    {% endfor %}
+</div>
+    {% else %}
+        <p class="sem-perfil">Perfil não encontrado. Por favor, complete seu perfil para receber recomendações personalizadas.</p>
+    {% endif %}
+{% endblock %}

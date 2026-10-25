@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - LUME Skin</title>
+    <link rel="stylesheet" href="{% static 'core/style.css' %}?v=2">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-left">
+            <div class="logo-title">
+                <div class="logo-icon">L</div> <span>LUME Skin</span>
+            </div>
+            <h1>Sua jornada para uma <span class="highlight">pele perfeita</span> começa aqui.</h1>
+            <p>Análise inteligente por IA, recomendações personalizadas e monitoramento contínuo para o seu skincare ideal.</p>
+        </div>
+        <div class="login-right">
+            <div class="login-box">
+                <div class="login-tabs">
+                    <button class="active">Login</button>
+                    <button>Criar Conta</button>
+                </div>
+            <h2>Bem-vindo de volta</h2>
+             <p class="subtitle">Acesse sua conta para continuar sua jornada.</p>
+
+           {% for message in messages %}
+              <div class="alerta-erro" role="alert">{{ message }}</div>
+           {% endfor %}
+
+                   <form method="POST" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <label>E-mail</label>
+                    <input type="email" name="email" placeholder="seu@email.com" value="{{ email|default:'' }}" required>
+                    
+                    <label>Senha <a href="#" class="forgot">Esqueceu a senha?</a></label>
+                    <input type="password" name="senha" placeholder="••••••••" required>
+                    
+                    <button type="submit" class="btn-primary">Entrar →</button>
+                </form>
+                
+                <div class="divider">OU</div>
+                
+                <button class="btn-social">Continuar com Google</button>
+                <button class="btn-social">Continuar com Apple</button>
+                <p class="alternate">Ainda não tem conta? <a href="{% url 'cadastro_view' %}">Cadastre-se aqui</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

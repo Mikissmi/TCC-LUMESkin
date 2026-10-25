@@ -1,0 +1,10 @@
+asgiref==3.11.1
+Django==6.0.6
+PyMySQL==1.1.1
+psycopg[binary]
+sqlparse==0.5.5
+tzdata==2026.2
+requests==2.32.3
+whitenoise
+python-dotenv
+psycopg[binary]

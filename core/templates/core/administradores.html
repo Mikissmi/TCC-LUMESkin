@@ -1,0 +1,239 @@
+{% extends 'core/index.html' %}
+
+{% block content %}
+<div class="perfil-cabecalho">
+    <p class="perfil-breadcrumb">Administração</p>
+    <h2>Painel de Administração</h2>
+</div>
+
+<div class="admin-secao">
+    <div class="admin-secao-cabecalho">
+        <h3>Artigos Científicos</h3>
+        <button type="button" class="btn-admin-novo" onclick="alternarOculto('artigo-novo-form')">+ Novo Artigo</button>
+    </div>
+
+    <form method="POST" action="{% url 'artigo_novo' %}" id="artigo-novo-form" class="admin-form-inline" hidden>
+        {% csrf_token %}
+        <div class="admin-form-grid">
+            <div class="campo-embutido">
+                <label>Título</label>
+                <input type="text" name="titulo" required>
+            </div>
+            <div class="campo-embutido">
+                <label>Autor</label>
+                <input type="text" name="autor" required>
+            </div>
+            <div class="campo-embutido">
+                <label>Ano</label>
+                <input type="number" name="ano" min="1900" max="2100" required>
+            </div>
+            <div class="campo-embutido">
+                <label>Resumo</label>
+                <input type="text" name="resumo" placeholder="Opcional">
+            </div>
+            <div class="campo-embutido">
+                <label>URL da Capa</label>
+                <input type="text" name="url_capa" placeholder="https:// (opcional)">
+            </div>
+            <div class="campo-embutido">
+                <label>URL de Leitura</label>
+                <input type="text" name="url_leitura" placeholder="https://" required>
+            </div>
+        </div>
+        <div class="admin-form-acoes-inline">
+            <button type="button" class="btn-perfil-secundario" onclick="alternarOculto('artigo-novo-form')">Cancelar</button>
+            <button type="submit" class="btn">Salvar</button>
+        </div>
+    </form>
+
+    <div class="admin-tabela-wrap">
+        <table class="admin-tabela">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Autor</th>
+                    <th>Ano</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for artigo in artigos %}
+                <tr id="artigo-exibir-{{ artigo.id }}">
+                    <td>{{ artigo.titulo }}</td>
+                    <td>{{ artigo.autor }}</td>
+                    <td>{{ artigo.ano }}</td>
+                    <td class="admin-acoes">
+                        <button type="button" class="btn-admin-acao" onclick="alternarOculto('artigo-exibir-{{ artigo.id }}'); alternarOculto('artigo-form-{{ artigo.id }}')">Editar</button>
+                        <form method="POST" action="{% url 'artigo_excluir' artigo.id %}" onsubmit="return confirm('Excluir o artigo \'{{ artigo.titulo|escapejs }}\'?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-admin-acao btn-admin-excluir">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr id="artigo-form-{{ artigo.id }}" hidden>
+                    <td colspan="4">
+                        <form method="POST" action="{% url 'artigo_editar' artigo.id %}" class="admin-form-inline admin-form-inline-linha">
+                            {% csrf_token %}
+                            <div class="admin-form-grid">
+                                <div class="campo-embutido">
+                                    <label>Título</label>
+                                    <input type="text" name="titulo" value="{{ artigo.titulo }}" required>
+                                </div>
+                                <div class="campo-embutido">
+                                    <label>Autor</label>
+                                    <input type="text" name="autor" value="{{ artigo.autor }}" required>
+                                </div>
+                                <div class="campo-embutido">
+                                    <label>Ano</label>
+                                    <input type="number" name="ano" min="1900" max="2100" value="{{ artigo.ano }}" required>
+                                </div>
+                                <div class="campo-embutido">
+                                    <label>Resumo</label>
+                                    <input type="text" name="resumo" value="{{ artigo.resumo|default:'' }}" placeholder="Opcional">
+                                </div>
+                                <div class="campo-embutido">
+                                    <label>URL da Capa</label>
+                                    <input type="text" name="url_capa" value="{{ artigo.url_capa|default:'' }}" placeholder="https:// (opcional)">
+                                </div>
+                                <div class="campo-embutido">
+                                    <label>URL de Leitura</label>
+                                    <input type="text" name="url_leitura" value="{{ artigo.url_leitura }}" placeholder="https://" required>
+                                </div>
+                            </div>
+                            <div class="admin-form-acoes-inline">
+                                <button type="button" class="btn-perfil-secundario" onclick="alternarOculto('artigo-exibir-{{ artigo.id }}'); alternarOculto('artigo-form-{{ artigo.id }}')">Cancelar</button>
+                                <button type="submit" class="btn">Salvar</button>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="admin-vazio">Nenhum artigo cadastrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="admin-secao">
+    <div class="admin-secao-cabecalho">
+        <h3>Especialistas</h3>
+        <button type="button" class="btn-admin-novo" onclick="alternarOculto('especialista-novo-form')">+ Novo Especialista</button>
+    </div>
+
+    <form method="POST" action="{% url 'especialista_novo' %}" id="especialista-novo-form" class="admin-form-inline" hidden>
+        {% csrf_token %}
+        <div class="admin-form-grid">
+            <div class="campo-embutido">
+                <label>Nome</label>
+                <input type="text" name="nome" required>
+            </div>
+            <div class="campo-embutido">
+                <label>Especialidade</label>
+                <select name="especialidade" required>
+                    <option value="dermatologista">Dermatologista</option>
+                    <option value="esteticista">Esteticista</option>
+                    <option value="cosmetologo">Cosmetólogo(a)</option>
+                </select>
+            </div>
+            <div class="campo-embutido">
+                <label>CRM</label>
+                <input type="text" name="crm" placeholder="CRM 00000-UF (opcional)">
+            </div>
+            <div class="campo-embutido">
+                <label>WhatsApp</label>
+                <input type="text" name="telefone_whatsapp" placeholder="5511999999999" required>
+            </div>
+            <div class="campo-embutido">
+                <label>URL da Foto</label>
+                <input type="text" name="url_foto" placeholder="https:// (opcional)">
+            </div>
+        </div>
+        <div class="admin-form-acoes-inline">
+            <button type="button" class="btn-perfil-secundario" onclick="alternarOculto('especialista-novo-form')">Cancelar</button>
+            <button type="submit" class="btn">Salvar</button>
+        </div>
+    </form>
+
+    <div class="admin-tabela-wrap">
+        <table class="admin-tabela">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Especialidade</th>
+                    <th>WhatsApp</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for especialista in especialistas %}
+                <tr id="especialista-exibir-{{ especialista.id }}">
+                    <td>{{ especialista.nome }}</td>
+                    <td>{{ especialista.especialidade|capfirst }}</td>
+                    <td>{{ especialista.telefone_whatsapp }}</td>
+                    <td class="admin-acoes">
+                        <button type="button" class="btn-admin-acao" onclick="alternarOculto('especialista-exibir-{{ especialista.id }}'); alternarOculto('especialista-form-{{ especialista.id }}')">Editar</button>
+                        <form method="POST" action="{% url 'especialista_excluir' especialista.id %}" onsubmit="return confirm('Excluir {{ especialista.nome|escapejs }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-admin-acao btn-admin-excluir">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr id="especialista-form-{{ especialista.id }}" hidden>
+                    <td colspan="4">
+                        <form method="POST" action="{% url 'especialista_editar' especialista.id %}" class="admin-form-inline admin-form-inline-linha">
+                            {% csrf_token %}
+                            <div class="admin-form-grid">
+                                <div class="campo-embutido">
+                                    <label>Nome</label>
+                                    <input type="text" name="nome" value="{{ especialista.nome }}" required>
+                                </div>
+                                <div class="campo-embutido">
+                                    <label>Especialidade</label>
+                                    <select name="especialidade" required>
+                                        <option value="dermatologista" {% if especialista.especialidade == 'dermatologista' %}selected{% endif %}>Dermatologista</option>
+                                        <option value="esteticista" {% if especialista.especialidade == 'esteticista' %}selected{% endif %}>Esteticista</option>
+                                        <option value="cosmetologo" {% if especialista.especialidade == 'cosmetologo' %}selected{% endif %}>Cosmetólogo(a)</option>
+                                    </select>
+                                </div>
+                                <div class="campo-embutido">
+                                    <label>CRM</label>
+                                    <input type="text" name="crm" value="{{ especialista.crm|default:'' }}" placeholder="CRM 00000-UF (opcional)">
+                                </div>
+                                <div class="campo-embutido">
+                                    <label>WhatsApp</label>
+                                    <input type="text" name="telefone_whatsapp" value="{{ especialista.telefone_whatsapp }}" placeholder="5511999999999" required>
+                                </div>
+                                <div class="campo-embutido">
+                                    <label>URL da Foto</label>
+                                    <input type="text" name="url_foto" value="{{ especialista.url_foto|default:'' }}" placeholder="https:// (opcional)">
+                                </div>
+                            </div>
+                            <div class="admin-form-acoes-inline">
+                                <button type="button" class="btn-perfil-secundario" onclick="alternarOculto('especialista-exibir-{{ especialista.id }}'); alternarOculto('especialista-form-{{ especialista.id }}')">Cancelar</button>
+                                <button type="submit" class="btn">Salvar</button>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="admin-vazio">Nenhum especialista cadastrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function alternarOculto(id) {
+    var elemento = document.getElementById(id);
+    if (elemento) {
+        elemento.hidden = !elemento.hidden;
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'core/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="perfil-cabecalho">
+    <p class="perfil-breadcrumb"><a href="{% url 'produtos' %}">Recomendações</a> / {{ produto.categoria }}</p>
+    <h2>{{ produto.nome }}</h2>
+</div>
+
+<div class="card" style="display:flex; gap:32px; flex-wrap:wrap; margin-top:16px;">
+    <div style="flex:1; min-width:260px; max-width:380px; aspect-ratio:1/1; border-radius:14px; overflow:hidden; background:#f8fafc; display:flex; align-items:center; justify-content:center;">
+        <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}" style="width:100%; height:100%; object-fit:cover;">
+    </div>
+
+    <div style="flex:1.3; min-width:260px;">
+        <span style="font-size:12px; font-weight:700; color:#a46fd2; text-transform:uppercase; letter-spacing:0.06em;">{{ produto.marca }}</span>
+
+        {% if produto.preco %}
+        <p style="font-size:28px; font-weight:800; color:#0b132a; margin:6px 0 4px;">R$ {{ produto.preco }}</p>
+        {% if produto.fonte %}<p style="font-size:12px; color:#718096; margin:0 0 12px;">Preço verificado em <strong>{{ produto.fonte }}</strong></p>{% endif %}
+        {% else %}
+        <p style="font-size:15px; font-weight:600; color:#a0aec0; margin:6px 0 12px;">Preço não verificado</p>
+        {% endif %}
+
+        {% if produto.avaliacao %}
+        <span class="pill-badge pill-roxo" style="display:inline-block; margin-bottom:10px;">★ {{ produto.avaliacao }} ({{ produto.num_avaliacoes }} avaliações)</span>
+        {% endif %}
+
+        {% if not produto.preco and not produto.avaliacao %}
+        <p style="font-size:12px; color:#a0aec0; font-style:italic; margin:8px 0 18px;">Ainda não confirmamos preço/avaliação numa fonte oficial para este produto — confira diretamente na loja{% if produto.fonte %} ({{ produto.fonte }}){% endif %}.</p>
+        {% endif %}
+
+        <p style="font-size:14px; color:#718096; line-height:1.6; margin-bottom:20px;">{{ produto.descricao }}</p>
+
+        <ul style="list-style:none; padding:0; margin:0;">
+            <li style="padding:12px 0; border-top:1px solid #edf2f7;">
+                <span style="display:block; font-size:11px; font-weight:700; color:#a0aec0; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px;">Indicado para</span>
+                {{ produto.tipos_pele|join:", " }}
+            </li>
+            <li style="padding:12px 0; border-top:1px solid #edf2f7;">
+                <span style="display:block; font-size:11px; font-weight:700; color:#a0aec0; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px;">Ajuda com</span>
+                {{ produto.preocupacoes|join:", " }}
+            </li>
+            <li style="padding:12px 0; border-top:1px solid #edf2f7;">
+                <span style="display:block; font-size:11px; font-weight:700; color:#a0aec0; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px;">Modo de uso</span>
+                {{ produto.modo_uso }}
+            </li>
+            <li style="padding:12px 0; border-top:1px solid #edf2f7;">
+                <span style="display:block; font-size:11px; font-weight:700; color:#a0aec0; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px;">Ingrediente principal</span>
+                {{ produto.ingrediente_principal }}
+            </li>
+            {% if produto.fps %}
+            <li style="padding:12px 0; border-top:1px solid #edf2f7;">
+                <span style="display:block; font-size:11px; font-weight:700; color:#a0aec0; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px;">FPS</span>
+                {{ produto.fps }}
+            </li>
+            {% endif %}
+            <li style="padding:12px 0; border-top:1px solid #edf2f7;">
+                <span style="display:block; font-size:11px; font-weight:700; color:#a0aec0; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px;">Tamanho</span>
+                {{ produto.tamanho_ml }}ml
+            </li>
+        </ul>
+
+        {% if produto.link_produto %}
+        <a href="{{ produto.link_produto }}" target="_blank" rel="noopener" class="btn-perfil-editar" style="display:inline-block; margin-top:20px;">Ver na loja{% if produto.fonte %} ({{ produto.fonte }}){% endif %}</a>
+        {% endif %}
+    </div>
+</div>
+
+<a href="{% url 'produtos' %}" class="btn-secundario" style="display:inline-block; margin-top:24px;">&larr; Voltar para recomendações</a>
+{% endblock %}

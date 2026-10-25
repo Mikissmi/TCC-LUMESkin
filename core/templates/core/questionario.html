@@ -1,0 +1,444 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionário | LUME Skin</title>
+    <link rel="stylesheet" href="{% static 'core/style.css' %}?v=6">
+</head>
+<body class="app-body">
+    <main class="main content">
+        <div class="pagina-questionario">
+            <h1>Questionário Dermatológico</h1>
+            <p>Responda com sinceridade para personalizarmos sua rotina.</p>
+
+            <!-- barra de progresso (preenchida pelo js no fim da pagina) -->
+            <div class="progresso-questionario" role="progressbar" aria-label="Progresso do questionário"
+                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progresso">
+                <div class="progresso-topo">
+                    <span id="progresso-texto"><strong>0</strong> de 11 perguntas respondidas</span>
+                    <span class="progresso-pct" id="progresso-pct">0%</span>
+                </div>
+                <div class="barra-progresso">
+                    <div class="barra-preenchida" id="progresso-barra" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <form method="POST" action="{% url 'questionario' %}" enctype="multipart/form-data" class="questionario-form" id="questionario-form">
+                {% csrf_token %}
+
+                <!-- linha 1 -->
+                <div class="form-bloco" data-pergunta>
+                    <label class="pergunta" for="idade">1. Qual a sua idade?</label>
+                    <input type="number" name="idade" id="idade" min="10" max="120" required>
+                </div>
+
+                <!-- linha 2: perguntas 2 e 2.1 lado a lado -->
+                <div class="form-bloco bloco-meio" data-pergunta>
+                    <label class="pergunta" for="tipo_pele">2. Qual o seu tipo de pele predominante?</label>
+                    <select name="tipo_pele" id="tipo_pele" required>
+                        <option value="" disabled selected>Selecione...</option>
+                        <option value="oleosa">Oleosa (Brilho excessivo e poros abertos)</option>
+                        <option value="seca">Seca (Descama ou repuxa)</option>
+                        <option value="mista">Mista (Oleosa na zona T, seca nas bochechas)</option>
+                        <option value="normal">Normal (Equilibrada)</option>
+                    </select>
+                </div>
+
+                <div class="form-bloco bloco-meio" data-pergunta>
+                    <fieldset>
+                        <legend class="pergunta pergunta-sub">2.1. Foi diagnosticado por um dermatologista ou uma análise pessoal?</legend>
+                        <div class="radio-group">
+                            <label><input type="radio" name="diagnostico" value="0" required> Diagnosticado por um dermatologista</label>
+                            <label><input type="radio" name="diagnostico" value="1" required> Análise pessoal</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <!-- linha 3 -->
+                <div class="form-bloco" data-pergunta>
+                    <label class="pergunta" for="objetivo">3. Qual é o seu principal objetivo com o skincare?</label>
+                    <select name="objetivo" id="objetivo" required>
+                        <option value="" disabled selected>Selecione...</option>
+                        <option value="hidratar">Hidratar</option>
+                        <option value="controlar oleosidade">Controlar Oleosidade</option>
+                        <option value="reduzir manchas">Reduzir Manchas</option>
+                        <option value="anti-idade">Anti-idade</option>
+                        <option value="reduzir acne">Reduzir Acne</option>
+                        <option value="melhorar textura">Melhorar Textura</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                    <!-- aparece so com "Outro" (js) -->
+                    <input type="text" name="objetivo_outro" id="objetivo_outro" placeholder="Especifique..."
+                           aria-label="Especifique seu objetivo" hidden>
+                </div>
+
+                <!-- linha 4 -->
+                <div class="form-bloco bloco-meio" data-pergunta>
+                    <fieldset>
+                        <legend class="pergunta">4. Você tem histórico de alergias na pele?</legend>
+                        <div class="radio-group">
+                            <label><input type="radio" name="alergias" value="0" required> Não, nunca tive</label>
+                            <label><input type="radio" name="alergias" value="1" required> Sim</label>
+                        </div>
+                    </fieldset>
+                    <!-- aparece so com "Sim" (js) -->
+                    <input type="text" name="descricaoalergia" id="descricaoalergia" placeholder="Descreva as alergias..."
+                           aria-label="Descreva suas alergias" hidden>
+                </div>
+
+                <div class="form-bloco bloco-meio" data-pergunta>
+                    <fieldset>
+                        <legend class="pergunta">5. Você utiliza maquiagem diariamente?</legend>
+                        <div class="radio-group">
+                            <label><input type="radio" name="maquiagem" value="0" required> Não</label>
+                            <label><input type="radio" name="maquiagem" value="1" required> Sim</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <!-- linha 5: escala de Fitzpatrick (6 fototipos) -->
+                <div class="form-bloco" data-pergunta>
+                    <fieldset>
+                        <legend class="pergunta">6. Como sua pele reage ao sol?</legend>
+                        <div class="radio-group">
+                            <label><input type="radio" name="reacao_sol" value="0" required> Sempre queima, nunca bronzeia</label>
+                            <label><input type="radio" name="reacao_sol" value="1" required> Sempre queima, bronzeia minimamente</label>
+                            <label><input type="radio" name="reacao_sol" value="2" required> Queima moderadamente, bronzeia gradualmente</label>
+                            <label><input type="radio" name="reacao_sol" value="3" required> Raramente queima, bronzeia com facilidade</label>
+                            <label><input type="radio" name="reacao_sol" value="4" required> Quase nunca queima, bronzeia muito facilmente</label>
+                            <label><input type="radio" name="reacao_sol" value="5" required> Nunca queima, pele naturalmente muito escura</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <!-- linha 6 -->
+                <div class="form-bloco" data-pergunta>
+                    <label class="pergunta" for="sono_horas">7. Em média, quantas horas você dorme por noite?</label>
+                    <select name="sono_horas" id="sono_horas" required>
+                        <option value="" disabled selected>Selecione...</option>
+                        <option value="curto">Menos de 5 horas</option>
+                        <option value="reduzido">De 5 a menos de 7 horas</option>
+                        <option value="adequado">De 7 a menos de 9 horas</option>
+                        <option value="longo">9 horas ou mais</option>
+                    </select>
+                </div>
+
+                <!-- linha 7 -->
+                <div class="form-bloco" data-pergunta>
+                    <label class="pergunta" for="exercicio_frequencia">8. Com que frequência você pratica atividade física?</label>
+                    <select name="exercicio_frequencia" id="exercicio_frequencia" required>
+                        <option value="" disabled selected>Selecione...</option>
+                        <option value="nunca">Nunca ou raramente</option>
+                        <option value="1-2x">1 a 2 vezes por semana</option>
+                        <option value="3-4x">3 a 4 vezes por semana</option>
+                        <option value="5x+">5 ou mais vezes por semana</option>
+                    </select>
+                </div>
+
+                <!-- linha 8 -->
+                <div class="form-bloco bloco-meio" data-pergunta>
+                    <fieldset>
+                        <legend class="pergunta">9. Com que frequência você usa protetor solar no rosto?</legend>
+                        <div class="radio-group">
+                            <label><input type="radio" name="protetor_solar" value="0" required> Nunca ou raramente</label>
+                            <label><input type="radio" name="protetor_solar" value="1" required> Às vezes</label>
+                            <label><input type="radio" name="protetor_solar" value="2" required> Todos os dias</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="form-bloco bloco-meio" data-pergunta>
+                    <fieldset>
+                        <legend class="pergunta">10. Você prefere produtos à base de gel ou creme?</legend>
+                        <div class="radio-group">
+                            <label><input type="radio" name="base_produto" value="gel" required> Gel</label>
+                            <label><input type="radio" name="base_produto" value="creme" required> Creme</label>
+                            <label><input type="radio" name="base_produto" value="gel-creme" required> Gel-creme</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <!-- linha 9: opcional, nao conta na barra de progresso -->
+                <div class="form-bloco">
+                    <fieldset>
+                        <legend class="pergunta">11. Deseja realizar um escaneamento facial com IA para uma análise mais precisa? (Opcional)</legend>
+                        <div class="radio-group">
+                            <label><input type="radio" name="quer_escanear" value="sim" id="scan-sim"> Sim, quero escanear minha pele</label>
+                            <label><input type="radio" name="quer_escanear" value="nao" id="scan-nao" checked> Não, apenas responder o questionário</label>
+                        </div>
+                    </fieldset>
+
+                    <!-- upload e consentimento aparecem so com "Sim" (js) -->
+                    <div id="bloco-upload-foto" class="bloco-upload-foto" hidden>
+                   <label class="consentimento" for="consentimento-foto">
+                   <input type="checkbox" name="consentimento_foto" value="1" id="consentimento-foto">
+                   <span>
+                         Li e concordo com os <a href="#">Termos de Serviço</a> e a <a href="#">Política de Privacidade</a>
+                        e autorizo, de forma específica, o tratamento da foto do meu rosto (dado pessoal sensível)
+                         apenas para gerar a análise da minha pele com inteligência artificial.
+                   </span>
+                  </label>
+
+                    <label for="input-foto">Envie uma foto clara do seu rosto de frente ou tire uma agora:</label>
+                        <input type="file" name="foto_rosto" accept="image/jpeg,image/png,image/webp" id="input-foto"aria-describedby="foto-ajuda foto-erro" disabled>
+                        <p class="foto-ajuda" id="foto-ajuda">Formatos aceitos: JPG, PNG ou WebP. Tamanho máximo: 5 MB.</p>
+                        <p class="foto-erro" id="foto-erro" role="alert" hidden></p>
+
+                       <button type="button" class="btn" id="btn-abrir-camera" disabled>Tirar foto agora</button>
+
+                       <div id="camera-area" hidden>
+                        <video id="camera-video" autoplay playsinline muted></video>
+                            <div class="camera-botoes">
+                                <button type="button" class="btn" id="btn-capturar">Capturar</button>
+                                <button type="button" class="btn" id="btn-fechar-camera">Cancelar</button>
+                            </div>
+                        </div>
+                       
+                       <canvas id="camera-canvas" hidden></canvas>
+
+                        <div class="foto-preview" id="foto-preview" hidden>
+                            <img id="foto-preview-img" alt="Pré-visualização da foto escolhida">
+                            <div class="foto-preview-info">
+                                <strong id="foto-preview-nome"></strong>
+                                <span id="foto-preview-tamanho"></span>
+                                <button type="button" class="btn-remover-foto" id="foto-remover">Remover foto</button>
+                            </div>
+                        </div>
+
+                        
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Salvar Perfil e Ver Resultados</button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+    (function () {
+        const form = document.getElementById('questionario-form');
+
+        /* campos condicionais */
+        const selectObjetivo = form.querySelector('[name="objetivo"]');
+        const objetivoOutro = form.querySelector('[name="objetivo_outro"]');
+        const descricaoAlergia = form.querySelector('[name="descricaoalergia"]');
+        const blocoUpload = document.getElementById('bloco-upload-foto');
+        const inputFoto = document.getElementById('input-foto');
+        const consentimentoFoto = document.getElementById('consentimento-foto');
+
+        /* foto: validacao e preview */
+        const TIPOS_FOTO = ['image/jpeg', 'image/png', 'image/webp'];
+        const TAMANHO_MAX_FOTO = 5 * 1024 * 1024; /* 5 MB */
+
+        const fotoErro = document.getElementById('foto-erro');
+        const fotoPreview = document.getElementById('foto-preview');
+        const fotoPreviewImg = document.getElementById('foto-preview-img');
+        const fotoPreviewNome = document.getElementById('foto-preview-nome');
+        const fotoPreviewTamanho = document.getElementById('foto-preview-tamanho');
+        const fotoRemover = document.getElementById('foto-remover');
+        let urlPreview = null;
+
+        function formatarTamanho(bytes) {
+            if (bytes < 1024 * 1024) { return Math.round(bytes / 1024) + ' KB'; }
+            return (bytes / (1024 * 1024)).toFixed(1).replace('.', ',') + ' MB';
+        }
+
+        function mostrarErroFoto(mensagem) {
+            fotoErro.textContent = mensagem;
+            fotoErro.hidden = !mensagem;
+        }
+
+        /* limpa o input, o preview e o erro */
+        function limparFoto() {
+            if (urlPreview) {
+                URL.revokeObjectURL(urlPreview);
+                urlPreview = null;
+            }
+            inputFoto.value = '';
+            fotoPreviewImg.removeAttribute('src');
+            fotoPreview.hidden = true;
+            mostrarErroFoto('');
+        }
+
+        inputFoto.addEventListener('change', function () {
+            const arquivo = inputFoto.files[0];
+
+            if (!arquivo) {
+                limparFoto();
+                return;
+            }
+
+            if (TIPOS_FOTO.indexOf(arquivo.type) === -1) {
+                limparFoto();
+                mostrarErroFoto('Formato não aceito. Envie uma imagem JPG, PNG ou WebP.');
+                return;
+            }
+
+            if (arquivo.size > TAMANHO_MAX_FOTO) {
+                const tamanho = formatarTamanho(arquivo.size);
+                limparFoto();
+                mostrarErroFoto('A foto tem ' + tamanho + '. O tamanho máximo é 5 MB.');
+                return;
+            }
+
+            mostrarErroFoto('');
+            if (urlPreview) { URL.revokeObjectURL(urlPreview); }
+            urlPreview = URL.createObjectURL(arquivo);
+            fotoPreviewImg.src = urlPreview;
+            fotoPreviewNome.textContent = arquivo.name;
+            fotoPreviewTamanho.textContent = formatarTamanho(arquivo.size);
+            fotoPreview.hidden = false;
+        });
+
+        /* imagem corrompida: o navegador nao consegue mostrar */
+        fotoPreviewImg.addEventListener('error', function () {
+            if (!fotoPreviewImg.getAttribute('src')) { return; }
+            limparFoto();
+            mostrarErroFoto('Não foi possível abrir essa imagem. Tente outra foto.');
+        });
+
+        fotoRemover.addEventListener('click', function () {
+            limparFoto();
+            inputFoto.focus();
+        });
+
+        /* camera: tira a foto e coloca no mesmo input de arquivo */
+        const btnAbrirCamera = document.getElementById('btn-abrir-camera');
+        const cameraArea = document.getElementById('camera-area');
+        const cameraVideo = document.getElementById('camera-video');
+        const btnCapturar = document.getElementById('btn-capturar');
+        const btnFecharCamera = document.getElementById('btn-fechar-camera');
+        const cameraCanvas = document.getElementById('camera-canvas');
+        let streamCamera = null;
+
+        function pararCamera() {
+             if (streamCamera) { streamCamera.getTracks().forEach(function (t) { t.stop(); }); }
+            streamCamera = null;
+            cameraVideo.srcObject = null;
+            cameraArea.hidden = true;
+        }
+
+        btnAbrirCamera.addEventListener('click', async function () {
+            mostrarErroFoto('');
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+             mostrarErroFoto('Seu navegador não permite usar a câmera aqui. Envie uma foto da galeria.');
+                return;
+            }
+        try {
+        streamCamera = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'user', width: { ideal: 1280 } },
+            audio: false
+        });
+        cameraVideo.srcObject = streamCamera;
+        cameraArea.hidden = false;
+    } catch (e) {
+        mostrarErroFoto('Não foi possível acessar a câmera. Verifique a permissão do navegador ou envie uma foto da galeria.');
+    }
+});
+
+btnCapturar.addEventListener('click', function () {
+    cameraCanvas.width = cameraVideo.videoWidth;
+    cameraCanvas.height = cameraVideo.videoHeight;
+    cameraCanvas.getContext('2d').drawImage(cameraVideo, 0, 0);
+
+    cameraCanvas.toBlob(function (blob) {
+        if (!blob) { return; }
+        const arquivo = new File([blob], 'scan.jpg', { type: 'image/jpeg' });
+        const dt = new DataTransfer();
+        dt.items.add(arquivo);
+        inputFoto.files = dt.files;
+        /* dispara o seu "change": ele valida o tamanho e mostra o preview */
+        inputFoto.dispatchEvent(new Event('change'));
+        pararCamera();
+    }, 'image/jpeg', 0.9);
+});
+
+btnFecharCamera.addEventListener('click', pararCamera);
+
+        /* mostra ou esconde um campo (so e obrigatorio enquanto aparece) */
+        function alternarTexto(campo, mostrar) {
+            campo.hidden = !mostrar;
+            campo.required = mostrar;
+            if (!mostrar) { campo.value = ''; }
+            
+        }
+
+        function atualizarCamposCondicionais() {
+            /* pergunta 3: "Outro" */
+            alternarTexto(objetivoOutro, selectObjetivo.value === 'outro');
+
+            /* pergunta 4: "Sim" */
+            const alergia = form.querySelector('[name="alergias"]:checked');
+            alternarTexto(descricaoAlergia, !!alergia && alergia.value === '1');
+
+            /* pergunta 11: "Sim" pede foto e consentimento */
+            const escanear = document.getElementById('scan-sim').checked;
+            blocoUpload.hidden = !escanear;
+            inputFoto.required = escanear;
+            consentimentoFoto.required = escanear;
+            if (!escanear) {
+            consentimentoFoto.checked = false;
+        }
+
+            /* a foto (arquivo ou camera) so e liberada depois do consentimento */
+            const consentiu = escanear && consentimentoFoto.checked;
+            inputFoto.disabled = !consentiu;
+            btnAbrirCamera.disabled = !consentiu;
+            if (!consentiu) {
+             pararCamera();
+             limparFoto();
+            }
+        }
+
+        /* barra de progresso: conta os cards [data-pergunta] respondidos
+           (select/numero com valor e radio marcado). texto livre e a pergunta 11 nao contam */
+        const blocos = Array.from(form.querySelectorAll('.form-bloco[data-pergunta]'));
+        const barra = document.getElementById('progresso-barra');
+        const texto = document.getElementById('progresso-texto');
+        const pct = document.getElementById('progresso-pct');
+        const progresso = document.getElementById('progresso');
+
+        function blocoRespondido(bloco) {
+            const radios = {};
+            let completo = true;
+
+            bloco.querySelectorAll('select, input[type="number"], input[type="radio"]').forEach(function (campo) {
+                if (campo.type === 'radio') {
+                    radios[campo.name] = radios[campo.name] || campo.checked;
+                } else if (!campo.value.trim()) {
+                    completo = false;
+                }
+            });
+
+            return completo && Object.keys(radios).every(function (nome) { return radios[nome]; });
+        }
+
+        function atualizarProgresso() {
+            const respondidas = blocos.filter(blocoRespondido).length;
+            const porcentagem = Math.round((respondidas / blocos.length) * 100);
+
+            barra.style.width = porcentagem + '%';
+            pct.textContent = porcentagem + '%';
+            texto.innerHTML = respondidas === blocos.length
+                ? 'Tudo respondido! Já pode salvar seu perfil.'
+                : '<strong>' + respondidas + '</strong> de ' + blocos.length + ' perguntas respondidas';
+            progresso.setAttribute('aria-valuenow', porcentagem);
+            progresso.setAttribute('aria-valuetext', texto.textContent);
+        }
+
+        function atualizarTudo() {
+            atualizarCamposCondicionais();
+            atualizarProgresso();
+        }
+
+        form.addEventListener('input', atualizarProgresso);
+        form.addEventListener('change', atualizarTudo);
+
+        /* ao carregar: o navegador pode restaurar respostas, entao sincroniza tudo */
+        atualizarTudo();
+    })();
+    </script>
+</body>
+</html>

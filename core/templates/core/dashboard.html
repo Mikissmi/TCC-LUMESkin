@@ -1,0 +1,318 @@
+{% extends 'core/index.html' %}
+
+{% block content %}
+    {% if perfil %}
+    <div class="dashboard-cabecalho">
+        <h3>Aqui está o resumo da sua pele, {{ perfil.usuario.nome_usuario|default:'usuário' }}.</h3>
+    </div>
+
+    <div class="dashboard-secao">
+        <div class="card card-saude">
+                       <div class="circulo-saude" style="--score-fill: {{ perfil.porcentagem_saude }}%; --score-color: {% if perfil.porcentagem_saude >= 85 %}#10b981{% elif perfil.porcentagem_saude >= 70 %}#0d7cb3{% elif perfil.porcentagem_saude >= 50 %}#a46fd2{% else %}#e35d6a{% endif %};">
+                <h2>{{ perfil.porcentagem_saude }}%</h2>
+                <span>Score Atual</span>
+            </div>
+            <div class="health-info">
+                <h3>Saúde da Pele <span class="perfil">{{ perfil.tipo_pele|capfirst }}</span></h3>
+                <p>Idade: {{ perfil.idade }} anos | Objetivo: {{ objetivo_rotulo|default:'Melhorar a pele' }}.</p>
+                <div class="detalhes">
+                    <div>
+                        <span class="preferencias">Preferência</span>
+                        <strong>{{ perfil.preferencia_produto|capfirst }}</strong>
+                    </div>
+                    <div>
+                        <span class="preferencias">Usa maquiagem</span>
+                        <strong>{% if perfil.usa_maquiagem_diariamente == 'sim' %}Sim{% else %}Não{% endif %}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card perfil">
+            <h2>Fototipo</h2>
+            {% if fototipo %}
+            <div class="fototipo-linha">
+                <span class="fototipo-numero">{{ fototipo.romano }}</span>
+                <small>escala Fitzpatrick</small>
+            </div>
+            <!-- barra de 6 tons: o da pessoa tem contorno roxo (o aria-label diz o mesmo para quem nao enxerga cores) -->
+            <ul class="fototipo-escala" role="img" aria-label="Fototipo {{ fototipo.romano }} de VI na escala Fitzpatrick">
+                {% for tom in fototipo.tons %}
+                <li{% if tom.atual %} class="atual"{% endif %} style="background-color: {{ tom.cor }}"></li>
+                {% endfor %}
+            </ul>
+            <p>{{ fototipo.texto }}</p>
+            {% else %}
+            <p>Fototipo não informado. Refaça o questionário para ver essa informação.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="dashboard-rotina dashboard-secao">
+    <div class="card card-rotina-diaria">
+        <div class="status-topo">
+            <div class="status-cabecalho">
+                <div>
+                    <h3>Sua rotina de hoje</h3>
+                    <p class="rotina-contador" id="rotina-contador" aria-live="polite">{{ resumo_manha.feitos }} de {{ resumo_manha.total }} passos concluídos</p>
+                </div>
+                <div class="escolha" role="tablist" aria-label="Período do dia">
+                    <button class="btn ativo" data-mode="manha" role="tab" aria-selected="true">Manhã</button>
+                    <button class="btn" data-mode="noite" role="tab" aria-selected="false">Noite</button>
+                </div>
+            </div>
+            <div class="rotina-progresso" id="rotina-progresso" role="progressbar" aria-label="Progresso da rotina" aria-valuemin="0" aria-valuemax="{{ resumo_manha.total }}" aria-valuenow="{{ resumo_manha.feitos }}">
+                <span style="width: {{ resumo_manha.porcentagem }}%"></span>
+            </div>
+        </div>
+
+        <!-- cada passo e clicavel: marca/desmarca como feito de hoje (salvo no banco por rotina_marcar) -->
+        <ul class="rotina-lista" id="rotina-lista" data-url-marcar="{% url 'rotina_marcar' %}" data-csrf="{{ csrf_token }}">
+            {% for item in rotina_manha %}
+            <li class="rotina-item {{ item.class }}">
+                <button type="button" class="status" aria-pressed="{% if item.feito %}true{% else %}false{% endif %}" aria-label="{% if item.feito %}Desmarcar{% else %}Marcar{% endif %} {{ item.title }} como feito">
+                    {% if item.icon %}<span aria-hidden="true">&#10003;</span>{% endif %}
+                </button>
+                <div class="rotina-details">
+                    <strong>{{ item.title }}</strong>
+                    <span>{% if item.action %}Próximo passo &middot; {% endif %}{% if item.url %}<a href="{{ item.url }}">{{ item.description }}</a>{% else %}{{ item.description }}{% endif %}</span>
+                </div>
+                {% if item.action %}<span class="rotina-botao" aria-hidden="true">{{ item.action }}</span>{% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        <p class="rotina-erro" id="rotina-erro" role="alert" hidden>Não foi possível salvar agora. Tente de novo.</p>
+
+        {% if avisos %}
+        <div class="rotina-avisos">
+            {% for aviso in avisos %}
+            <p class="rotina-aviso{% if aviso.destaque %} destaque{% endif %}" role="note">{{ aviso.texto }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {{ rotina_manha|json_script:"rotina-manha-data" }}
+        {{ rotina_noite|json_script:"rotina-noite-data" }}
+    </div>
+
+    <aside class="card card-uv">
+            <h3>Índice UV</h3>
+
+            <div class="uv-valor">
+                <strong id="uv-numero">--</strong>
+                <span id="uv-nivel" class="uv-badge"></span>
+            </div>
+
+            <div class="uv-barra">
+                <div id="uv-marcador" class="uv-marcador" hidden></div>
+            </div>
+            <div class="uv-escala"><span>Baixo</span><span>Extremo</span></div>
+
+            <p id="uv-descricao" class="uv-descricao">Obtendo índice UV...</p>
+            <p id="uv-local" class="uv-local"></p>
+
+            <small class="uv-credito">
+                Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>
+            </small>
+        </aside>
+
+    <!-- nota fixa, fora do card: pequena e discreta -->
+    <p class="rotina-nota" role="note">{{ aviso_rotulo }}<br>Esta rotina não substitui a avaliação de um dermatologista.</p>
+
+    <script>
+        (function() {
+            const rotinas = {
+                manha: JSON.parse(document.getElementById('rotina-manha-data').textContent),
+                noite: JSON.parse(document.getElementById('rotina-noite-data').textContent),
+            };
+            const listaRotina = document.getElementById('rotina-lista');
+            const erroRotina = document.getElementById('rotina-erro');
+            const contador = document.getElementById('rotina-contador');
+            const progresso = document.getElementById('rotina-progresso');
+            const botoes = document.querySelectorAll('.escolha .btn');
+            let periodoAtual = 'manha';
+
+            /* Tres estados (mesma regra do servidor, em views._preparar_passos):
+               feito = verde com check; o primeiro nao feito = "proximo passo" (azul, com botao); os demais = neutros */
+            function recalcular(periodo) {
+                let proximoDefinido = false;
+                rotinas[periodo].forEach(item => {
+                    item.icon = null;
+                    item.action = null;
+                    if (item.feito) {
+                        item.class = 'completed';
+                        item.icon = 'fa-check';
+                    } else if (!proximoDefinido) {
+                        item.class = 'action-required';
+                        item.action = 'Marcar como feito';
+                        proximoDefinido = true;
+                    } else {
+                        item.class = 'pending';
+                    }
+                });
+            }
+
+            function criarItemRotina(item, indice) {
+                const li = document.createElement('li');
+                li.className = `rotina-item ${item.class}`;
+
+                /* bolinha = botao (teclado e leitor de tela); o clique em qualquer parte do passo, menos no link, tambem marca */
+                const status = document.createElement('button');
+                status.type = 'button';
+                status.className = 'status';
+                status.setAttribute('aria-pressed', item.feito ? 'true' : 'false');
+                status.setAttribute('aria-label', `${item.feito ? 'Desmarcar' : 'Marcar'} ${item.title} como feito`);
+                if (item.icon) {
+                    /* check em texto: o Font Awesome nao e carregado nesta pagina */
+                    const check = document.createElement('span');
+                    check.textContent = '\u2713';
+                    check.setAttribute('aria-hidden', 'true');
+                    status.appendChild(check);
+                }
+
+                const detalhes = document.createElement('div');
+                detalhes.className = 'rotina-details';
+                const titulo = document.createElement('strong');
+                titulo.textContent = item.title;
+                const descricao = document.createElement('span');
+                if (item.action) {
+                    descricao.append('Pr\u00f3ximo passo \u00b7 ');
+                }
+                if (item.url) {
+                    /* produto do catalogo: o texto vira link para a tela de detalhe */
+                    const link = document.createElement('a');
+                    link.href = item.url;
+                    link.textContent = item.description;
+                    descricao.appendChild(link);
+                } else {
+                    descricao.append(item.description);
+                }
+                detalhes.append(titulo, descricao);
+
+                li.append(status, detalhes);
+                if (item.action) {
+                    const botao = document.createElement('span');
+                    botao.className = 'rotina-botao';
+                    botao.setAttribute('aria-hidden', 'true');
+                    botao.textContent = item.action;
+                    li.append(botao);
+                }
+
+                li.addEventListener('click', (evento) => {
+                    if (evento.target.closest('a')) { return; }
+                    /* detail === 0: o "clique" veio do teclado (Enter/Espaco) - so ai devolvemos o foco */
+                    alternarFeito(item, indice, evento.detail === 0);
+                });
+                return li;
+            }
+
+            /* "2 de 4 passos concluidos" e a barra de progresso do periodo mostrado */
+            function atualizarResumo(periodo) {
+                const itens = rotinas[periodo];
+                const feitos = itens.filter(item => item.feito).length;
+                const porcentagem = itens.length ? Math.round(100 * feitos / itens.length) : 0;
+                contador.textContent = `${feitos} de ${itens.length} passos conclu\u00eddos`;
+                progresso.setAttribute('aria-valuemax', itens.length);
+                progresso.setAttribute('aria-valuenow', feitos);
+                progresso.firstElementChild.style.width = porcentagem + '%';
+            }
+
+            function renderizarRotina(periodo, indiceFoco) {
+                periodoAtual = periodo;
+                recalcular(periodo);
+                listaRotina.innerHTML = ''; // string vazia, sem risco - so limpa a lista
+                rotinas[periodo].forEach((item, indice) => listaRotina.appendChild(criarItemRotina(item, indice)));
+                atualizarResumo(periodo);
+                if (indiceFoco !== undefined) {
+                    /* quem usa teclado nao perde o lugar quando a lista e redesenhada */
+                    listaRotina.children[indiceFoco].querySelector('.status').focus();
+                }
+            }
+
+            async function carregarIndiceUV() {
+                const numeroUV = document.getElementById('uv-numero');
+                const nivelUV = document.getElementById('uv-nivel');
+                const descricaoUV = document.getElementById('uv-descricao');
+                const localUV = document.getElementById('uv-local');
+                const marcadorUV = document.getElementById('uv-marcador');
+
+                try {
+                    const resposta = await fetch("{% url 'indice_uv' %}");
+                    const dados = await resposta.json();
+                    if (!resposta.ok) {
+                        throw new Error(dados.erro || `HTTP ${resposta.status}`);
+                    }
+
+                    const uv = Number(dados.uv);
+                    if (!Number.isFinite(uv) || !dados.nivel) {
+                        throw new Error('Resposta inválida do serviço de índice UV');
+                    }
+
+                    numeroUV.textContent = String(uv);
+                    nivelUV.textContent = dados.nivel;
+                    nivelUV.className = `uv-badge uv-${dados.nivel.toLowerCase().replace(/\s+/g, '-')}`;
+                    descricaoUV.textContent = 'Índice UV atual para a sua localização.';
+                    localUV.textContent = dados.cidade;
+                    marcadorUV.style.left = `${Math.min(100, Math.max(0, uv / 11 * 100))}%`;
+                    marcadorUV.hidden = false;
+                } catch (erro) {
+                    console.error('Não foi possível carregar o índice UV:', erro);
+                    nivelUV.textContent = 'Indisponível';
+                    nivelUV.className = 'uv-badge';
+                    descricaoUV.textContent = 'Não foi possível obter o índice UV agora.';
+                }
+            }
+
+            async function alternarFeito(item, indice, comFoco) {
+                if (item.salvando) { return; }
+                const periodo = periodoAtual;
+                item.salvando = true;
+                erroRotina.hidden = true;
+                item.feito = !item.feito;                       /* mostra na hora */
+                renderizarRotina(periodo, comFoco ? indice : undefined);
+                try {
+                    const resposta = await fetch(listaRotina.dataset.urlMarcar, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': listaRotina.dataset.csrf },
+                        body: new URLSearchParams({
+                            periodo: periodo,
+                            titulo: item.title,
+                            produto_id: item.produto_id || 0,
+                            feito: item.feito ? '1' : '0',
+                        }),
+                    });
+                    if (!resposta.ok) { throw new Error('HTTP ' + resposta.status); }
+                } catch (erro) {
+                    item.feito = !item.feito;                   /* nao salvou: volta ao estado anterior */
+                    erroRotina.hidden = false;
+                    if (periodoAtual === periodo) { renderizarRotina(periodo); } else { recalcular(periodo); }
+                } finally {
+                    item.salvando = false;
+                }
+            }
+
+            botoes.forEach(botao => {
+                botao.addEventListener('click', () => {
+                    botoes.forEach(b => {
+                        b.classList.remove('ativo');
+                        b.setAttribute('aria-selected', 'false');
+                    });
+                    botao.classList.add('ativo');
+                    botao.setAttribute('aria-selected', 'true');
+                    renderizarRotina(botao.dataset.mode === 'noite' ? 'noite' : 'manha');
+                });
+            });
+
+            renderizarRotina('manha');
+            carregarIndiceUV();
+        })();
+    </script>
+</div>
+
+    {% else %}
+    <div class="dashboard-cabecalho">
+        <p>Nenhum perfil encontrado. Complete o questionário para ver o seu dashboard.</p>
+    </div>
+    {% endif %}
+{% endblock %}
+

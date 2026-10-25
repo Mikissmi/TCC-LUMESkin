@@ -1,0 +1,29 @@
+{% extends 'core/index.html' %}
+{% load static %}
+
+{% block content %}
+    <h2>Recomendações de Especialistas</h2>
+    <p class="subtitulo">Aqui estão alguns especialistas em cuidados com a pele que podem ajudá-lo a alcançar seus objetivos de beleza e saúde da pele.</p>
+
+    <div class="filtros-rotina">
+        <a href="?especialidade=" class="btn-filtro {% if not filtro_ativo %}ativo{% endif %}">Todos</a>
+        <a href="?especialidade=dermatologista" class="btn-filtro {% if filtro_ativo == 'dermatologista' %}ativo{% endif %}">Dermatologista</a>
+        <a href="?especialidade=esteticista" class="btn-filtro {% if filtro_ativo == 'esteticista' %}ativo{% endif %}">Esteticista</a>
+        <a href="?especialidade=cosmetologo" class="btn-filtro {% if filtro_ativo == 'cosmetologo' %}ativo{% endif %}">Cosmetólogo(a)</a>
+    </div>
+
+    <div class="especialistas-grid">
+        {% for especialista in especialistas %}
+            <div class="card-especialista">
+                <div class="especialista-imagem">
+                <img src="{{ especialista.url_foto }}" alt="{{ especialista.nome }}">
+                </div>
+                <h4>{{ especialista.nome }}</h4>
+                <p class="especialista-descricao">{{ especialista.especialidade|capfirst }}{% if especialista.crm %} · {{ especialista.crm }}{% endif %}</p>
+                <a href="https://wa.me/{{ especialista.telefone_whatsapp }}" class="btn-filtro ativo" target="_blank">Falar no WhatsApp</a>
+            </div>
+        {% empty %}
+            <p class="sem-produtos">Nenhum especialista encontrado nessa categoria.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

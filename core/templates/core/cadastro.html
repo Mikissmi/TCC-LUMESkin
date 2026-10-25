@@ -1,0 +1,140 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUME Skin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}?v=2">
+</head>
+<body class="body">
+
+<div class="conteiner-texto">
+    <div class="secao-texto">
+        <div class="logo-area">
+                <img src="{% static 'core/images/LogoLUMESkin.png' %}" class="LUME-Skin_Logo">
+        </div>
+        
+        <h1 class="main-titulo">Sua jornada para uma <span class="highlight">pele bem cuidada</span> começa aqui.</h1>
+        <p class="subtitulo">Análise inteligente por IA, recomendações personalizadas e monitoramento contínuo para o seu skincare.</p>
+        
+        <div class="cards-conteiner">
+            <div class="card-scanner">
+                <div class="icone-scanner"><i class="fa-solid fa-expand"></i></div>
+                <div class="icone-texto">
+                    <strong>Scanner de IA</strong>
+                    <p>Análise facial com pontuação</p>
+                </div>
+            </div>
+            <div class="card-metas">
+                <div class="icone-metas"><i class="fa-solid fa-bullseye"></i></div>
+                <div class="icone-texto">
+                    <strong>Metas Personalizadas</strong>
+                    <p>Cronograma de cuidados</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="secao-autenticacao">
+        <div class="card-autenticacao">
+            <div class="conteiner-login-cadastro">
+                <button class="tab-btn {% if erro %}active{% endif %}" data-target="login-form">Login</button>
+                <button class="tab-btn {% if not erro %}active{% endif %}" data-target="cadastro-form">Criar Conta</button>
+            </div>
+
+     <div class="form-login">
+    <form method="POST" action="{% url 'login' %}" class="login-form {% if not erro %}hide{% endif %}" id="login-form">
+        {% csrf_token %}
+        <h2 class="form-titulo">Bem-vindo de volta</h2>
+        <p class="form-subtitulo">Acesse sua conta para continuar sua jornada.</p>
+
+        {% if erro %}
+        <p class="form-erro">{{ erro }}</p>
+        {% endif %}
+
+        <div class="input-caixa">
+            <label>E-mail</label>
+            <div class="caixa-texto">
+                <i class="fa-regular fa-envelope input-icon"></i>
+                <input type="email" name="email" placeholder="seu@email.com" required>            
+            </div>
+        </div>
+        <div class="input-caixa">
+            <label>Senha</label>
+            <div class="caixa-texto">
+                <i class="fa-solid fa-lock input-icon"></i>
+                <input type="password" name="senha" placeholder="••••••••" required>               
+            </div>
+        </div>
+        <button type="submit" class="botao">Entrar</button>
+    </form>
+
+    <form method="POST" action="{% url 'cadastro_view' %}" class="register-form {% if erro %}hide{% endif %}" id="cadastro-form">
+        {% csrf_token %}
+        <h2 class="form-titulo">Crie sua conta</h2>
+        <p class="form-subtitulo">Cadastre-se para começar sua jornada de skincare inteligente.</p>
+    
+        <div class="input-caixa">
+            <label>Nome Completo</label>
+            <div class="caixa-texto">
+                <i class="fa-solid fa-user input-icon"></i>
+                <input type="text" name="nome" placeholder="Seu nome completo" required>
+            </div>
+        </div>
+
+        <div class="input-caixa">
+            <label>E-mail</label>
+            <div class="caixa-texto">
+                <i class="fa-regular fa-envelope input-icon"></i>
+                <input type="email" name="email" placeholder="seu@email.com" required>
+            </div>
+        </div>
+        
+        <div class="input-caixa">
+            <div class="label-senha">
+                <label>Senha</label>
+            </div>
+            <div class="caixa-texto">
+                <i class="fa-solid fa-lock input-icon"></i>
+                <input type="password" name="senha" placeholder="••••••••" required>
+            </div>
+        </div>
+        
+        <button type="submit" class="botao">Cadastrar e Iniciar &nbsp;</button>
+    </form>
+</div>
+
+            <p class="terms-text">
+                Ao continuar, você concorda com nossos <a href="{% url 'termosdeuso' %}">Termos de Serviço</a> e <a href="{% url 'politica_privacidade' %}">Política de Privacidade</a>.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>  //javascript (odeio essa prr)
+// alterna entre login e cadastro
+document.addEventListener('DOMContentLoaded', function(){
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs.forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+            // ativa botão
+            tabs.forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // mostra formulário alvo
+            const targetId = btn.getAttribute('data-target');
+            if(!targetId) return;
+            const toShow = document.getElementById(targetId);
+            if(!toShow) return;
+
+            document.querySelectorAll('.form-login form').forEach(f=>{
+                if(f.id === targetId) f.classList.remove('hide'); else f.classList.add('hide');
+            });
+        });
+    });
+});
+</script>
+</body>
+</html>

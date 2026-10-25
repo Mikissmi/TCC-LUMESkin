@@ -1,0 +1,126 @@
+{% extends 'core/index.html' %}
+{% load static %}
+
+{% block content %}
+    <h2>TERMOS DE USO</h2>
+    <p class="subtitulo">Em vigor desde: 19 de outubro de 2026.</p>
+
+   <div class="pagina" id="topo">
+        <p>
+            Bem-vinda(o) ao LUME Skin! Leia estes Termos de Uso com atenção: eles regem o seu acesso e uso do aplicativo. Ao criar uma conta ou usar o LUME Skin, você declara que leu e concorda com eles. Se não concordar, por favor, não use o aplicativo. O tratamento dos seus dados pessoais é explicado na nossa <a href="{% url 'politica_privacidade' %}">Política de Privacidade</a>, que faz parte destes Termos.
+        </p>
+
+        <h3 id="s1">1. Quem somos</h3>
+        <ul>
+            <li>O LUME Skin foi desenvolvido exclusivamente para o trabalho de conclusão de curso (TCC) do curso de Técnico em Desenvolvimento de Sistemas do Instituto Federal de Educação, Ciência e Tecnologia Sul-Rio-Grandense.</li>
+            <li>Responsável: Caroline B. e Mariana G.</li>
+            <li>Cidade/UF: Sapucaia do Sul/RS</li>
+            <li>Contato: <a href="mailto:lumeskinmc@gmail.com">lumeskinmc@gmail.com</a></li>
+            <li>Endereço do site: <a href="https://lumeskin-one.vercel.app">https://lumeskin-one.vercel.app</a></li>
+        </ul>
+
+        <h3 id="s2">2. O que é o LUME Skin</h3>
+        <p>O LUME Skin é um aplicativo web de cuidados com a pele personalizados. Ele permite que você:</p>
+        <ul>
+            <li>responda a um questionário sobre sua pele e seus hábitos;</li>
+            <li>faça, se quiser, um escaneamento facial com inteligência artificial;</li>
+            <li>veja um painel com pontuação de saúde da pele, tipo de pele, fototipo e rotina de manhã e de noite;</li>
+            <li>receba recomendações de produtos por categoria (limpeza, tratamento e proteção);</li>
+            <li>consulte artigos científicos e uma lista de especialistas;</li>
+            <li>gerencie seu perfil.</li>
+        </ul>
+
+        <div class="aviso">
+        <h3 id="s3">3. Aviso importante: o LUME Skin não é serviço médico</h3>
+        <ul>
+            <li>Tudo o que o LUME Skin mostra (pontuação, indicadores, rotina, produtos e artigos) é informativo e de bem-estar/cosmetologia. São sugestões e simulações, e não diagnóstico, prescrição, tratamento ou parecer médico.</li>
+            <li>Nada aqui substitui consulta com dermatologista ou outro profissional de saúde.</li>
+            <li>Os resultados do escaneamento facial são estimativas de um modelo de IA e podem errar. Dependem de iluminação, ângulo, qualidade da câmera, maquiagem e do próprio modelo. Não use esses resultados para decidir iniciar, interromper ou alterar tratamento médico.</li>
+            <li>Se você tem alergias, doenças de pele, lesões que mudam de aspecto ou sangram, manchas novas, dor ou reações após usar um produto, procure um profissional de saúde. Em caso de reação grave, procure atendimento de emergência.</li>
+            <li>Faça teste de contato antes de usar um produto novo, principalmente se tiver alergias, e leia sempre o rótulo e as instruções do fabricante.</li>
+            <li>A estimativa do fototipo e do tipo de pele depende das suas respostas. Se você tiver diagnóstico de um dermatologista, ele prevalece sobre o que o aplicativo indicar.</li>
+        </ul>
+        <p>O LUME Skin não garante resultados estéticos nem de saúde e não se responsabiliza pelo uso que você fizer das informações, sem prejuízo dos direitos que a lei assegura a você como consumidor.</p>
+
+        </div>
+
+        <h3 id="s4">4. Quem pode usar</h3>
+        <p>Para usar o LUME Skin você precisa ter 18 anos ou mais e capacidade legal para aceitar estes Termos. O aplicativo não é destinado a crianças e adolescentes.</p>
+        <p>O acesso ao LUME Skin é gratuito. Os custos de internet e do aparelho são seus.</p>
+
+        <h3 id="s5">5. Cadastro e conta</h3>
+        <ul>
+            <li>Para usar o painel, você precisa criar uma conta com e-mail e nome de usuário e proteger o acesso com senha.</li>
+            <li>Forneça informações verdadeiras e atualizadas. Respostas falsas ao questionário geram pontuação e recomendações que não fazem sentido para você.</li>
+            <li>A conta é pessoal e intransferível. Não compartilhe sua senha. Você é responsável pelo que for feito com a sua conta. Se desconfiar de uso indevido, avise-nos pelo contato acima.</li>
+            <li>Podemos limitar ou suspender contas que violem estes Termos ou coloquem o serviço ou outras pessoas em risco. Sempre que possível, avisaremos antes.</li>
+            <li>Você pode excluir sua conta a qualquer momento, conforme a Política de Privacidade.</li>
+        </ul>
+
+        <h3 id="s6">6. Questionário</h3>
+        <p>O questionário tem 11 perguntas e só <strong>a última é opcional</strong> (escaneamento facial). Ele pede dados de saúde e de hábitos (como alergias, fototipo, sono e atividade física). Respondê-lo é uma escolha sua, mas, sem as respostas obrigatórias, não conseguimos gerar pontuação, rotina nem recomendações. Você pode editar suas respostas no perfil.</p>
+
+        <h3 id="s7">7. Escaneamento facial por inteligência artificial</h3>
+        <p>O escaneamento é <strong>opcional</strong> e depende do <strong>seu consentimento prévio</strong>, dado a cada uso.</p>
+        <ul>
+            <li><strong>Como funciona:</strong> você tira uma foto com a câmera (com guia oval do rosto) ou escolhe uma da galeria. A imagem é enviada a um fornecedor de análise de pele por IA (YouCam, da Perfect Corp.), que devolve indicadores de oleosidade, hidratação, acne/poros, textura e manchas, além de uma imagem de mapeamento facial. Os detalhes sobre tratamento de dados estão na Política de Privacidade.</li>
+            <li><strong>Use apenas o seu rosto:</strong> você declara que a foto é sua. É proibido enviar fotos de outras pessoas sem autorização, e nunca de crianças ou adolescentes.</li>
+            <li><strong>Requisitos da foto:</strong> formato JPG, PNG ou WebP, de até 5 MB, com o rosto de frente, bem iluminado e sem objetos cobrindo a face. O aplicativo pode recusar fotos que não atendam a esses requisitos.</li>
+            <li><strong>Limite de uso:</strong> cada análise tem custo para o serviço. Por isso, cada usuário pode fazer até 20 análises por hora. Tentar contornar esse limite é uso indevido.</li>
+            <li><strong>Indicadores indisponíveis:</strong> quando a IA não consegue medir algo, mostramos "Indisponível", e não um valor inventado.</li>
+            <li><strong>Variações:</strong> o resultado pode mudar entre uma foto e outra, mesmo com a mesma pele, e o fornecedor ajusta as notas exibidas para uma apresentação mais amigável. Compare resultados com cautela e não os trate como medida clínica.</li>
+            <li><strong>Resultado temporário:</strong> o resultado do último escaneamento fica disponível por cerca de 30 minutos na sua sessão.</li>
+            <li><strong>Você pode desistir:</strong> é possível cancelar a análise ou retirar o consentimento quando quiser. O aplicativo continua funcionando sem o escaneamento.</li>
+        </ul>
+
+        <h3 id="s8">8. Pontuação, rotina e recomendações</h3>
+        <ul>
+            <li>A pontuação de saúde é calculada a partir das suas respostas (principalmente fototipo, tipo de pele, maquiagem e alergias) e, se você escanear o rosto, combinada com indicadores da IA. É um índice interno do LUME Skin, criado para acompanhamento, sem valor clínico e sem equivalência com qualquer escala médica.</li>
+            <li>A rotina é uma sugestão geral de hábitos e etapas. Ajuste-a conforme a orientação do seu dermatologista.</li>
+            <li>As recomendações de produtos são filtradas pelo seu perfil e por categoria. Não são anúncios pagos e o LUME Skin não recebe comissão pelas marcas listadas. Informações de composição, preço e disponibilidade podem estar desatualizadas ou incompletas: confira sempre com o fabricante ou o vendedor.</li>
+            <li>Marcas e produtos citados pertencem aos seus titulares. A menção não indica parceria, aval ou vínculo, salvo se dito expressamente.</li>
+        </ul>
+
+        <h3 id="s9">9. Artigos científicos e especialistas</h3>
+        <ul>
+            <li>Os artigos são conteúdo de caráter informativo e educativo, com indicação de suas fontes. Resumos podem simplificar o texto original e podem ficar desatualizados. Consulte sempre a fonte.</li>
+            <li>A lista de especialistas é apenas informativa. Constar na lista não significa que o LUME Skin indique, garanta ou se responsabilize pelo atendimento, nem cria qualquer vínculo entre você e o profissional. A relação de consulta é exclusivamente entre você e ele.</li>
+        </ul>
+
+        <h3 id="s10">10. Regras de uso</h3>
+        <p>Ao usar o LUME Skin, você concorda em não:</p>
+        <ul>
+            <li>fornecer dados falsos, usar identidade de outra pessoa ou criar contas em nome de terceiros;</li>
+            <li>enviar imagens de terceiros sem autorização, de menores de idade ou conteúdo ilegal, ofensivo ou que viole direitos de outras pessoas;</li>
+            <li>tentar acessar áreas restritas (incluindo a área de administração), contas de outros usuários, ou dados que não sejam seus;</li>
+            <li>burlar limites de uso (como o de análises por hora), usar robôs, scraping automatizado ou sobrecarregar o serviço;</li>
+            <li>tentar descobrir ou copiar o código-fonte, desmontar o aplicativo ou explorar falhas de segurança. Se encontrar uma falha, por favor, avise-nos pelo contato acima;</li>
+            <li>usar o LUME Skin ou seus resultados para fins comerciais, revenda ou como se fosse laudo ou atestado de saúde;</li>
+            <li>usar o serviço para violar qualquer lei.</li>
+        </ul>
+
+        <h3 id="s11">11. Propriedade intelectual</h3>
+        <p>O LUME Skin, incluindo seu nome, logotipo, design, interface, textos, código, a forma de calcular a pontuação e a organização do conteúdo, é protegido pela legislação de propriedade intelectual e pertence ao responsável indicado na seção 1 ou a seus licenciantes. Artigos, marcas, imagens de produtos e tecnologias de terceiros (como a análise de pele da YouCam) pertencem aos respectivos titulares.</p>
+        <p>Você recebe uma licença pessoal, gratuita, limitada, não exclusiva e intransferível para usar o aplicativo conforme estes Termos. É proibido copiar, reproduzir, modificar, distribuir ou explorar comercialmente o conteúdo do LUME Skin sem autorização por escrito.</p>
+        <p>Suas fotos e respostas continuam sendo suas. Concedemos a nós mesmos apenas o direito de tratá-las para prestar o serviço, nos termos da Política de Privacidade. Não usamos sua foto, imagem ou depoimento em publicidade ou divulgação sem a sua autorização específica.</p>
+
+        <h3 id="s12">12. Serviços de terceiros, disponibilidade e responsabilidade</h3>
+        <p>O LUME Skin depende de serviços de terceiros, como o provedor de análise facial por IA e a hospedagem. Se eles ficarem indisponíveis, o escaneamento ou o aplicativo podem parar de funcionar temporariamente.</p>
+        <p>Nos esforçamos para manter o serviço no ar, mas não garantimos disponibilidade contínua, ausência de erros ou de interrupções. Podemos suspender o acesso para manutenção ou por motivo técnico, e alterar, adicionar ou retirar funções.</p>
+        <p>Links para sites de terceiros são oferecidos por conveniência. Não controlamos esses sites e a navegação neles é por sua conta e risco.</p>
+        <p>Na máxima extensão permitida pela lei, não respondemos por danos indiretos, lucros cessantes ou prejuízos decorrentes do uso indevido do aplicativo, de decisões tomadas com base nas informações exibidas ou de falhas de serviços de terceiros. Isto não afasta a responsabilidade que a lei, inclusive o Código de Defesa do Consumidor, impõe a nós, nem os seus direitos como consumidor.</p>
+
+        <h3 id="s13">13. Privacidade e dados pessoais</h3>
+        <p>O tratamento dos seus dados, incluindo dados sensíveis de saúde e a imagem do rosto, é descrito na <a href="{% url 'politica_privacidade' %}">Política de Privacidade</a> do LUME Skin, que você deve ler junto com estes Termos. Lá você encontra quais dados coletamos, para quê, com quem compartilhamos, por quanto tempo guardamos e como exercer seus direitos previstos na LGPD, inclusive a retirada do consentimento.</p>
+
+        <h3 id="s14">14. Cancelamento e encerramento</h3>
+        <p>Você pode parar de usar o LUME Skin e excluir sua conta quando quiser. Podemos encerrar ou suspender o acesso de quem violar estes Termos, usar o serviço de forma abusiva ou fraudulenta, ou se o serviço for descontinuado. Neste último caso, avisaremos com antecedência razoável e orientaremos sobre seus dados. Ao encerrar a conta, tratamos os dados conforme a Política de Privacidade.</p>
+
+        <h3 id="s15">15. Alterações destes Termos e do aplicativo</h3>
+        <p>Podemos atualizar estes Termos para refletir mudanças no aplicativo, na lei ou em serviços de terceiros. A data no topo mostra a versão em vigor. Alterações relevantes serão avisadas no aplicativo ou por e-mail antes de valerem. Se você continuar usando o LUME Skin depois do aviso, entendemos que concorda com a nova versão. Se não concordar, pode encerrar sua conta. Mudanças que exijam novo consentimento (por exemplo, sobre dados sensíveis) só valerão com ele.</p>
+
+        <h3 id="s16">16. Lei aplicável, solução de conflitos e contato</h3>
+        <p>Estes Termos são regidos pelas leis da República Federativa do Brasil. Em caso de conflito, tentaremos resolver amigavelmente. Se não for possível, você pode recorrer à Justiça comum ou aos órgãos de defesa do consumidor. Para dúvidas ou reclamações, entre em contato pelo e-mail: <a href="mailto:lumeskinmc@gmail.com">lumeskinmc@gmail.com</a>.</p>
+        <a class="topo" href="#topo">↑ Voltar ao topo</a>
+    </div>
+{% endblock %}
