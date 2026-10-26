@@ -4095,3 +4095,35 @@ body.scanner-aberto {
         color: #718096;
     }
 }
+
+/* ==========================================================================
+   QUESTIONARIO: a câmera usa a mesma janela do scanner (cole depois do bloco do scanner)
+   ========================================================================== */
+
+/* a regra antiga de #camera-video limitava a largura e arredondava: dentro da janela ela precisa preencher a caixa */
+.scanner-janela #camera-video {
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+    border-radius: 0;
+    object-fit: cover;
+    background: transparent;
+}
+
+/* no celular, a coluna do formulário crescia junto com o campo de arquivo (396 px)
+   e deixava a página mais larga que a tela. minmax(0, 1fr) impede isso */
+@media (max-width: 700px) {
+    .questionario-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.questionario-form > .form-bloco {
+    min-width: 0;
+}
+
+.bloco-upload-foto input[type="file"] {
+    max-width: 100%;
+}

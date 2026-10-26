@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Questionário | LUME Skin</title>
-    <link rel="stylesheet" href="{% static 'core/style.css' %}?v=6">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}?v=7">
 </head>
 <body class="app-body">
     <main class="main content">
@@ -160,36 +160,6 @@
                     </fieldset>
                 </div>
 
-                <div class="form-bloco bloco-meio">
-                    <fieldset>
-                        <legend class="pergunta">Sua pele é sensível?</legend>
-                        <div class="radio-group">
-                            <label><input type="radio" name="sensibilidade" value="1"> Sim</label>
-                            <label><input type="radio" name="sensibilidade" value="0" checked> Não</label>
-                        </div>
-                    </fieldset>
-                </div>
-
-                <div class="form-bloco bloco-meio">
-                    <fieldset>
-                        <legend class="pergunta">Está grávida?</legend>
-                        <div class="radio-group">
-                            <label><input type="radio" name="gestante" value="1"> Sim</label>
-                            <label><input type="radio" name="gestante" value="0" checked> Não</label>
-                        </div>
-                    </fieldset>
-                </div>
-
-                <div class="form-bloco bloco-meio">
-                    <label class="pergunta" for="tipo_acne">Se tiver acne, qual tipo foi identificado?</label>
-                    <select name="tipo_acne" id="tipo_acne">
-                        <option value="nao-sei" selected>Não sei</option>
-                        {% for valor, texto in tipos_acne %}
-                        <option value="{{ valor }}">{{ texto }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
                 <!-- linha 9: opcional, nao conta na barra de progresso -->
                 <div class="form-bloco">
                     <fieldset>
@@ -218,14 +188,39 @@
 
                        <button type="button" class="btn" id="btn-abrir-camera" disabled>Tirar foto agora</button>
 
-                       <div id="camera-area" hidden>
-                        <video id="camera-video" autoplay playsinline muted></video>
-                            <div class="camera-botoes">
-                                <button type="button" class="btn" id="btn-capturar">Capturar</button>
-                                <button type="button" class="btn" id="btn-fechar-camera">Cancelar</button>
+                       <!-- janela da camera: tela cheia no celular e pop-up no computador (mesmo visual do scanner) -->
+                       <div class="scanner-janela" id="camera-area" role="dialog" aria-modal="true" aria-labelledby="janela-titulo" hidden>
+                        <div class="janela-caixa">
+                            <div class="janela-topo">
+                                <h3 id="janela-titulo">Posicione o rosto</h3>
+                                <button type="button" class="btn-fechar-janela" id="btn-fechar-camera" aria-label="Fechar câmera">✕</button>
+                            </div>
+                            <div class="janela-corpo">
+                                <div class="camera-preview" role="group" aria-label="Pré-visualização da câmera">
+                                    <video id="camera-video" autoplay playsinline muted></video>
+                                    <div class="guia-oval" id="guia-oval" aria-hidden="true"></div>
+                                    <span class="camera-aviso" id="camera-aviso"></span>
+                                </div>
+                                <div class="janela-dicas">
+                                    <h4>Antes de tirar a foto</h4>
+                                    <ul>
+                                        <li>Rosto de frente, olhando para a câmera</li>
+                                        <li>Boa luz, de preferência natural</li>
+                                        <li>Sem óculos, boné ou cabelo no rosto</li>
+                                        <li>Rosto preenchendo o oval, da testa ao queixo</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="janela-rodape">
+                                <div class="camera-controles">
+                                    <button type="button" class="btn-capturar" id="btn-capturar" title="Capturar foto" aria-label="Capturar foto" disabled>
+                                        <svg class="icone-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                       
+                       </div>
+
                        <canvas id="camera-canvas" hidden></canvas>
 
                         <div class="foto-preview" id="foto-preview" hidden>
@@ -334,58 +329,232 @@
             inputFoto.focus();
         });
 
-        /* camera: tira a foto e coloca no mesmo input de arquivo */
+        /* camera: janela com guia do rosto (igual ao scanner). a foto vai para o mesmo input de arquivo */
+        const DETECTOR_JS = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs';
+        const DETECTOR_WASM = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm';
+        const DETECTOR_MODELO = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
+        const ROSTO_MIN = 0.62;    /* largura do rosto / largura da foto. A YouCam exige mais de 0.60 */
+        const ROSTO_MAX = 0.95;    /* acima disso o rosto esta cortado */
+        const CENTRO_MAX_X = 0.14; /* o centro do rosto pode sair no maximo 14% da largura do centro */
+        const CENTRO_MAX_Y = 0.20; /* e 20% da altura */
+        const CONFIRMACOES = 3;    /* leituras seguidas "ideais" antes de ficar verde (evita piscar) */
+        const BLOQUEAR_FORA_DO_IDEAL = true; /* true: o botao de foto so libera no verde. false: o guia so avisa */
+        const DEPURAR = false;     /* true: mostra no console (F12) a largura do rosto, pra ajustar ROSTO_MIN */
+        const LADO_MAX = 1280;     /* lado maior da imagem enviada (px) */
+        const TEXTOS_GUIA = {
+            livre: 'Encaixe o rosto no oval',
+            carregando: 'Preparando o guia...',
+            procurando: 'Procurando seu rosto... aproxime-se',
+            longe: 'Aproxime o rosto',
+            perto: 'Afaste um pouco o rosto',
+            descentralizado: 'Centralize o rosto no oval',
+            ideal: 'Perfeito! Segure assim'
+        };
+
         const btnAbrirCamera = document.getElementById('btn-abrir-camera');
         const cameraArea = document.getElementById('camera-area');
         const cameraVideo = document.getElementById('camera-video');
         const btnCapturar = document.getElementById('btn-capturar');
         const btnFecharCamera = document.getElementById('btn-fechar-camera');
         const cameraCanvas = document.getElementById('camera-canvas');
+        const guia = document.getElementById('guia-oval');
+        const aviso = document.getElementById('camera-aviso');
         let streamCamera = null;
+        let videoPronto = false;
+        let detector = null;
+        let detectorEstado = 'ocioso';      /* ocioso | carregando | pronto | falhou */
+        let estadoGuia = 'carregando';
+        let confirmacoes = 0;
+        let laco = null;
+        let ultimaDeteccao = 0;
+
+        function guiaLiberada() {
+            if (!BLOQUEAR_FORA_DO_IDEAL || detectorEstado === 'falhou') { return true; }
+            return estadoGuia === 'ideal';
+        }
+
+        function atualizarBotaoCapturar() {
+            btnCapturar.disabled = !(streamCamera && videoPronto && guiaLiberada());
+        }
+
+        function estadoInicialGuia() {
+            if (detectorEstado === 'falhou') { return 'livre'; }
+            return detectorEstado === 'pronto' ? 'procurando' : 'carregando';
+        }
+
+        function atualizarGuia(estado, forcar) {
+            if (estado === estadoGuia && aviso.textContent && !forcar) { return; }
+            estadoGuia = estado;
+            const ajustar = estado === 'longe' || estado === 'perto' || estado === 'descentralizado';
+            guia.classList.toggle('ideal', estado === 'ideal');
+            guia.classList.toggle('ajustar', ajustar);
+            aviso.className = 'camera-aviso' + (estado === 'ideal' ? ' ideal' : ajustar ? ' ajustar' : '');
+            aviso.textContent = TEXTOS_GUIA[estado];
+            atualizarBotaoCapturar();
+        }
+
+        /* parte do video que aparece na tela (object-fit: cover corta as bordas).
+           a foto enviada e recortada nesta mesma area: o que a pessoa ve e o que a YouCam recebe */
+        function recorteVisivel() {
+            const vw = cameraVideo.videoWidth, vh = cameraVideo.videoHeight;
+            const cw = cameraVideo.clientWidth, ch = cameraVideo.clientHeight;
+            if (!vw || !vh || !cw || !ch) { return null; }
+            const escala = Math.max(cw / vw, ch / vh);
+            const sw = cw / escala, sh = ch / escala;
+            return { sx: (vw - sw) / 2, sy: (vh - sh) / 2, sw: sw, sh: sh };
+        }
+
+        function avaliarRosto() {
+            let resultado;
+            try {
+                resultado = detector.detectForVideo(cameraVideo, performance.now());
+            } catch (erro) {
+                return;
+            }
+            const rec = recorteVisivel();
+            if (!rec) { return; }
+            const rostos = (resultado && resultado.detections) || [];
+            if (!rostos.length) {
+                confirmacoes = 0;
+                atualizarGuia('procurando');
+                return;
+            }
+            const caixa = rostos
+                .map(function (d) { return d.boundingBox; })
+                .sort(function (a, b) { return b.width * b.height - a.width * a.height; })[0];   /* o maior rosto */
+            const razao = caixa.width / rec.sw;
+            const dx = ((caixa.originX + caixa.width / 2) - (rec.sx + rec.sw / 2)) / rec.sw;
+            const dy = ((caixa.originY + caixa.height / 2) - (rec.sy + rec.sh / 2)) / rec.sh;
+            if (DEPURAR) { console.log('[camera] rosto = ' + razao.toFixed(2) + ' da largura | dx ' + dx.toFixed(2) + ' dy ' + dy.toFixed(2)); }
+
+            let estado;
+            if (razao < ROSTO_MIN) { estado = 'longe'; }
+            else if (razao > ROSTO_MAX) { estado = 'perto'; }
+            else if (Math.abs(dx) > CENTRO_MAX_X || Math.abs(dy) > CENTRO_MAX_Y) { estado = 'descentralizado'; }
+            else { estado = 'ideal'; }
+
+            if (estado === 'ideal') {
+                confirmacoes++;
+                if (confirmacoes >= CONFIRMACOES) { atualizarGuia('ideal'); }
+            } else {
+                confirmacoes = 0;
+                atualizarGuia(estado);
+            }
+        }
+
+        function iniciarLaco() {
+            if (laco || detectorEstado !== 'pronto' || !streamCamera) { return; }
+            function passo() {
+                laco = requestAnimationFrame(passo);
+                if (!streamCamera || !videoPronto || cameraVideo.readyState < 2) { return; }
+                const agora = performance.now();
+                if (agora - ultimaDeteccao < 120) { return; }   /* ~8 leituras por segundo bastam */
+                ultimaDeteccao = agora;
+                avaliarRosto();
+            }
+            laco = requestAnimationFrame(passo);
+        }
+
+        function pararLaco() {
+            if (laco) { cancelAnimationFrame(laco); }
+            laco = null;
+            confirmacoes = 0;
+        }
+
+        /* baixa o detector (gratuito, roda no navegador) so uma vez e so quando a pessoa vai usar a camera */
+        async function garantirDetector() {
+            if (detectorEstado !== 'ocioso') { return; }
+            detectorEstado = 'carregando';
+            const limite = setTimeout(function () {
+                if (detectorEstado === 'carregando') {
+                    detectorEstado = 'falhou';   /* sem o detector, o oval fica fixo e a foto nao e bloqueada */
+                    if (streamCamera) { atualizarGuia('livre', true); }
+                    atualizarBotaoCapturar();
+                }
+            }, 20000);
+            try {
+                const modulo = await import(DETECTOR_JS);
+                const arquivos = await modulo.FilesetResolver.forVisionTasks(DETECTOR_WASM);
+                detector = await modulo.FaceDetector.createFromOptions(arquivos, {
+                    baseOptions: { modelAssetPath: DETECTOR_MODELO },
+                    runningMode: 'VIDEO',
+                    minDetectionConfidence: 0.5
+                });
+                detectorEstado = 'pronto';
+            } catch (erro) {
+                detectorEstado = 'falhou';
+            }
+            clearTimeout(limite);
+            if (streamCamera) {
+                atualizarGuia(estadoInicialGuia(), true);
+                iniciarLaco();
+            }
+            atualizarBotaoCapturar();
+        }
 
         function pararCamera() {
-             if (streamCamera) { streamCamera.getTracks().forEach(function (t) { t.stop(); }); }
+            if (streamCamera) { streamCamera.getTracks().forEach(function (t) { t.stop(); }); }
             streamCamera = null;
+            videoPronto = false;
+            pararLaco();
             cameraVideo.srcObject = null;
             cameraArea.hidden = true;
+            document.body.classList.remove('scanner-aberto');
+            atualizarBotaoCapturar();
         }
+
+        cameraVideo.addEventListener('loadeddata', function () {
+            videoPronto = true;
+            iniciarLaco();
+            atualizarBotaoCapturar();
+        });
 
         btnAbrirCamera.addEventListener('click', async function () {
             mostrarErroFoto('');
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-             mostrarErroFoto('Seu navegador não permite usar a câmera aqui. Envie uma foto da galeria.');
+                mostrarErroFoto('Seu navegador não permite usar a câmera aqui. Envie uma foto da galeria.');
                 return;
             }
-        try {
-        streamCamera = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'user', width: { ideal: 1280 } },
-            audio: false
+            garantirDetector();
+            try {
+                streamCamera = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } },
+                    audio: false
+                });
+                videoPronto = false;
+                cameraVideo.srcObject = streamCamera;
+                cameraArea.hidden = false;
+                document.body.classList.add('scanner-aberto');
+                atualizarGuia(estadoInicialGuia(), true);
+            } catch (e) {
+                mostrarErroFoto('Não foi possível acessar a câmera. Verifique a permissão do navegador ou envie uma foto da galeria.');
+            }
         });
-        cameraVideo.srcObject = streamCamera;
-        cameraArea.hidden = false;
-    } catch (e) {
-        mostrarErroFoto('Não foi possível acessar a câmera. Verifique a permissão do navegador ou envie uma foto da galeria.');
-    }
-});
 
-btnCapturar.addEventListener('click', function () {
-    cameraCanvas.width = cameraVideo.videoWidth;
-    cameraCanvas.height = cameraVideo.videoHeight;
-    cameraCanvas.getContext('2d').drawImage(cameraVideo, 0, 0);
+        btnCapturar.addEventListener('click', function () {
+            if (!cameraVideo.videoWidth) { return; }
+            const rec = recorteVisivel() || { sx: 0, sy: 0, sw: cameraVideo.videoWidth, sh: cameraVideo.videoHeight };
+            const escala = Math.min(1, LADO_MAX / Math.max(rec.sw, rec.sh));
+            cameraCanvas.width = Math.round(rec.sw * escala);
+            cameraCanvas.height = Math.round(rec.sh * escala);
+            cameraCanvas.getContext('2d').drawImage(cameraVideo, rec.sx, rec.sy, rec.sw, rec.sh, 0, 0, cameraCanvas.width, cameraCanvas.height);
 
-    cameraCanvas.toBlob(function (blob) {
-        if (!blob) { return; }
-        const arquivo = new File([blob], 'scan.jpg', { type: 'image/jpeg' });
-        const dt = new DataTransfer();
-        dt.items.add(arquivo);
-        inputFoto.files = dt.files;
-        /* dispara o seu "change": ele valida o tamanho e mostra o preview */
-        inputFoto.dispatchEvent(new Event('change'));
-        pararCamera();
-    }, 'image/jpeg', 0.9);
-});
+            cameraCanvas.toBlob(function (blob) {
+                if (!blob) { return; }
+                const arquivo = new File([blob], 'scan.jpg', { type: 'image/jpeg' });
+                const dt = new DataTransfer();
+                dt.items.add(arquivo);
+                inputFoto.files = dt.files;
+                /* dispara o seu "change": ele valida o tamanho e mostra o preview */
+                inputFoto.dispatchEvent(new Event('change'));
+                pararCamera();
+            }, 'image/jpeg', 0.9);
+        });
 
-btnFecharCamera.addEventListener('click', pararCamera);
+        btnFecharCamera.addEventListener('click', pararCamera);
+        document.addEventListener('keydown', function (evento) {
+            if (evento.key === 'Escape' && !cameraArea.hidden) { pararCamera(); }
+        });
 
         /* mostra ou esconde um campo (so e obrigatorio enquanto aparece) */
         function alternarTexto(campo, mostrar) {
@@ -416,6 +585,7 @@ btnFecharCamera.addEventListener('click', pararCamera);
             const consentiu = escanear && consentimentoFoto.checked;
             inputFoto.disabled = !consentiu;
             btnAbrirCamera.disabled = !consentiu;
+            if (consentiu) { garantirDetector(); }
             if (!consentiu) {
              pararCamera();
              limparFoto();
