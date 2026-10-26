@@ -72,6 +72,18 @@
                     <!-- aparece so com "Outro" (js) -->
                     <input type="text" name="objetivo_outro" id="objetivo_outro" placeholder="Especifique..."
                            aria-label="Especifique seu objetivo" hidden>
+                    <!-- NOVO: aparece so com "Reduzir Acne" (js). "Não sei" tem valor "nao-sei" para a barra de
+                         progresso contar como respondido; a view trata qualquer valor desconhecido como "não sei" -->
+                    <div id="bloco-tipo-acne" hidden>
+                        <label for="tipo_acne" class="pergunta pergunta-sub">3.1. Qual tipo de acne você tem?</label>
+                        <select name="tipo_acne" id="tipo_acne">
+                            <option value="nao-sei">Não sei</option>
+                            <option value="Comedonal">Comedonal: cravos brancos e pretos</option>
+                            <option value="Inflamatória">Inflamatória: espinhas vermelhas, com pus</option>
+                            <option value="Nodular">Nodular: caroços duros e doloridos sob a pele</option>
+                            <option value="Cística">Cística: bolsas grandes, profundas e dolorosas</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- linha 4 -->
@@ -86,6 +98,28 @@
                     <!-- aparece so com "Sim" (js) -->
                     <input type="text" name="descricaoalergia" id="descricaoalergia" placeholder="Descreva as alergias..."
                            aria-label="Descreva suas alergias" hidden>
+                </div>
+
+                <!-- NOVO: pergunta 4.1 -->
+                <div class="form-bloco bloco-meio" data-pergunta>
+                    <fieldset>
+                        <legend class="pergunta pergunta-sub">4.1. Sua pele é sensível? (arde, fica vermelha ou coça com facilidade ao usar produtos)</legend>
+                        <div class="radio-group">
+                            <label><input type="radio" name="sensibilidade" value="0" required> Não</label>
+                            <label><input type="radio" name="sensibilidade" value="1" required> Sim</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <!-- NOVO: pergunta 4.2 -->
+                <div class="form-bloco bloco-meio" data-pergunta>
+                    <fieldset>
+                        <legend class="pergunta pergunta-sub">4.2. Você está grávida? (alguns ativos não são indicados na gravidez)</legend>
+                        <div class="radio-group">
+                            <label><input type="radio" name="gestante" value="0" required> Não</label>
+                            <label><input type="radio" name="gestante" value="1" required> Sim</label>
+                        </div>
+                    </fieldset>
                 </div>
 
                 <div class="form-bloco bloco-meio" data-pergunta>
@@ -176,7 +210,7 @@
                    <input type="checkbox" name="consentimento_foto" value="1" id="consentimento-foto">
                    <span>
                          Li e concordo com os <a href="#">Termos de Serviço</a> e a <a href="#">Política de Privacidade</a>
-                        e autorizo, de forma específica, o tratamento da foto do meu rosto (dado pessoal sensível)
+                        e autorizo, de forma específica, o tratamento da foto do meu rosto
                          apenas para gerar a análise da minha pele com inteligência artificial.
                    </span>
                   </label>
@@ -249,6 +283,9 @@
         const selectObjetivo = form.querySelector('[name="objetivo"]');
         const objetivoOutro = form.querySelector('[name="objetivo_outro"]');
         const descricaoAlergia = form.querySelector('[name="descricaoalergia"]');
+        /* NOVO: tipo de acne (pergunta 3.1) */
+        const blocoTipoAcne = document.getElementById('bloco-tipo-acne');
+        const selectTipoAcne = document.getElementById('tipo_acne');
         const blocoUpload = document.getElementById('bloco-upload-foto');
         const inputFoto = document.getElementById('input-foto');
         const consentimentoFoto = document.getElementById('consentimento-foto');
@@ -567,6 +604,11 @@
         function atualizarCamposCondicionais() {
             /* pergunta 3: "Outro" */
             alternarTexto(objetivoOutro, selectObjetivo.value === 'outro');
+
+            /* NOVO - pergunta 3.1: so para "Reduzir Acne" (fora disso volta para "Não sei") */
+            const eAcne = selectObjetivo.value === 'reduzir acne';
+            blocoTipoAcne.hidden = !eAcne;
+            if (!eAcne) { selectTipoAcne.value = 'nao-sei'; }
 
             /* pergunta 4: "Sim" */
             const alergia = form.querySelector('[name="alergias"]:checked');
