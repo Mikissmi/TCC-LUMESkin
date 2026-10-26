@@ -176,6 +176,8 @@
     </div>
 </div>
 
+{{ ultimo_scan|json_script:"ultimo-scan" }}
+
 <script>
 (function() {
     const URL_ANALISAR = '{% url "scanner_analisar" %}';
@@ -791,6 +793,13 @@
         cancelarAnalise();
         pararCamera();
     });
+
+    /* ultimo scan salvo no perfil (feito no questionario): mostra o resultado ao abrir a pagina */
+    const guardado = JSON.parse(document.getElementById('ultimo-scan').textContent);
+    if (guardado) {
+        preencherResultados(guardado);
+        dizer('Resultado do seu último scan (feito no questionário). Faça um novo scan para atualizar.');
+    }
 
     atualizarControles();
     carregarDetector();

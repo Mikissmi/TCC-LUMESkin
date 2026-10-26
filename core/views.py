@@ -1080,7 +1080,19 @@ def scanner_salvar(request):
 
 
 def tela_scanner(request):
-    return render(request, 'core/scanner.html')
+    # se o usuario ja fez um scan (no questionario), mostra o ultimo resultado salvo no perfil
+    ultimo_scan = None
+    if request.user.is_authenticated:
+        perfil = _perfil_do_usuario(request.user)
+        indicadores = _indicadores_do_perfil(perfil)
+        if indicadores:
+            notas = [i['nota'] for i in indicadores if i['nota'] is not None]
+            ultimo_scan = {
+                'score_geral': round(sum(notas) / len(notas)),
+                'indicadores': indicadores,
+                'mapeamento_facial': _url_https(perfil.foto_rosto),
+            }
+    return render(request, 'core/scanner.html', {'ultimo_scan': ultimo_scan})
 
 
 # ==========================================================================
