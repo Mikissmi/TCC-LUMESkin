@@ -1,25 +1,39 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
 from django.conf import settings
 from django.core.cache import cache
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.contrib import messages
 from functools import wraps
-from .models import Usuario, PerfilDermatologico, Artigo, Especialista, Produto
-from .recomendacao import recomendar_produtos, classificar_indicador
+from .models import (
+    Artigo,
+    Especialista,
+    PassoRotinaFeito,
+    PerfilDermatologico,
+    Produto,
+    Usuario,
+)
+from .recomendacao import (
+    OBJETIVOS,
+    montar_rotina,
+    normalizar_objetivo,
+    recomendar_produtos,
+    rotulo_objetivo,
+    classificar_indicador,
+)
 import requests
 import io
 import json
 import time
 import os
 import zipfile
-import json
 import urllib.request
 from urllib.parse import unquote
-
-from django.http import JsonResponse
 
 
 # ==========================================================================
@@ -588,6 +602,12 @@ def tela_questionario(request):
         foto_salva = None
         resultados_ia = None
         redirecionar_para_scanner = False
+        sono_horas = request.POST.get('sono_horas')
+        exercicio_frequencia = request.POST.get('exercicio_frequencia')
+        protetor_solar = request.POST.get('protetor_solar')
+        sensibilidade = request.POST.get('sensibilidade')
+        gestante = request.POST.get('gestante')
+        tipo_acne = request.POST.get('tipo_acne')
 
         # Calcula a porcentagem usando as respostas do questionário
         porcentagem_regras = calcular_porcentagem_saude(
@@ -674,7 +694,7 @@ def tela_questionario(request):
 
         # Salva ou atualiza o perfil
         if request.user.is_authenticated:
-            perfil, created = PerfilDermatologico.objects.get_or_create(
+            perfil, _ = PerfilDermatologico.objects.get_or_create(
                 usuario=request.user,
                 defaults={
                     'idade': idade,
@@ -691,6 +711,21 @@ def tela_questionario(request):
                     'fototipo': pontos_sol + 1,
                     'dados_ia': dados_ia_json,
                     'foto_rosto': foto_salva,
+                    'sono_horas': sono_horas if sono_horas in dict(PerfilDermatologico.SONO_CHOICES) else 'adequado',
+                    'exercicio_frequencia': (
+                        exercicio_frequencia
+                        if exercicio_frequencia in dict(PerfilDermatologico.EXERCICIO_CHOICES)
+                        else '1-2x'
+                    ),
+                    'protetor_solar': _inteiro(protetor_solar, 1, 0, 2),
+                    'sensibilidade': sensibilidade == '1',
+                    'gestante': gestante == '1',
+                    'tipo_acne': (
+                        tipo_acne
+                        if objective == 'reduzir acne'
+                        and tipo_acne in dict(PerfilDermatologico.TIPO_ACNE_CHOICES)
+                        else ''
+                    ),
                 }
             )
 
@@ -706,6 +741,24 @@ def tela_questionario(request):
 
             perfil.porcentagem_saude = porcentagem_calculada
 
+            if sono_horas in dict(PerfilDermatologico.SONO_CHOICES):
+                perfil.sono_horas = sono_horas
+            if exercicio_frequencia in dict(PerfilDermatologico.EXERCICIO_CHOICES):
+                perfil.exercicio_frequencia = exercicio_frequencia
+            if protetor_solar is not None:
+                protetor_valido = _inteiro(protetor_solar, None, 0, 2)
+                if protetor_valido is not None:
+                    perfil.protetor_solar = protetor_valido
+
+            if 'sensibilidade' in request.POST:
+                perfil.sensibilidade = sensibilidade == '1'
+            if 'gestante' in request.POST:
+                perfil.gestante = gestante == '1'
+            if objective == 'reduzir acne' and tipo_acne in dict(PerfilDermatologico.TIPO_ACNE_CHOICES):
+                perfil.tipo_acne = tipo_acne
+            elif objective and objective != 'reduzir acne':
+                perfil.tipo_acne = ''
+
             # Só substitui a análise anterior se houve um novo scan
             if dados_ia_json:
                 perfil.dados_ia = dados_ia_json
@@ -719,12 +772,15 @@ def tela_questionario(request):
 
             return redirect('dashboard')
 
-    return render(request, 'core/questionario.html')
+    return render(
+        request,
+        'core/questionario.html',
+        {'tipos_acne': PerfilDermatologico.TIPO_ACNE_CHOICES},
+    )
 
 
 
 def dashboard_view(request):
-    # sem login nao mostra perfil (antes pegava o primeiro do banco, que e de outra pessoa)
     if request.user.is_authenticated:
         perfil = PerfilDermatologico.objects.filter(usuario=request.user).first()
     else:
@@ -732,66 +788,115 @@ def dashboard_view(request):
 
     rotina_manha = []
     rotina_noite = []
+    avisos = []
+    aviso_rotulo = (
+        'Só conhecemos o ingrediente principal de cada produto. '
+        'Confira o rótulo antes de usar, principalmente se você tem alergias.'
+    )
     if perfil:
-        rotina_manha = [
-            {
-                'class': 'completed',
-                'title': 'Limpeza Suave',
-                'description': f'Rotina de limpeza diária para pele {perfil.tipo_pele}',
-                'time': '08:00',
-                'action': None,
-                'icon': 'fa-check',
-            },
-            {
-                'class': 'action-required' if perfil.porcentagem_saude < 80 else 'completed',
-                'title': 'Hidratação & Tratamento',
-                'description': f'Sérum recomendado para objetivo "{perfil.objetivo}"',
-                'time': None if perfil.porcentagem_saude < 80 else '19:00',
-                'action': 'Fazer agora' if perfil.porcentagem_saude < 80 else None,
-                'icon': 'fa-check' if perfil.porcentagem_saude >= 80 else None,
-            },
-            {
-                'class': 'pending' if perfil.fototipo and perfil.fototipo < 5 else 'completed',
-                'title': 'Proteção Solar',
-                'description': f'FPS 50+ para fototipo {perfil.fototipo or "1"}',
-                'time': '12:00' if perfil.fototipo and perfil.fototipo < 5 else 'Já feito',
-                'action': None,
-                'icon': 'fa-check' if perfil.fototipo and perfil.fototipo >= 5 else None,
-            },
+        rotina = montar_rotina(perfil)
+        avisos = [
+            aviso for aviso in rotina['avisos']
+            if 'Confira o rótulo antes de usar' not in aviso['texto']
         ]
-        rotina_noite = [
-            {
-                'class': 'completed',
-                'title': 'Remoção de Maquiagem',
-                'description': 'Demaquilante suave antes de dormir',
-                'time': '21:00',
-                'action': None,
-                'icon': 'fa-check',
-            },
-            {
-                'class': 'completed',
-                'title': 'Tratamento Noturno',
-                'description': f'Sérum calmante para {perfil.tipo_pele}',
-                'time': '21:30',
-                'action': None,
-                'icon': 'fa-check',
-            },
-            {
-                'class': 'pending',
-                'title': 'Hidratação Profunda',
-                'description': 'Creme nutritivo para reparar enquanto dorme',
-                'time': '22:00',
-                'action': 'Aplicar agora',
-                'icon': None,
-            },
-        ]
+        marcados = set(
+            PassoRotinaFeito.objects.filter(
+                usuario=request.user,
+                data=timezone.localdate(),
+            ).values_list('periodo', 'titulo', 'produto_id')
+        )
+
+        def preparar_passos(passos, periodo):
+            preparados = []
+            proximo_definido = False
+            for passo in passos:
+                produto_id = passo['produto_id']
+                chave_produto = produto_id or 0
+                feito = (periodo, passo['title'], chave_produto) in marcados
+                if feito:
+                    estado = 'completed'
+                elif not proximo_definido:
+                    estado = 'action-required'
+                    proximo_definido = True
+                else:
+                    estado = 'pending'
+                preparados.append({
+                    **passo,
+                    'class': estado,
+                    'feito': feito,
+                    'action': 'Marcar como feito' if estado == 'action-required' else None,
+                    'icon': 'fa-check' if feito else None,
+                    'url': (
+                        reverse('produto_detalhe', args=[produto_id])
+                        if produto_id else None
+                    ),
+                })
+            return preparados
+
+        rotina_manha = preparar_passos(rotina['manha'], 'manha')
+        rotina_noite = preparar_passos(rotina['noite'], 'noite')
+
+    def resumo(passos):
+        feitos = sum(passo['feito'] for passo in passos)
+        total = len(passos)
+        return {
+            'feitos': feitos,
+            'total': total,
+            'porcentagem': round(feitos * 100 / total) if total else 0,
+        }
 
     context = {
         'perfil': perfil,
         'rotina_manha': rotina_manha,
         'rotina_noite': rotina_noite,
+        'resumo_manha': resumo(rotina_manha),
+        'resumo_noite': resumo(rotina_noite),
+        'avisos': avisos,
+        'aviso_rotulo': aviso_rotulo,
+        'fototipo': _fototipo_do_perfil(perfil),
+        'objetivo_rotulo': rotulo_objetivo(perfil.objetivo) if perfil else '',
     }
     return render(request, 'core/dashboard.html', context)
+
+
+@login_required
+def rotina_marcar(request):
+    if request.method != 'POST':
+        return JsonResponse({'erro': 'Método não permitido.'}, status=405)
+
+    perfil = PerfilDermatologico.objects.filter(usuario=request.user).first()
+    if not perfil:
+        return JsonResponse({'erro': 'Responda o questionário antes de marcar a rotina.'}, status=400)
+
+    periodo = request.POST.get('periodo')
+    titulo = request.POST.get('titulo')
+    feito = request.POST.get('feito')
+    produto_id = _inteiro(request.POST.get('produto_id'), None, 0)
+    if periodo not in ('manha', 'noite') or feito not in ('0', '1') or produto_id is None:
+        return JsonResponse({'erro': 'Passo de rotina inválido.'}, status=400)
+
+    rotina = montar_rotina(perfil)
+    passos = rotina['manha' if periodo == 'manha' else 'noite']
+    passo_valido = any(
+        passo['title'] == titulo and (passo['produto_id'] or 0) == produto_id
+        for passo in passos
+    )
+    if not passo_valido:
+        return JsonResponse({'erro': 'Este passo não existe na sua rotina.'}, status=400)
+
+    chave = {
+        'usuario': request.user,
+        'data': timezone.localdate(),
+        'periodo': periodo,
+        'titulo': titulo,
+        'produto_id': produto_id,
+    }
+    if feito == '1':
+        PassoRotinaFeito.objects.get_or_create(**chave)
+        return JsonResponse({'ok': True, 'feito': True})
+
+    PassoRotinaFeito.objects.filter(**chave).delete()
+    return JsonResponse({'ok': True, 'feito': False})
 
 
 # ==========================================================================
@@ -982,16 +1087,128 @@ def tela_scanner(request):
 # PERFIL DO USUÁRIO
 # ==========================================================================
 
-def tela_perfil(request):
-    if request.user.is_authenticated:
-        perfil = PerfilDermatologico.objects.filter(usuario=request.user).first()
-    else:
-        perfil = None
+def _iniciais_do_nome(nome):
+    partes = (nome or '').strip().split()
+    if not partes:
+        return 'U'
+    if len(partes) == 1:
+        return (partes[0][:2] or 'U').upper()
+    return (partes[0][0] + partes[-1][0]).upper()
 
-    context = {
-        'perfil': perfil,
+
+def _alergias_do_perfil(perfil):
+    alergias = (perfil.alergias or '').strip()
+    if alergias in ('0', '1'):
+        return []
+    return [item.strip() for item in alergias.replace(';', ',').split(',') if item.strip()]
+
+
+FOTOTIPOS = {
+    1: ('I', '#f3d9c8', 'Pele muito clara. Sempre queima e nunca bronzeia.'),
+    2: ('II', '#e9b99b', 'Pele clara. Queima com facilidade e bronzeia pouco.'),
+    3: (
+        'III',
+        '#c98e63',
+        'Sensibilidade moderada ao sol. Use protetor solar todos os dias, mesmo em dias nublados.',
+    ),
+    4: ('IV', '#a66b45', 'Pele morena clara. Raramente queima e bronzeia com facilidade.'),
+    5: ('V', '#75452e', 'Pele morena escura. Quase nunca queima e bronzeia com facilidade.'),
+    6: ('VI', '#4a2d1b', 'Pele negra. Nunca queima e tem alta pigmentação natural.'),
+}
+
+
+def _fototipo_do_perfil(perfil):
+    if perfil is None or perfil.fototipo not in FOTOTIPOS:
+        return None
+    numero = perfil.fototipo
+    romano, _, texto = FOTOTIPOS[numero]
+    tons = [
+        {
+            'romano': dados[0],
+            'cor': dados[1],
+            'atual': indice == numero,
+        }
+        for indice, dados in FOTOTIPOS.items()
+    ]
+    return {'romano': romano, 'texto': texto, 'tons': tons}
+
+
+def _indicadores_do_perfil(perfil):
+    if not perfil or not perfil.dados_ia:
+        return []
+    try:
+        resultados = json.loads(perfil.dados_ia)
+    except (TypeError, ValueError):
+        return []
+    if not isinstance(resultados, (dict, list)) or not _tem_algum_score(resultados):
+        return []
+
+    chaves = (
+        ('oleosidade', 'oiliness'),
+        ('hidratacao', 'moisture'),
+        ('acne_poros', None),
+        ('textura', 'texture'),
+        ('manchas', 'age_spot'),
+    )
+    notas = {
+        chave: _extract_score(resultados, chave)
+        for chave in INDICADORES_LIDOS
     }
-    return render(request, 'core/perfil.html', context)
+    valores = []
+    for titulo, indicador in chaves:
+        if indicador == 'acne_poros':
+            nota = _media_ou_none(notas['acne'], notas['pore'])
+        elif indicador is None:
+            nota = None
+        else:
+            nota = notas[indicador]
+        item = montar_indicador(titulo, nota)
+        valores.append({
+            **item,
+            'titulo': {
+                'oleosidade': 'Oleosidade',
+                'hidratacao': 'Hidratação',
+                'acne_poros': 'Acne e poros',
+                'textura': 'Textura',
+                'manchas': 'Manchas',
+            }[titulo],
+            'classe_selo': (
+                'badge-' + item['classificacao'].lower().replace('ó', 'o').replace('ã', 'a')
+                if item['classificacao'] else ''
+            ),
+        })
+    return valores
+
+
+def _contexto_perfil(request, perfil=None, form_senha=None, aba='resumo'):
+    if perfil is None:
+        perfil = PerfilDermatologico.objects.filter(usuario=request.user).first()
+    objetivo_atual = normalizar_objetivo(perfil.objetivo) if perfil else ''
+    alergias_lista = _alergias_do_perfil(perfil) if perfil else []
+    objetivos = list(OBJETIVOS.items())
+    if objetivo_atual and objetivo_atual not in OBJETIVOS:
+        objetivos.append((objetivo_atual, objetivo_atual))
+    return {
+        'perfil': perfil,
+        'aba_ativa': aba,
+        'iniciais': _iniciais_do_nome(request.user.nome_usuario),
+        'indicadores': _indicadores_do_perfil(perfil),
+        'form_senha': form_senha or PasswordChangeForm(request.user),
+        'objetivos': objetivos,
+        'objetivo_atual': objetivo_atual,
+        'objetivo_rotulo': rotulo_objetivo(perfil.objetivo) if perfil else '',
+        'alergias_lista': alergias_lista,
+    }
+
+
+@login_required
+def tela_perfil(request):
+    perfil = PerfilDermatologico.objects.filter(usuario=request.user).first()
+    abas = {'resumo', 'dados', 'pele', 'seguranca', 'privacidade'}
+    aba = request.GET.get('aba', 'resumo')
+    if aba not in abas:
+        aba = 'resumo'
+    return render(request, 'core/perfil.html', _contexto_perfil(request, perfil, aba=aba))
 
 
 @login_required
@@ -1002,7 +1219,7 @@ def editar_perfil(request):
     if not perfil:
         return redirect('questionario')
 
-    destino = f"{reverse('perfil')}?aba=conta"
+    destino = f"{reverse('perfil')}?aba=pele"
 
     if request.method != 'POST':
         return redirect(destino)
@@ -1026,14 +1243,152 @@ def editar_perfil(request):
         perfil.tipo_pele = tipo_pele
     perfil.alergias = alergias
     if objetivo:
-        perfil.objetivo = objetivo
+        perfil.objetivo = normalizar_objetivo(objetivo)
     if preferencia_produto in ('creme', 'gel'):
         perfil.preferencia_produto = preferencia_produto
     if usa_maquiagem_diariamente in ('sim', 'nao'):
         perfil.usa_maquiagem_diariamente = usa_maquiagem_diariamente
+    if request.POST.get('sensibilidade') in ('sim', 'nao'):
+        perfil.sensibilidade = request.POST['sensibilidade'] == 'sim'
+    if request.POST.get('gestante') in ('sim', 'nao'):
+        perfil.gestante = request.POST['gestante'] == 'sim'
+    if objetivo:
+        tipo_acne = request.POST.get('tipo_acne', '')
+        perfil.tipo_acne = (
+            tipo_acne
+            if normalizar_objetivo(objetivo) == 'reduzir acne'
+            and tipo_acne in dict(PerfilDermatologico.TIPO_ACNE_CHOICES)
+            else ''
+        )
 
     perfil.save()
+    return redirect(f"{reverse('perfil')}?aba=pele")
+
+
+@login_required
+def editar_dados_pessoais(request):
+    destino = f"{reverse('perfil')}?aba=dados"
+    if request.method != 'POST':
+        return redirect(destino)
+
+    nome_usuario = request.POST.get('nome_usuario', '').strip()
+    if not nome_usuario:
+        messages.error(request, 'Informe um nome válido para salvar os dados.')
+        return redirect(destino)
+
+    request.user.nome_usuario = nome_usuario
+    request.user.save(update_fields=['nome_usuario'])
+
+    perfil = PerfilDermatologico.objects.filter(usuario=request.user).first()
+    idade = request.POST.get('idade')
+    if perfil and idade:
+        perfil.idade = _inteiro(idade, perfil.idade, 0, 120)
+        perfil.save(update_fields=['idade'])
     return redirect(destino)
+
+
+@login_required
+def alterar_senha(request):
+    if request.method != 'POST':
+        return redirect(f"{reverse('perfil')}?aba=seguranca")
+
+    form = PasswordChangeForm(request.user, request.POST)
+    if form.is_valid():
+        usuario = form.save()
+        update_session_auth_hash(request, usuario)
+        messages.success(request, 'Senha alterada com sucesso.')
+        return redirect(f"{reverse('perfil')}?aba=seguranca")
+
+    perfil = PerfilDermatologico.objects.filter(usuario=request.user).first()
+    return render(
+        request,
+        'core/perfil.html',
+        _contexto_perfil(request, perfil, form_senha=form, aba='seguranca'),
+    )
+
+
+@login_required
+def apagar_foto_perfil(request):
+    if request.method == 'POST':
+        PerfilDermatologico.objects.filter(usuario=request.user).update(foto_rosto=None)
+    return redirect(f"{reverse('perfil')}?aba=privacidade")
+
+
+@login_required
+def exportar_dados(request):
+    perfil = PerfilDermatologico.objects.filter(usuario=request.user).first()
+    dados_perfil = None
+    if perfil:
+        try:
+            analise_ia = json.loads(perfil.dados_ia) if perfil.dados_ia else None
+        except (TypeError, ValueError):
+            analise_ia = None
+        dados_perfil = {
+            'idade': perfil.idade,
+            'tipo_pele': perfil.tipo_pele,
+            'alergias': perfil.alergias,
+            'objetivo': perfil.objetivo,
+            'preferencia_produto': perfil.preferencia_produto,
+            'usa_maquiagem_diariamente': perfil.usa_maquiagem_diariamente,
+            'sono_horas': perfil.sono_horas,
+            'exercicio_frequencia': perfil.exercicio_frequencia,
+            'protetor_solar': perfil.protetor_solar,
+            'sensibilidade': perfil.sensibilidade,
+            'pele_sensivel': perfil.sensibilidade,
+            'gestante': perfil.gestante,
+            'tipo_acne': perfil.tipo_acne,
+            'porcentagem_saude': perfil.porcentagem_saude,
+            'fototipo': perfil.fototipo,
+            'foto_rosto': perfil.foto_rosto,
+            'analise_ia': analise_ia,
+        }
+
+    rotina_feita = [
+        {
+            'data': str(marcacao.data),
+            'periodo': marcacao.periodo,
+            'passo': marcacao.titulo,
+            'produto_id': marcacao.produto_id or None,
+        }
+        for marcacao in PassoRotinaFeito.objects.filter(usuario=request.user).order_by('data', 'marcado_em')
+    ]
+    dados = {
+        'conta': {
+            'nome': request.user.nome_usuario,
+            'email': request.user.email,
+            'data_cadastro': request.user.data_cadastro.isoformat(),
+        },
+        'perfil_dermatologico': dados_perfil,
+        'rotina_feita': rotina_feita,
+    }
+    resposta = HttpResponse(
+        json.dumps(dados, ensure_ascii=False, indent=2),
+        content_type='application/json; charset=utf-8',
+    )
+    resposta['Content-Disposition'] = 'attachment; filename="lume-skin-dados.json"'
+    return resposta
+
+
+@login_required
+def excluir_conta(request):
+    if request.method == 'POST':
+        senha = request.POST.get('senha', '')
+        confirmacao = request.POST.get('confirmacao', '').strip().upper()
+        if confirmacao == 'EXCLUIR' and request.user.check_password(senha):
+            usuario = request.user
+            auth_logout(request)
+            usuario.delete()
+            return redirect('login')
+        messages.error(request, 'Confirme com EXCLUIR e informe sua senha correta para apagar a conta.')
+    return redirect(f"{reverse('perfil')}?aba=privacidade")
+
+
+def tela_termos_de_uso(request):
+    return render(request, 'core/termosdeuso.html')
+
+
+def tela_politica_privacidade(request):
+    return render(request, 'core/politica_privacidade.html')
 
 
 # ==========================================================================
@@ -1063,7 +1418,7 @@ def tela_produtos(request):
 
     context = {
         "perfil": perfil,
-        "objetivo_usuario": perfil.objetivo if perfil else "não definido",
+        "objetivo_usuario": rotulo_objetivo(perfil.objetivo) if perfil else "não definido",
         "produtos": produtos,
         "filtro_ativo": filtro,
     }

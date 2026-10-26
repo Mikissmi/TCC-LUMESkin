@@ -126,17 +126,25 @@ if _db_url:
         }
     }
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', ''),
-            'USER': os.getenv('DB_USER', ''),
-            'PASSWORD': os.getenv('DB_PASSWORD', ''),
-            'HOST': os.getenv('DB_HOST', ''),
-            'PORT': os.getenv('DB_PORT', '5432'),
-            'OPTIONS': {'sslmode': 'require'},
+    if any(os.getenv(name) for name in ('DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_HOST')):
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.getenv('DB_NAME', ''),
+                'USER': os.getenv('DB_USER', ''),
+                'PASSWORD': os.getenv('DB_PASSWORD', ''),
+                'HOST': os.getenv('DB_HOST', ''),
+                'PORT': os.getenv('DB_PORT', '5432'),
+                'OPTIONS': {'sslmode': 'require'},
+            }
         }
-    }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 
 # bancos MySQL na nuvem (Aiven, TiDB Cloud, etc.) costumam exigir SSL.
 # coloque DB_SSL=true nas variaveis de ambiente pra ativar.

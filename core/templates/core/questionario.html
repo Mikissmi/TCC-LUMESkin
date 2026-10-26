@@ -160,6 +160,36 @@
                     </fieldset>
                 </div>
 
+                <div class="form-bloco bloco-meio">
+                    <fieldset>
+                        <legend class="pergunta">Sua pele é sensível?</legend>
+                        <div class="radio-group">
+                            <label><input type="radio" name="sensibilidade" value="1"> Sim</label>
+                            <label><input type="radio" name="sensibilidade" value="0" checked> Não</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="form-bloco bloco-meio">
+                    <fieldset>
+                        <legend class="pergunta">Está grávida?</legend>
+                        <div class="radio-group">
+                            <label><input type="radio" name="gestante" value="1"> Sim</label>
+                            <label><input type="radio" name="gestante" value="0" checked> Não</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="form-bloco bloco-meio">
+                    <label class="pergunta" for="tipo_acne">Se tiver acne, qual tipo foi identificado?</label>
+                    <select name="tipo_acne" id="tipo_acne">
+                        <option value="nao-sei" selected>Não sei</option>
+                        {% for valor, texto in tipos_acne %}
+                        <option value="{{ valor }}">{{ texto }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <!-- linha 9: opcional, nao conta na barra de progresso -->
                 <div class="form-bloco">
                     <fieldset>
