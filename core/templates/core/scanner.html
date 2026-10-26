@@ -7,11 +7,30 @@
 
 <div class="scanner-secao">
     <div class="card card-camera">
+        <!-- caixa que aparece enquanto a camera esta fechada -->
+        <div class="scanner-lancador" id="scanner-lancador">
+            <div class="lancador-icone"><svg class="icone-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
+            <h3>Escanear meu rosto</h3>
+            <p id="lancador-texto">Marque o consentimento em “Preparação para o Scan” para liberar a câmera.</p>
+            <button type="button" class="btn-abrir-camera" id="btn-abrir-camera" disabled>Abrir câmera</button>
+            <button type="button" class="btn-link-galeria" id="btn-galeria-lancador">Escolher da galeria</button>
+            <p class="scanner-status" id="lancador-status" role="status" aria-live="polite"></p>
+        </div>
+
+        <!-- janela da camera: tela cheia no celular e pop-up no computador -->
+        <div class="scanner-janela" id="scanner-janela" role="dialog" aria-modal="true" aria-labelledby="janela-titulo" hidden>
+        <div class="janela-caixa">
+            <div class="janela-topo">
+                <h3 id="janela-titulo">Posicione o rosto</h3>
+                <button type="button" class="btn-fechar-janela" id="btn-fechar-camera" aria-label="Fechar câmera">✕</button>
+            </div>
+            <div class="janela-corpo">
         <div class="camera-preview" id="camera-preview" role="group" aria-label="Pré-visualização da câmera">
             <span class="camera-badge" id="camera-badge"><i><svg class="icone-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="preenchido" cx="12" cy="12" r="6" fill="currentColor" stroke="none"/></svg></i> Câmera Ativa</span>
             <video id="video-camera" autoplay playsinline muted></video>
             <img id="foto-capturada" alt="Foto capturada" style="display: none;">
             <div class="guia-oval" id="guia-oval" aria-hidden="true"></div>
+            <span class="camera-aviso" id="camera-aviso"></span>
 
             <!-- aparece quando nao tem camera -->
             <div class="camera-vazia" id="camera-vazia" hidden>
@@ -21,9 +40,20 @@
                 <button type="button" class="btn-camera-vazia" id="btn-galeria-vazia">Escolher da galeria</button>
             </div>
         </div>
+            <div class="janela-dicas">
+                <h4>Antes de tirar a foto</h4>
+                <ul>
+                    <li>Rosto de frente, olhando para a câmera</li>
+                    <li>Boa luz, de preferência natural</li>
+                    <li>Sem óculos, boné ou cabelo no rosto</li>
+                    <li>Rosto preenchendo o oval, da testa ao queixo</li>
+                </ul>
+            </div>
+            </div>
         <canvas id="canvas-captura" style="display: none;"></canvas>
         <input type="file" id="input-galeria" accept="image/jpeg,image/png,image/webp" style="display: none;">
 
+        <div class="janela-rodape">
         <div class="camera-controles">
             <button type="button" class="btn-controle" id="btn-galeria" title="Escolher da galeria" aria-label="Escolher foto da galeria">
                 <svg class="icone-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 9"/></svg>
@@ -41,6 +71,9 @@
             <div class="barra-preenchida barra-indeterminada"></div>
         </div>
         <p class="scanner-status" id="scanner-status" role="status" aria-live="polite"></p>
+        </div>
+        </div>
+        </div>
     </div>
 
     <div class="card card-preparacao">
@@ -156,6 +189,27 @@
     const TEXTO_VAZIO = 'Faça um scan pra ver o resultado.';
     const BOLINHA = '<i><svg class="icone-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="preenchido" cx="12" cy="12" r="6" fill="currentColor" stroke="none"/></svg></i> ';
 
+    /* ---- guia do rosto (detector gratuito que roda no navegador, nao gasta credito da YouCam) ---- */
+    const DETECTOR_JS = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs';
+    const DETECTOR_WASM = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm';
+    const DETECTOR_MODELO = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
+    const ROSTO_MIN = 0.62;    /* largura do rosto / largura da foto. A YouCam exige mais de 0.60 */
+    const ROSTO_MAX = 0.95;    /* acima disso o rosto esta cortado */
+    const CENTRO_MAX_X = 0.14; /* o centro do rosto pode sair no maximo 14% da largura do centro */
+    const CENTRO_MAX_Y = 0.20; /* e 20% da altura */
+    const CONFIRMACOES = 3;    /* leituras seguidas "ideais" antes de ficar verde (evita piscar) */
+    const BLOQUEAR_FORA_DO_IDEAL = true; /* true: o botao de foto so libera no verde. false: o guia so avisa */
+    const DEPURAR = false;     /* true: mostra no console (F12) a largura do rosto, pra ajustar ROSTO_MIN */
+    const TEXTOS_GUIA = {
+        livre: 'Encaixe o rosto no oval',
+        carregando: 'Preparando o guia...',
+        procurando: 'Procurando seu rosto... aproxime-se',
+        longe: 'Aproxime o rosto',
+        perto: 'Afaste um pouco o rosto',
+        descentralizado: 'Centralize o rosto no oval',
+        ideal: 'Perfeito! Segure assim',
+    };
+
     const video = document.getElementById('video-camera');
     const fotoCapturada = document.getElementById('foto-capturada');
     const guia = document.getElementById('guia-oval');
@@ -175,6 +229,13 @@
     const circulo = document.getElementById('circulo-score-geral');
     const scoreValor = document.getElementById('score-geral-valor');
     const mapaContainer = document.getElementById('mapeamento-imagem');
+    const janela = document.getElementById('scanner-janela');
+    const aviso = document.getElementById('camera-aviso');
+    const btnAbrir = document.getElementById('btn-abrir-camera');
+    const btnFechar = document.getElementById('btn-fechar-camera');
+    const btnGaleriaLancador = document.getElementById('btn-galeria-lancador');
+    const lancadorTexto = document.getElementById('lancador-texto');
+    const lancadorStatus = document.getElementById('lancador-status');
 
     let streamAtivo = null;   /* camera ligada */
     let videoPronto = false;  /* o video ja tem imagem */
@@ -183,6 +244,12 @@
     let controlador = null;   /* AbortController da analise */
     let analisando = false;
     let urlFoto = null;       /* link temporario da foto na tela */
+    let detector = null;      /* detector de rosto */
+    let detectorEstado = 'carregando'; /* carregando | pronto | falhou */
+    let estadoGuia = 'carregando';     /* estado do oval (ver TEXTOS_GUIA) */
+    let confirmacoes = 0;
+    let laco = null;          /* requestAnimationFrame da deteccao */
+    let ultimaDeteccao = 0;
 
     function pegarCsrfToken() {
         if (CSRF) return CSRF;
@@ -192,6 +259,7 @@
 
     function dizer(texto) {
         status.textContent = texto;
+        lancadorStatus.textContent = texto;   /* aparece tambem na caixa de fora, com a camera fechada */
     }
 
     /* mensagem com link (so aceita caminho interno, que comeca com "/") */
@@ -213,9 +281,13 @@
     /* decide o que fica habilitado */
     function atualizarControles() {
         const consentido = consentimento.checked;
-        btnCapturar.disabled = !(consentido && streamAtivo && videoPronto && !analisando);
+        btnCapturar.disabled = !(consentido && streamAtivo && videoPronto && !analisando && guiaLiberada());
         btnGaleria.disabled = analisando;
         btnGaleriaVazia.disabled = analisando;
+        btnGaleriaLancador.disabled = analisando;
+        btnAbrir.disabled = !consentido || analisando;
+        btnFechar.disabled = analisando;
+        lancadorTexto.hidden = consentido;
         dica.hidden = consentido;
     }
 
@@ -225,6 +297,7 @@
         cameraVaziaTexto.textContent = motivo;
         cameraVazia.hidden = false;
         guia.hidden = true;
+        aviso.hidden = true;
         video.style.display = 'none';
         dizer(motivo + ' Você ainda pode escolher uma foto da galeria.');
     }
@@ -246,11 +319,13 @@
         }
 
         try {
-            streamAtivo = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+            streamAtivo = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } } });
             videoPronto = false;
             video.srcObject = streamAtivo;
             video.style.display = 'block';
             fotoCapturada.style.display = 'none';
+            aviso.hidden = false;
+            atualizarGuia(estadoInicialGuia(), true);
             badge('Câmera Ativa', false);
         } catch (erro) {
             streamAtivo = null;
@@ -274,13 +349,151 @@
         }
         video.srcObject = null;
         videoPronto = false;
+        pararLaco();
         atualizarControles();
     }
 
     video.addEventListener('loadeddata', () => {
         videoPronto = true;
+        iniciarLaco();
         atualizarControles();
     });
+
+    /* ---------- guia do rosto ---------- */
+    function estadoInicialGuia() {
+        if (detectorEstado === 'falhou') return 'livre';
+        return detectorEstado === 'pronto' ? 'procurando' : 'carregando';
+    }
+
+    function guiaLiberada() {
+        if (!BLOQUEAR_FORA_DO_IDEAL || detectorEstado === 'falhou') return true;
+        return estadoGuia === 'ideal';
+    }
+
+    function atualizarGuia(estado, forcar) {
+        if (estado === estadoGuia && aviso.textContent && !forcar) return;
+        estadoGuia = estado;
+        const ajustar = estado === 'longe' || estado === 'perto' || estado === 'descentralizado';
+        guia.classList.toggle('ideal', estado === 'ideal');
+        guia.classList.toggle('ajustar', ajustar);
+        aviso.className = 'camera-aviso' + (estado === 'ideal' ? ' ideal' : ajustar ? ' ajustar' : '');
+        aviso.textContent = TEXTOS_GUIA[estado];
+        atualizarControles();
+    }
+
+    /* parte do video que aparece na tela (o video usa object-fit: cover, entao as bordas ficam cortadas).
+       a foto enviada e recortada nesta mesma area: o que a pessoa ve e o que a YouCam recebe */
+    function recorteVisivel() {
+        const vw = video.videoWidth, vh = video.videoHeight;
+        const cw = video.clientWidth, ch = video.clientHeight;
+        if (!vw || !vh || !cw || !ch) return null;
+        const escala = Math.max(cw / vw, ch / vh);
+        const sw = cw / escala, sh = ch / escala;
+        return { sx: (vw - sw) / 2, sy: (vh - sh) / 2, sw: sw, sh: sh };
+    }
+
+    function avaliarRosto() {
+        let resultado;
+        try {
+            resultado = detector.detectForVideo(video, performance.now());
+        } catch (erro) {
+            return;
+        }
+        const rec = recorteVisivel();
+        if (!rec) return;
+        const rostos = (resultado && resultado.detections) || [];
+        if (!rostos.length) {
+            confirmacoes = 0;
+            atualizarGuia('procurando');
+            return;
+        }
+        const caixa = rostos
+            .map(d => d.boundingBox)
+            .sort((a, b) => b.width * b.height - a.width * a.height)[0];   /* o maior rosto */
+        const razao = caixa.width / rec.sw;
+        const dx = ((caixa.originX + caixa.width / 2) - (rec.sx + rec.sw / 2)) / rec.sw;
+        const dy = ((caixa.originY + caixa.height / 2) - (rec.sy + rec.sh / 2)) / rec.sh;
+        if (DEPURAR) console.log('[scanner] rosto = ' + razao.toFixed(2) + ' da largura | dx ' + dx.toFixed(2) + ' dy ' + dy.toFixed(2));
+
+        let estado;
+        if (razao < ROSTO_MIN) estado = 'longe';
+        else if (razao > ROSTO_MAX) estado = 'perto';
+        else if (Math.abs(dx) > CENTRO_MAX_X || Math.abs(dy) > CENTRO_MAX_Y) estado = 'descentralizado';
+        else estado = 'ideal';
+
+        if (estado === 'ideal') {
+            confirmacoes++;
+            if (confirmacoes >= CONFIRMACOES) atualizarGuia('ideal');
+        } else {
+            confirmacoes = 0;
+            atualizarGuia(estado);
+        }
+    }
+
+    function iniciarLaco() {
+        if (laco || detectorEstado !== 'pronto' || !streamAtivo) return;
+        const passo = () => {
+            laco = requestAnimationFrame(passo);
+            if (!streamAtivo || !videoPronto || video.readyState < 2) return;
+            const agora = performance.now();
+            if (agora - ultimaDeteccao < 120) return;   /* ~8 leituras por segundo bastam */
+            ultimaDeteccao = agora;
+            avaliarRosto();
+        };
+        laco = requestAnimationFrame(passo);
+    }
+
+    function pararLaco() {
+        if (laco) cancelAnimationFrame(laco);
+        laco = null;
+        confirmacoes = 0;
+    }
+
+    async function carregarDetector() {
+        const limite = setTimeout(() => {
+            if (detectorEstado === 'carregando') {
+                detectorEstado = 'falhou';   /* sem o detector, o oval fica fixo e a foto nao e bloqueada */
+                if (streamAtivo) atualizarGuia('livre', true);
+                atualizarControles();
+            }
+        }, 20000);
+        try {
+            const modulo = await import(DETECTOR_JS);
+            const arquivos = await modulo.FilesetResolver.forVisionTasks(DETECTOR_WASM);
+            detector = await modulo.FaceDetector.createFromOptions(arquivos, {
+                baseOptions: { modelAssetPath: DETECTOR_MODELO },
+                runningMode: 'VIDEO',
+                minDetectionConfidence: 0.5,
+            });
+            detectorEstado = 'pronto';
+        } catch (erro) {
+            detectorEstado = 'falhou';
+        }
+        clearTimeout(limite);
+        if (streamAtivo) {
+            atualizarGuia(estadoInicialGuia(), true);
+            iniciarLaco();
+        }
+        atualizarControles();
+    }
+
+    /* ---------- janela da camera (tela cheia no celular, pop-up no computador) ---------- */
+    function abrirJanela() {
+        janela.hidden = false;
+        document.body.classList.add('scanner-aberto');
+    }
+
+    function fecharJanela() {
+        janela.hidden = true;
+        document.body.classList.remove('scanner-aberto');
+    }
+
+    function fecharCamera() {
+        if (analisando) return;   /* nao fecha no meio da analise */
+        pararCamera();
+        esconderFoto();
+        fecharJanela();
+    }
 
     /* ---------- foto na tela ---------- */
     function mostrarFoto(arquivoOuBlob) {
@@ -290,6 +503,7 @@
         fotoCapturada.style.display = 'block';
         video.style.display = 'none';
         guia.hidden = true;
+        aviso.hidden = true;
         cameraVazia.hidden = true;
     }
 
@@ -301,6 +515,7 @@
         fotoCapturada.removeAttribute('src');
         fotoCapturada.style.display = 'none';
         guia.hidden = false;
+        aviso.hidden = !streamAtivo;
     }
 
     /* reduz a imagem e converte pra jpeg (upload mais leve) */
@@ -309,6 +524,15 @@
         canvas.width = Math.round(largura * escala);
         canvas.height = Math.round(altura * escala);
         canvas.getContext('2d').drawImage(fonte, 0, 0, canvas.width, canvas.height);
+        return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+    }
+
+    /* recorta so a parte do video que aparece na tela e converte pra jpeg */
+    function desenharRecorte(fonte, rec) {
+        const escala = Math.min(1, LADO_MAX / Math.max(rec.sw, rec.sh));
+        canvas.width = Math.round(rec.sw * escala);
+        canvas.height = Math.round(rec.sh * escala);
+        canvas.getContext('2d').drawImage(fonte, rec.sx, rec.sy, rec.sw, rec.sh, 0, 0, canvas.width, canvas.height);
         return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
     }
 
@@ -464,6 +688,10 @@
             }
             preencherResultados(json);
             dizer('Análise concluída! Score geral: ' + json.score_geral + ' de 100.');
+            esconderFoto();
+            fecharJanela();
+            const cabecalho = document.querySelector('.resultados-cabecalho');
+            if (cabecalho) cabecalho.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } catch (erro) {
             if (erro.name === 'AbortError') {
                 if (expirou) dizer('A análise demorou demais.' + DICA_REFAZER);
@@ -500,7 +728,8 @@
             dizer('A câmera ainda está iniciando. Aguarde um instante e tente de novo.');
             return;
         }
-        const blob = await desenharReduzido(video, video.videoWidth, video.videoHeight);
+        const rec = recorteVisivel() || { sx: 0, sy: 0, sw: video.videoWidth, sh: video.videoHeight };
+        const blob = await desenharRecorte(video, rec);
         if (!blob) {
             dizer('Não foi possível capturar a imagem. Tente de novo.');
             return;
@@ -513,6 +742,17 @@
 
     function abrirGaleria() { inputGaleria.click(); }
     btnGaleria.addEventListener('click', abrirGaleria);
+    btnGaleriaLancador.addEventListener('click', abrirGaleria);
+
+    btnAbrir.addEventListener('click', () => {
+        abrirJanela();
+        esconderFoto();
+        iniciarCamera();
+    });
+    btnFechar.addEventListener('click', fecharCamera);
+    document.addEventListener('keydown', (evento) => {
+        if (evento.key === 'Escape' && !janela.hidden) fecharCamera();
+    });
     btnGaleriaVazia.addEventListener('click', abrirGaleria);
 
     inputGaleria.addEventListener('change', () => {
@@ -529,6 +769,7 @@
             return;
         }
 
+        abrirJanela();
         mostrarFoto(arquivo);
         pararCamera();
         badge('Foto da galeria', false);
@@ -552,7 +793,7 @@
     });
 
     atualizarControles();
-    iniciarCamera();
+    carregarDetector();
 })();
 </script>
 {% endblock %}
