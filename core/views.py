@@ -1083,15 +1083,32 @@ def tela_scanner(request):
     # se o usuario ja fez um scan (no questionario), mostra o ultimo resultado salvo no perfil
     ultimo_scan = None
     if request.user.is_authenticated:
-        perfil = _perfil_do_usuario(request.user)
-        indicadores = _indicadores_do_perfil(perfil)
-        if indicadores:
+        perfil = PerfilDermatologico.objects.filter(usuario=request.user).first()
+        resultados_ia = None
+        if perfil and perfil.dados_ia:
+            try:
+                resultados_ia = json.loads(perfil.dados_ia)
+            except (json.JSONDecodeError, TypeError):
+                resultados_ia = None
+
+        if resultados_ia:
+            indicadores = [
+                montar_indicador('oleosidade', _extract_score(resultados_ia, 'oiliness')),
+                montar_indicador('hidratacao', _extract_score(resultados_ia, 'moisture')),
+                montar_indicador('acne_poros', _media_ou_none(
+                    _extract_score(resultados_ia, 'acne'),
+                    _extract_score(resultados_ia, 'pore'),
+                )),
+                montar_indicador('textura', _extract_score(resultados_ia, 'texture')),
+                montar_indicador('manchas', _extract_score(resultados_ia, 'age_spot')),
+            ]
             notas = [i['nota'] for i in indicadores if i['nota'] is not None]
-            ultimo_scan = {
-                'score_geral': round(sum(notas) / len(notas)),
-                'indicadores': indicadores,
-                'mapeamento_facial': _url_https(perfil.foto_rosto),
-            }
+            if notas:
+                ultimo_scan = {
+                    'score_geral': round(sum(notas) / len(notas)),
+                    'indicadores': indicadores,
+                    'mapeamento_facial': _url_https(perfil.foto_rosto),
+                }
     return render(request, 'core/scanner.html', {'ultimo_scan': ultimo_scan})
 
 
