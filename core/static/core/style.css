@@ -4127,3 +4127,30 @@ body.scanner-aberto {
 .bloco-upload-foto input[type="file"] {
     max-width: 100%;
 }
+
+/* ==========================================================================
+   PERFIL NO CELULAR
+   ========================================================================== */
+@media (max-width: 900px) {
+    /* a coluna da grade crescia junto com as 5 abas (721 px) e deixava a pagina mais larga que a tela.
+       minmax(0, 1fr) deixa a coluna na largura da tela */
+    .perfil-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .perfil-layout > * {
+        min-width: 0;
+    }
+
+    /* as 5 abas quebram em linhas (2 por linha), assim todas aparecem e a aba ativa nunca fica escondida */
+    .perfil-tabs {
+        flex-wrap: wrap;
+        overflow-x: visible;
+    }
+
+    .perfil-tab {
+        flex: 1 1 calc(50% - 6px);
+        text-align: center;
+        white-space: normal;   /* em telas bem estreitas o texto pode quebrar em 2 linhas */
+    }
+}
