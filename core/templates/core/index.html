@@ -5,26 +5,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LUME Skin</title>
-    <link rel="stylesheet" href="{% static 'core/style.css' %}?v=11">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}?v=12">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="body">
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <div class="logo">
              <img src="{% static 'core/images/LogoLUMESkinIndex.png' %}" class="LUMESkin_LogoIndex">
         </div>
-        <nav class="menu">
-            <a href="{% url 'dashboard' %}" class="menu-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
-            <a href="{% url 'scanner' %}" class="menu-item {% if request.resolver_match.url_name == 'scanner' %}active{% endif %}">Scanner de Pele por IA</a>
-            <a href="{% url 'produtos' %}" class="menu-item {% if request.resolver_match.url_name == 'produtos' %}active{% endif %}">Recomendações</a>
-            <a href="{% url 'especialistas' %}" class="menu-item {% if request.resolver_match.url_name == 'especialistas' %}active{% endif %}">Especialistas</a>
-            <a href="{% url 'artigos' %}" class="menu-item {% if request.resolver_match.url_name == 'artigos' %}active{% endif %}">Artigos Científicos</a>
-            {% if request.session.admin_logado %}
-            <a href="{% url 'administradores' %}" class="menu-item {% if request.resolver_match.url_name == 'administradores' or request.resolver_match.url_name == 'artigo_novo' or request.resolver_match.url_name == 'artigo_editar' or request.resolver_match.url_name == 'especialista_novo' or request.resolver_match.url_name == 'especialista_editar' %}active{% endif %}">Administradores</a>
-            {% endif %}
-        </nav>
-        <div class="sidebar-footer">
-            <a href="{% url 'perfil' %}" class="menu-item {% if request.resolver_match.url_name == 'perfil' or request.resolver_match.url_name == 'editar_perfil' %}active{% endif %}">Perfil e configurações</a>
+
+        <button class="menu-toggle" id="menu-toggle" type="button"
+                aria-label="Abrir menu" aria-expanded="false" aria-controls="menu-links">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <div class="menu-collapse" id="menu-links">
+            <nav class="menu">
+                <a href="{% url 'dashboard' %}" class="menu-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="{% url 'scanner' %}" class="menu-item {% if request.resolver_match.url_name == 'scanner' %}active{% endif %}">Scanner de Pele por IA</a>
+                <a href="{% url 'produtos' %}" class="menu-item {% if request.resolver_match.url_name == 'produtos' %}active{% endif %}">Recomendações</a>
+                <a href="{% url 'especialistas' %}" class="menu-item {% if request.resolver_match.url_name == 'especialistas' %}active{% endif %}">Especialistas</a>
+                <a href="{% url 'artigos' %}" class="menu-item {% if request.resolver_match.url_name == 'artigos' %}active{% endif %}">Artigos Científicos</a>
+                {% if request.session.admin_logado %}
+                <a href="{% url 'administradores' %}" class="menu-item {% if request.resolver_match.url_name == 'administradores' or request.resolver_match.url_name == 'artigo_novo' or request.resolver_match.url_name == 'artigo_editar' or request.resolver_match.url_name == 'especialista_novo' or request.resolver_match.url_name == 'especialista_editar' %}active{% endif %}">Administradores</a>
+                {% endif %}
+            </nav>
+            <div class="sidebar-footer">
+                <a href="{% url 'perfil' %}" class="menu-item {% if request.resolver_match.url_name == 'perfil' or request.resolver_match.url_name == 'editar_perfil' %}active{% endif %}">Perfil e configurações</a>
+            </div>
         </div>
     </aside>
 
@@ -38,5 +48,15 @@
         {% block content %}
         {% endblock %}
     </main>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const botaoMenu = document.getElementById('menu-toggle');
+        botaoMenu.addEventListener('click', () => {
+            const aberto = sidebar.classList.toggle('aberto');
+            botaoMenu.setAttribute('aria-expanded', aberto);
+            botaoMenu.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu');
+        });
+    </script>
 </body>
 </html>

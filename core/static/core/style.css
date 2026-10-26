@@ -3659,3 +3659,86 @@ body.body:has(.sidebar) {
 .dashboard-rotina.dashboard-secao {
     align-items: stretch;
 }
+
+/* ===== Menu hambúrguer (celular) ===== */
+
+/* no computador: o botão não aparece e o conteúdo do menu continua em coluna */
+.menu-toggle {
+    display: none;
+}
+
+.menu-collapse {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    flex: 1;
+}
+
+@media (max-width: 900px) {
+    .sidebar {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0;
+        padding: 14px 20px;
+        position: sticky;      /* a barra com o hambúrguer fica no topo ao rolar */
+        top: 0;
+        z-index: 100;
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+
+    .LUMESkin_LogoIndex {
+        width: 140px;
+    }
+
+    .menu-toggle {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+        width: 44px;
+        height: 44px;
+        padding: 11px;
+        background: #ffffff;
+        border: 1px solid #edf2f7;
+        border-radius: 12px;
+        cursor: pointer;
+    }
+
+    .menu-toggle span {
+        display: block;
+        height: 2px;
+        background: #a46fd2;
+        border-radius: 2px;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    /* menu fechado: escondido. aberto: aparece embaixo da logo, ocupando a largura toda */
+    .menu-collapse {
+        display: none;
+        flex-basis: 100%;
+        gap: 16px;
+        padding-top: 16px;
+    }
+
+    .sidebar.aberto .menu-collapse {
+        display: flex;
+    }
+
+    .menu {
+        flex-direction: column;
+    }
+
+    /* o hambúrguer vira um X quando o menu está aberto */
+    .sidebar.aberto .menu-toggle span:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+    }
+    .sidebar.aberto .menu-toggle span:nth-child(2) {
+        opacity: 0;
+    }
+    .sidebar.aberto .menu-toggle span:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+    }
+}
