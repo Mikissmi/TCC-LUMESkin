@@ -2,16 +2,19 @@ import csv
 from decimal import Decimal
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
 from core.models import Produto
 
 
 class Command(BaseCommand):
-    help = 'Importa produtos de skincare a partir do CSV do dataset (produtos_skincare.csv)'
+    help = 'Importa produtos de skincare a partir do CSV do dataset (core/data/00_produtos_skincare.csv)'
 
     def add_arguments(self, parser):
         parser.add_argument('csv_path', type=str)
 
+    # tudo ou nada: se uma linha der erro, nenhum produto fica pela metade no banco
+    @transaction.atomic
     def handle(self, *args, **options):
         csv_path = options['csv_path']
         criados = 0
@@ -24,7 +27,10 @@ class Command(BaseCommand):
 
         with arquivo:
             leitor = csv.DictReader(arquivo)
-            for linha in leitor:
+            for numero, linha in enumerate(leitor, start=2):  # linha 1 é o cabeçalho
+                # linha cortada: o DictReader preenche as colunas que faltam com None
+                if None in linha.values() or None in linha:
+                    raise CommandError(f'Linha {numero}: o número de colunas não bate com o cabeçalho.')
                 defaults = {
                     'marca': linha['marca'],
                     'nome': linha['nome'],

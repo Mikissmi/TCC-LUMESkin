@@ -13,7 +13,7 @@ COLUNAS = [
 
 
 class Command(BaseCommand):
-    help = 'Importa as regras de tratamento a partir do CSV do dataset (Tratamento_Skincare_Dataset_PT.csv)'
+    help = 'Importa as regras de tratamento a partir do CSV do dataset (core/data/tratamento_skincare.csv)'
 
     def add_arguments(self, parser):
         parser.add_argument('csv_path', type=str)

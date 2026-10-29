@@ -96,10 +96,10 @@ Thumbs.db
 # Ignore local virtualenv and environment files
 .env
 .env.*
+!.env.example
 
 venv/
-__pycache__/
-*.pyc
-.env
-db.sqlite3
-staticfiles/
+.venv/
+
+# resposta crua da YouCam gravada para diagnostico (so em DEBUG)
+youcam_ultima_resposta.json

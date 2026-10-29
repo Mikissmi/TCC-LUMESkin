@@ -24,7 +24,7 @@
 
          <div class="produtos-grid">
            {% for produto in produtos %}
-           <a href="{% url 'produto_detalhe' produto.id %}" style="text-decoration:none; color:inherit; display:block;">
+           <a href="{% url 'produto_detalhe' produto.id %}" class="card-produto-link">
            <div class="card-produto">
             <div class="produto-imagem">
                 <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}">

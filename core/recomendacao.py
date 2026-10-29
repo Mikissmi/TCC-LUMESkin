@@ -2,7 +2,7 @@ import json
 import unicodedata
 from itertools import zip_longest
 
-from .models import PerfilDermatologico, Produto, RegraTratamento
+from .models import Produto, RegraTratamento
 from .youcam_utils import _extract_score
 
 MAPA_TIPO_PELE = {
@@ -87,7 +87,9 @@ TIPO_ACNE_PADRAO = 'Comedonal'          # usado quando a pessoa "nao sabe" o tip
 TIPOS_ACNE_GRAVES = {'Nodular', 'Cística'}
 
 # --- Seguranca dos ativos --------------------------------------------------
-# TODO: revisar com dermatologista (todas as constantes desta secao)
+# Limitacao do trabalho: estas regras de seguranca (idade minima, conflitos entre ativos,
+# cuidados na gravidez) seguem referencias gerais e ainda nao foram validadas por um
+# dermatologista. A rotina e apenas apoio e nao substitui avaliacao profissional.
 IDADE_MINIMA_RETINOIDE = 18
 RETINOIDES = {'Retinol', 'Pró-Retinol'}                       # nunca na gravidez nem antes dos 18
 ACIDOS = {'Ácido Salicílico', 'Ácido Glicólico', 'Ácido Lático'}  # na gravidez: "consulte seu medico"

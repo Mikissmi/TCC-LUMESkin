@@ -16,9 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from core import views # Importa a lógica do nosso app
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')), # Isso conecta as URLs do seu app!
+    path('', include('core.urls')),  # rotas do app core
 ]

@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import os
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 from dotenv import load_dotenv
 
@@ -65,11 +66,13 @@ AUTH_USER_MODEL = 'core.Usuario'
 # Django, /accounts/login/, nao existe nesse projeto)
 LOGIN_URL = 'login'
 
-# credenciais fixas do administrador - usadas na mesma tela de login (email/senha)
-# pra liberar o painel /administradores/. nao existe cadastro pra isso, e um
-# usuario/senha pre-definidos mesmo
-ADMIN_LOGIN_EMAIL = 'admin@lumeskin.com'
-ADMIN_LOGIN_SENHA = 'lumeskin2026'
+# credenciais do administrador - usadas na mesma tela de login (email/senha)
+# pra liberar o painel /administradores/. nao existe cadastro pra isso: e um
+# usuario/senha pre-definidos. Em producao defina ADMIN_LOGIN_EMAIL e
+# ADMIN_LOGIN_SENHA no .env (ou nas Environment Variables do Vercel); os valores
+# abaixo so servem para a demonstracao local.
+ADMIN_LOGIN_EMAIL = os.getenv('ADMIN_LOGIN_EMAIL', 'admin@lumeskin.com')
+ADMIN_LOGIN_SENHA = os.getenv('ADMIN_LOGIN_SENHA', 'lumeskin2026')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -103,13 +106,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'configuracao.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-# Chave da YouCam: coloque YOUCAM_API_KEY no .env.
+# Chave da YouCam (analise de pele por IA): coloque YOUCAM_API_KEY no .env.
 YOUCAM_API_KEY = os.getenv('YOUCAM_API_KEY', '')
 
-from urllib.parse import urlparse, unquote
+
+# Database
+# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 _db_url = os.getenv('DATABASE_URL') or os.getenv('POSTGRES_URL')
 if _db_url:
@@ -145,13 +147,6 @@ else:
                 'NAME': BASE_DIR / 'db.sqlite3',
             }
         }
-
-# bancos MySQL na nuvem (Aiven, TiDB Cloud, etc.) costumam exigir SSL.
-# coloque DB_SSL=true nas variaveis de ambiente pra ativar.
-# if os.getenv('DB_SSL', '').lower() in ('1', 'true', 'yes'):
-#   DATABASES['default']['OPTIONS'] = {'ssl': {'check_hostname': False}
-
-
 
 
 # Password validation
@@ -196,3 +191,16 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 WHITENOISE_USE_FINDERS = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Logs: mensagens do app (ex.: erros da YouCam) vao para o terminal / logs do Vercel
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler'},
+    },
+    'loggers': {
+        'core': {'handlers': ['console'], 'level': 'INFO'},
+    },
+}

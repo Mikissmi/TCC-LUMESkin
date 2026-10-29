@@ -6,6 +6,14 @@
     <h2>Painel de Administração</h2>
 </div>
 
+{% if messages %}
+<div class="perfil-mensagens">
+    {% for mensagem in messages %}
+    <p class="perfil-mensagem perfil-mensagem-{{ mensagem.level_tag }}" role="status">{{ mensagem }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
 <div class="admin-secao">
     <div class="admin-secao-cabecalho">
         <h3>Artigos Científicos</h3>

@@ -1,6 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-/* 1. Reset Global Completo */
+/* ==========================================================================
+   1. LOGIN E CADASTRO (reset global, container, branding e formulários)
+   ========================================================================== */
+
+/* Reset global */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -22,7 +26,7 @@ body.body {
     padding: 20px;
 }
 
-/* 2. Container Principal (Força as duas colunas lado a lado) */
+/* Container principal (força as duas colunas lado a lado) */
 .conteiner-texto {
     display: flex;
     max-width: 1140px;
@@ -32,7 +36,7 @@ body.body {
     justify-content: center;
 }
 
-/* 3. Lado Esquerdo - Branding */
+/* Lado esquerdo - branding */
 .secao-texto {
     flex: 1;
     max-width: 500px;
@@ -116,7 +120,7 @@ body.body {
     line-height: 1.4;
 }
 
-/* 4. Lado Direito - Sessão de Autenticação */
+/* Lado direito - sessão de autenticação */
 .secao-autenticacao {
     flex: 1;
     max-width: 430px;
@@ -243,25 +247,6 @@ body.body {
     background-color: #8a5fc0;
 }
 
-
-/* Mensagem de erro no login */
-
-.alerta-erro {
-    background: #fdecec;
-    color: #c53030;
-    border: 1px solid #f5b5b5;
-    border-radius: 10px;
-    padding: 12px 16px;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 16px;
-    animation: alerta-sumir 0.4s ease 5s forwards;
-}
-
-@keyframes alerta-sumir {
-    to { opacity: 0; visibility: hidden; height: 0; padding: 0; margin: 0; border: 0; }
-}
-
 /* Mensagem de erro no login */
 .form-erro {
     color: #e53e3e;
@@ -286,24 +271,12 @@ body.body {
     text-decoration: none;
 }
 
-/* (nao e mais usado no questionario - apague se nenhuma outra pagina usar) */
-.termo-scanner {
-    font-size: 12px;
-    color: #a0aec0;
-    line-height: 1.5;
-    margin-top: 8px;
-}
-
-.termo-scanner a {
-    color: #a46fd2;
-}
-
 /* Helpers para alternância de formulários (login / registro) */
 .hide { display: none !important; }
 .form-login form { width: 100%; }
 .form-login .form-titulo { margin-top: 0; }
 
-/* 5. Responsividade Completa (Para telas menores) */
+/* Responsividade (telas menores) */
 @media (max-width: 900px) {
     .conteiner-texto {
         flex-direction: column;
@@ -551,7 +524,7 @@ body.body {
 }
 
 /* ==========================================================================
-   6. BOTÃO DE ENVIO DO QUESTIONÁRIO (MANTENDO A IDENTIDADE)
+   6. BOTÃO DE ENVIO DO QUESTIONÁRIO
    ========================================================================== */
 .btn {
     width: 100%;
@@ -576,7 +549,7 @@ body.body {
     transform: scale(0.99);
 }
 
-/* Adiciona a setinha dinâmica via pseudo-elemento simulando o ícone do modelo.
+/* Adiciona a setinha ao botao via pseudo-elemento.
    So se aplica ao botao de enviar o questionario - o .escolha abaixo desliga isso */
 .questionario-form .btn::after {
     content: " →";
@@ -680,7 +653,6 @@ body.body {
     cursor: pointer;
 }
 
-
 #camera-video {
     width: 100%;
     max-width: 420px;
@@ -699,26 +671,10 @@ body.body {
     cursor: not-allowed;
 }
 
-.camera-botoes {
-    display: flex;
-    gap: 12px;
-}
-
-.camera-botoes .btn {
-    flex: 1;
-    width: auto;
-    margin: 0;
-}
-
-
 /* ==========================================================================
    7. RESPONSIVIDADE DO QUESTIONARIO
    ========================================================================== */
 @media (max-width: 700px) {
-    .questionario-form {
-        grid-template-columns: 1fr;
-    }
-
     .questionario-form .form-bloco.bloco-meio {
         grid-column: 1 / -1;
     }
@@ -789,7 +745,6 @@ body.body:has(.sidebar) {
     align-items: center;
     gap: 10px;
 }
-
 
 .LUMESkin_LogoIndex {
     width: 210px;
@@ -1086,11 +1041,6 @@ body.body:has(.sidebar) {
         width: 100%;
         min-width: 0;
         height: auto;
-        position: static; /* no celular o menu vira uma barra normal, nao fixa */
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 16px;
         border-right: none;
         border-bottom: 1px solid #edf2f7;
     }
@@ -1102,7 +1052,6 @@ body.body:has(.sidebar) {
     }
 
     .menu {
-        flex-direction: row;
         flex-wrap: wrap;
     }
 
@@ -1127,7 +1076,7 @@ body.body:has(.sidebar) {
 }
 
 /* ==========================================================================
-   WIDGET: Status de Hoje
+   10. WIDGET: Status de Hoje
    ========================================================================== */
 .card-rotina-diaria {
     display: flex;
@@ -1382,7 +1331,7 @@ body.body:has(.sidebar) {
 }
 
 /* ==========================================================================
-   10. ESTILOS DA TELA DE SCANNER
+   11. ESTILOS DA TELA DE SCANNER
    ========================================================================== */
 
 .scanner-cabecalho {
@@ -1621,32 +1570,6 @@ body.body:has(.sidebar) {
     font-size: 18px;
     font-weight: 700;
     color: #0b132a;
-}
-
-.btn-salvar-checkin {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #a46fd2;
-    color: #ffffff;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 6px 18px rgba(164, 111, 210, 0.25);
-    transition: background-color 0.2s ease;
-}
-
-.btn-salvar-checkin:hover:not(:disabled) {
-    background: #935dc0;
-}
-
-.btn-salvar-checkin:disabled {
-    background: #cbd5e0;
-    box-shadow: none;
-    cursor: not-allowed;
 }
 
 .resultados-grid {
@@ -1888,8 +1811,7 @@ body.body:has(.sidebar) {
 
 .btn-camera-vazia:focus-visible,
 .btn-controle:focus-visible,
-.btn-capturar:focus-visible,
-.btn-salvar-checkin:focus-visible {
+.btn-capturar:focus-visible {
     outline: 2px solid #a46fd2;
     outline-offset: 2px;
 }
@@ -1932,7 +1854,7 @@ body.body:has(.sidebar) {
 }
 
 /* ==========================================================================
-   11. ESTILOS DA TELA DE RECOMENDAÇÕES DE PRODUTOS
+   12. ESTILOS DA TELA DE RECOMENDAÇÕES DE PRODUTOS
    (a grade e os cards de produto tambem servem a tela de especialistas)
    ========================================================================== */
 
@@ -2085,7 +2007,7 @@ body.body:has(.sidebar) {
 }
 
 /* ==========================================================================
-   12. ESTILOS DA TELA DE ARTIGOS
+   13. ESTILOS DA TELA DE ARTIGOS
    ========================================================================== */
 
 .artigos-lista {
@@ -2106,7 +2028,6 @@ body.body:has(.sidebar) {
     align-items: center;
     box-sizing: border-box;
     min-width: 0;
-    /* sem width: 45% */
 }
 
 .artigo-capa {
@@ -2118,10 +2039,10 @@ body.body:has(.sidebar) {
     background: #edf2f7;
     border-radius: 10px;
     flex-shrink: 0;
-    overflow: hidden;          /* novo: a imagem respeita o arredondamento */
+    overflow: hidden;          /* a imagem respeita o arredondamento */
 }
 
-.artigo-capa img {             /* novo */
+.artigo-capa img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -2213,9 +2134,8 @@ body.body:has(.sidebar) {
     }
 }
 
-
 /* ==========================================================================
-   13. ESTILOS DA TELA DE ESPECIALISTAS
+   14. ESTILOS DA TELA DE ESPECIALISTAS
    (grade, card, titulo e descricao sao compartilhados com produtos - secao 11;
    aqui ficam so as diferencas)
    ========================================================================== */
@@ -2237,9 +2157,8 @@ body.body:has(.sidebar) {
     margin-bottom: 12px;
 }
 
-
 /* ==========================================================================
-   14. CABEÇALHO PADRÃO COM BREADCRUMB (perfil, editar perfil, administradores)
+   15. CABEÇALHO PADRÃO COM BREADCRUMB (perfil, editar perfil, administradores)
    ========================================================================== */
 
 .perfil-cabecalho {
@@ -2267,7 +2186,7 @@ body.body:has(.sidebar) {
 }
 
 /* ==========================================================================
-   15. ESTILOS DA TELA DE PERFIL
+   16. ESTILOS DA TELA DE PERFIL
    ========================================================================== */
 
 .perfil-card-topo {
@@ -2477,17 +2396,6 @@ body.body:has(.sidebar) {
     color: #2d3748;
 }
 
-.tag-objetivo {
-    display: inline-block;
-    margin-top: 2px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #0d7cb3;
-    background: #e7f4fb;
-    padding: 5px 12px;
-    border-radius: 20px;
-}
-
 .btn-perfil-secundario {
     background: #f8fafc;
     color: #4a5568;
@@ -2534,13 +2442,8 @@ body.body:has(.sidebar) {
         text-align: center;
     }
 
-    .perfil-layout {
-        grid-template-columns: 1fr;
-    }
-
     .perfil-tabs {
         flex-direction: row;
-        overflow-x: auto;
     }
 
     .perfil-item {
@@ -2551,7 +2454,7 @@ body.body:has(.sidebar) {
 }
 
 /* ==========================================================================
-   16. FORMULÁRIOS EMBUTIDOS (edição de perfil na aba "Preferências da
+   17. FORMULÁRIOS EMBUTIDOS (edição de perfil na aba "Preferências da
    Conta" e criação/edição de artigos e especialistas em administradores)
    ========================================================================== */
 
@@ -2624,7 +2527,7 @@ body.body:has(.sidebar) {
 }
 
 /* ==========================================================================
-   17. ESTILOS DO PAINEL DE ADMINISTRAÇÃO (artigos e especialistas)
+   18. ESTILOS DO PAINEL DE ADMINISTRAÇÃO (artigos e especialistas)
    ========================================================================== */
 
 .admin-secao {
@@ -2782,60 +2685,46 @@ body.body:has(.sidebar) {
 }
 
 /* ==========================================================================
-   18. CARD DE PRODUTO: link clicavel + preco/avaliacao/fonte opcionais
+   19. CARD DE PRODUTO (lista) E PÁGINA DE DETALHE DO PRODUTO
    ========================================================================== */
 
+/* link que envolve o card na lista de produtos */
 .card-produto-link {
     text-decoration: none;
     color: inherit;
     display: block;
 }
 
-.produto-meta {
+/* detalhe: imagem à esquerda, informações à direita */
+.card.produto-detalhe-layout {
     display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 10px;
-    padding: 0 16px;
+    gap: 32px;
     flex-wrap: wrap;
-}
-
-.produto-fonte {
-    font-size: 12px;
-    color: #a0aec0;
-    margin-top: 6px;
-    padding: 0 16px;
-}
-
-.produto-fonte-vazia {
-    font-style: italic;
-}
-
-/* ==========================================================================
-   19. PÁGINA DE DETALHE DO PRODUTO
-   ========================================================================== */
-
-.produto-detalhe-layout {
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 24px;
-    align-items: start;
-    margin-top: 8px;
+    margin-top: 16px;
 }
 
 .produto-detalhe-imagem {
-    padding: 0;
+    flex: 1;
+    min-width: 260px;
+    max-width: 380px;
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
     overflow: hidden;
+    background: #f8fafc;
     display: flex;
     align-items: center;
     justify-content: center;
-    aspect-ratio: 1 / 1;
 }
 
 .produto-detalhe-imagem img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+.produto-detalhe-info {
+    flex: 1.3;
+    min-width: 260px;
 }
 
 .produto-detalhe-marca {
@@ -2850,55 +2739,70 @@ body.body:has(.sidebar) {
     font-size: 28px;
     font-weight: 800;
     color: #0b132a;
-    margin: 6px 0 14px;
+    margin: 6px 0 4px;
 }
 
 .produto-detalhe-preco-vazio {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     color: #a0aec0;
-}
-
-.produto-detalhe-badges {
-    margin-bottom: 12px;
+    margin: 6px 0 12px;
 }
 
 .produto-detalhe-fonte {
     font-size: 12px;
     color: #718096;
-    margin-bottom: 20px;
+    margin: 0 0 12px;
 }
 
-.produto-detalhe-fonte-vazia {
+.pill-badge.produto-detalhe-badge {
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.produto-detalhe-aviso {
+    font-size: 12px;
     color: #a0aec0;
     font-style: italic;
+    margin: 8px 0 18px;
 }
 
 .produto-detalhe-descricao {
     font-size: 14px;
     color: #718096;
     line-height: 1.6;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .produto-detalhe-specs {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.produto-detalhe-specs li {
+    padding: 12px 0;
     border-top: 1px solid #edf2f7;
 }
 
-.produto-detalhe-cta {
+.produto-detalhe-spec-rotulo {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #a0aec0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+}
+
+.btn-perfil-editar.produto-detalhe-cta {
     display: inline-block;
     margin-top: 20px;
 }
 
-.produto-detalhe-voltar {
+.btn-secundario.produto-detalhe-voltar {
     display: inline-block;
     margin-top: 24px;
-}
-
-@media (max-width: 900px) {
-    .produto-detalhe-layout {
-        grid-template-columns: 1fr;
-    }
 }
 
 /* ==========================================================================
@@ -3398,17 +3302,13 @@ body.body:has(.sidebar) {
         justify-content: center;
     }
 
-    .perfil-tab {
-        white-space: nowrap;
-    }
 }
 
-/* Estilo das páginas (Termos de Uso e Política de Privacidade)*/
+/* Estilo das páginas (Termos de Uso e Política de Privacidade) */
 .pagina {
     --lume-roxo: #a46fd2;
     --lume-azul: #0d7cb3;
     --lume-texto: #2b2433;
-    --lume-suave: #6b6475;
     --lume-fundo: #f7f2fc;
     max-width: 820px;
     margin: 0 auto;
@@ -3526,19 +3426,12 @@ body.body:has(.sidebar) {
 }
 .topo:hover { opacity: 0.9; color: #fff !important; }
 
-@media (max-width: 600px) {
-    .pagina-legal { font-size: 0.97rem; }
-    .pagina-legal h3 { font-size: 1.1rem; }
-    .aviso-legal, .resumo-legal { padding: 2px 16px 10px; }
-}
-
 @media (prefers-reduced-motion: no-preference) {
     html { scroll-behavior: smooth; }
 }
 
-
 /* ==========================================================================
-   20. CARD DO ÍNDICE UV (ao lado da rotina no dashboard)
+   21. CARD DO ÍNDICE UV (ao lado da rotina no dashboard)
    ========================================================================== */
 
 .card-uv {
@@ -3744,7 +3637,7 @@ body.body:has(.sidebar) {
 }
 
 /* ==========================================================================
-   SCANNER: janela da câmera (tela cheia no celular, pop-up no computador)
+   22. SCANNER: janela da câmera (tela cheia no celular, pop-up no computador)
    ========================================================================== */
 
 /* ---- caixa que aparece com a câmera fechada ---- */
@@ -4097,7 +3990,7 @@ body.scanner-aberto {
 }
 
 /* ==========================================================================
-   QUESTIONARIO: a câmera usa a mesma janela do scanner (cole depois do bloco do scanner)
+   23. QUESTIONARIO: a câmera usa a mesma janela do scanner (precisa vir depois do bloco do scanner)
    ========================================================================== */
 
 /* a regra antiga de #camera-video limitava a largura e arredondava: dentro da janela ela precisa preencher a caixa */
@@ -4129,7 +4022,7 @@ body.scanner-aberto {
 }
 
 /* ==========================================================================
-   PERFIL NO CELULAR
+   24. PERFIL NO CELULAR
    ========================================================================== */
 @media (max-width: 900px) {
     /* a coluna da grade crescia junto com as 5 abas (721 px) e deixava a pagina mais larga que a tela.

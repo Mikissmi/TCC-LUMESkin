@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Questionário | LUME Skin</title>
-    <link rel="stylesheet" href="{% static 'core/style.css' %}?v=7">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}?v=8">
 </head>
 <body class="app-body">
     <main class="main content">
@@ -209,7 +209,7 @@
                    <label class="consentimento" for="consentimento-foto">
                    <input type="checkbox" name="consentimento_foto" value="1" id="consentimento-foto">
                    <span>
-                         Li e concordo com os <a href="#">Termos de Serviço</a> e a <a href="#">Política de Privacidade</a>
+                         Li e concordo com os <a href="{% url 'termosdeuso' %}" target="_blank" rel="noopener">Termos de Serviço</a> e a <a href="{% url 'politica_privacidade' %}" target="_blank" rel="noopener">Política de Privacidade</a>
                         e autorizo, de forma específica, o tratamento da foto do meu rosto
                          apenas para gerar a análise da minha pele com inteligência artificial.
                    </span>

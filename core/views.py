@@ -3,6 +3,8 @@ from django.contrib.auth import login as auth_login, authenticate, logout as aut
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse, JsonResponse
@@ -26,14 +28,19 @@ from .recomendacao import (
     rotulo_objetivo,
     classificar_indicador,
 )
+from .youcam_utils import _extract_score
 import requests
+import hmac
 import io
 import json
+import logging
 import time
 import os
 import zipfile
 import urllib.request
 from urllib.parse import unquote
+
+logger = logging.getLogger(__name__)
 
 
 # ==========================================================================
@@ -76,13 +83,13 @@ def _youcam_headers():
     }
 
 
-# imprime o erro da YouCam (HTTP + detalhe) no terminal
+# registra o erro da YouCam (HTTP + detalhe) no log
 def _youcam_error(response, etapa):
     try:
         detalhe = response.json()
     except ValueError:
         detalhe = response.text
-    print(f'[YouCam] {etapa} - HTTP {response.status_code}: {detalhe}')
+    logger.error('[YouCam] %s - HTTP %s: %s', etapa, response.status_code, detalhe)
 
 
 # ==========================================================================
@@ -92,7 +99,6 @@ def _youcam_error(response, etapa):
 # o json muda de formato conforme o recurso (e o plano), entao nao da pra
 # apontar um caminho fixo: as funcoes abaixo procuram o valor em qualquer nivel
 SUFIXOS_IMAGEM = ('.png', '.jpg', '.jpeg', '.webp')
-CHAVES_NOTA = ('ui_score', 'raw_score', 'score', 'value', 'severity')
 INDICADORES_LIDOS = ('oiliness', 'moisture', 'acne', 'pore', 'texture', 'age_spot')
 
 
@@ -124,59 +130,6 @@ def _extract_url(value):
     return None
 
 
-# garante que o valor e um numero (int ou float) e nao um booleano. Se nao for, devolve None
-def _numero(valor):
-    return float(valor) if isinstance(valor, (int, float)) and not isinstance(valor, bool) else None
-
-
-# nota de um indicador: numero direto, {"ui_score": 80, ...} ou por regiao ({"whole": {...}, ...})
-# ordem de tentativa: numero puro -> chave de nota (a primeira que existir) -> "whole" (rosto inteiro) -> media das regioes
-def _nota_de(item):
-    direto = _numero(item)
-    if direto is not None:
-        return direto
-    if not isinstance(item, dict):
-        return None
-    for chave in CHAVES_NOTA:
-        nota = _numero(item.get(chave))
-        if nota is not None:
-            return nota
-    if isinstance(item.get('whole'), dict):
-        nota = _nota_de(item['whole'])
-        if nota is not None:
-            return nota
-    regioes = [_nota_de(v) for v in item.values() if isinstance(v, dict)]
-    regioes = [n for n in regioes if n is not None]
-    return sum(regioes) / len(regioes) if regioes else None
-
-
-# procura a nota de um indicador em qualquer nivel do JSON da YouCam. Aceita:
-# {"oiliness": {"ui_score": 80}}, {"hd_oiliness": {...}}, {"oiliness": 80}
-# [{"type": "oiliness", "ui_score": 80, "raw_score": 78.2, "mask_urls": [...]}]
-def _extract_score(value, key):
-    nomes = (key, 'hd_' + key)
-    if isinstance(value, dict):
-        if value.get('type') in nomes:
-            nota = _nota_de(value)
-            if nota is not None:
-                return nota
-        for nome in nomes:
-            if nome in value:
-                nota = _nota_de(value[nome])
-                if nota is not None:
-                    return nota
-        for item in value.values():
-            found = _extract_score(item, key)
-            if found is not None:
-                return found
-    elif isinstance(value, list):
-        for item in value:
-            found = _extract_score(item, key)
-            if found is not None:
-                return found
-    return None
-
-
 # verifica se algum dos indicadores lidos tem nota (ou seja, se a YouCam mediu algum score)
 def _tem_algum_score(resultados):
     return any(_extract_score(resultados, chave) is not None for chave in INDICADORES_LIDOS)
@@ -202,15 +155,15 @@ def _ler_score_info_do_zip(url):
     try:
         resposta = requests.get(url, timeout=30)
         if not resposta.ok or len(resposta.content) > 20 * 1024 * 1024:
-            print(f'[YouCam] Não consegui baixar o zip de resultados (HTTP {resposta.status_code}).')
+            logger.warning(f'[YouCam] Não consegui baixar o zip de resultados (HTTP {resposta.status_code}).')
             return None
         with zipfile.ZipFile(io.BytesIO(resposta.content)) as arquivo:
             for nome in arquivo.namelist():
                 if nome.lower().endswith('score_info.json'):
                     return json.loads(arquivo.read(nome).decode('utf-8'))
-        print('[YouCam] O zip de resultados não tem score_info.json.')
+        logger.warning('[YouCam] O zip de resultados não tem score_info.json.')
     except (requests.RequestException, zipfile.BadZipFile, ValueError, KeyError) as exc:
-        print(f'[YouCam] Erro ao ler o zip de resultados: {exc}')
+        logger.warning(f'[YouCam] Erro ao ler o zip de resultados: {exc}')
     return None
 
 
@@ -230,15 +183,15 @@ def _completar_resultados(resultados):
 # mostra (e, em DEBUG, grava em arquivo) a resposta crua quando nenhum score foi reconhecido
 def _guardar_resposta_para_diagnostico(resultados):
     texto = json.dumps(resultados, ensure_ascii=False, indent=2, default=str)
-    print('[YouCam] Nenhum score reconhecido na resposta. Resposta recebida:')
-    print(texto[:6000])
+    logger.warning('[YouCam] Nenhum score reconhecido na resposta. Resposta recebida:')
+    logger.warning('%s', texto[:6000])
     if settings.DEBUG:
         try:
             with open(os.path.join(settings.BASE_DIR, 'youcam_ultima_resposta.json'), 'w', encoding='utf-8') as arq:
                 arq.write(texto)
-            print('[YouCam] Resposta completa gravada em youcam_ultima_resposta.json')
+            logger.warning('[YouCam] Resposta completa gravada em youcam_ultima_resposta.json')
         except OSError as exc:
-            print(f'[YouCam] Não consegui gravar o arquivo de diagnóstico: {exc}')
+            logger.warning(f'[YouCam] Não consegui gravar o arquivo de diagnóstico: {exc}')
 
 
 # ==========================================================================
@@ -272,7 +225,7 @@ def _analisar_na_youcam(headers, file_id, acoes):
 
     task_id = resposta_task.json().get('data', {}).get('task_id')
     if not task_id:
-        print(f'[YouCam] Tarefa criada sem task_id: {resposta_task.text}')
+        logger.warning(f'[YouCam] Tarefa criada sem task_id: {resposta_task.text}')
         return None, 'sem_task_id'
 
     # Consulta o resultado. A API é assíncrona.
@@ -293,12 +246,12 @@ def _analisar_na_youcam(headers, file_id, acoes):
         data = payload.get('data', {})
         status = data.get('task_status')
 
-        print(f'[YouCam] tarefa={task_id} status={status}')
+        logger.debug(f'[YouCam] tarefa={task_id} status={status}')
 
         if status == 'success':
             resultados = data.get('results')
             if not resultados:
-                print(f'[YouCam] Tarefa concluída, mas sem results: {payload}')
+                logger.warning(f'[YouCam] Tarefa concluída, mas sem results: {payload}')
                 return None, 'sem_resultados'
 
             # Guarda a URL do resultado, caso exista, para o mapeamento facial.
@@ -310,10 +263,10 @@ def _analisar_na_youcam(headers, file_id, acoes):
             return resultados, 'ok'
 
         if status == 'error':
-            print(f'[YouCam] Tarefa terminou com erro: {payload}')
+            logger.warning(f'[YouCam] Tarefa terminou com erro: {payload}')
             return None, 'erro_na_tarefa'
 
-    print('[YouCam] Tempo limite aguardando o resultado da análise.')
+    logger.warning('[YouCam] Tempo limite aguardando o resultado da análise.')
     return None, 'tempo_esgotado'
 
 
@@ -331,7 +284,7 @@ def comunicar_youcam_api(foto_arquivo):
         foto_arquivo.seek(0)
         conteudo = foto_arquivo.read()
         if not conteudo:
-            print('[YouCam] A imagem recebida está vazia.')
+            logger.warning('[YouCam] A imagem recebida está vazia.')
             return None
 
         content_type = foto_arquivo.content_type or 'image/jpeg'
@@ -360,7 +313,7 @@ def comunicar_youcam_api(foto_arquivo):
 
         file_data = resposta_file.json().get('data', {}).get('files', [])
         if not file_data:
-            print(f'[YouCam] File API não retornou files: {resposta_file.text}')
+            logger.warning(f'[YouCam] File API não retornou files: {resposta_file.text}')
             return None
 
         file_info = file_data[0]
@@ -370,7 +323,7 @@ def comunicar_youcam_api(foto_arquivo):
         upload_url = upload_request.get('url') if upload_request else None
 
         if not file_id or not upload_url:
-            print(f'[YouCam] File API não retornou file_id/upload URL: {file_info}')
+            logger.warning(f'[YouCam] File API não retornou file_id/upload URL: {file_info}')
             return None
 
         # 2. Envia a imagem para a URL assinada.
@@ -395,17 +348,17 @@ def comunicar_youcam_api(foto_arquivo):
         resultados, motivo = _analisar_na_youcam(headers, file_id, YOUCAM_ACOES_COMPLETAS)
 
         if resultados is None and motivo in ('recusada', 'erro_na_tarefa'):
-            print('[YouCam] Tentando de novo só com os recursos básicos.')
+            logger.warning('[YouCam] Tentando de novo só com os recursos básicos.')
             resultados, motivo = _analisar_na_youcam(headers, file_id, YOUCAM_ACOES_BASE)
 
         return resultados
 
     except requests.RequestException as exc:
-        print(f'[Erro de conexão YouCam API]: {exc}')
+        logger.warning(f'[Erro de conexão YouCam API]: {exc}')
     except (ValueError, KeyError, TypeError) as exc:
-        print(f'[Erro ao interpretar resposta YouCam API]: {exc}')
+        logger.warning(f'[Erro ao interpretar resposta YouCam API]: {exc}')
     except Exception as exc:
-        print(f'[Erro YouCam API]: {exc}')
+        logger.warning(f'[Erro YouCam API]: {exc}')
 
     return None
 
@@ -510,12 +463,33 @@ def _inteiro(valor, padrao=0, minimo=None, maximo=None):
 # AUTENTICAÇÃO - cadastro, login e logout
 # ==========================================================================
 
+def _erro_no_cadastro(nome, email, senha):
+    # None se os dados servem para criar a conta; senao, a mensagem pro usuario
+    if not nome or not email or not senha:
+        return 'Preencha nome, e-mail e senha.'
+    if Usuario.objects.filter(email__iexact=email).exists():
+        return 'Já existe uma conta com este e-mail.'
+    try:
+        validate_password(senha, user=Usuario(email=email, nome_usuario=nome))
+    except ValidationError as erro:
+        return ' '.join(erro.messages)
+    return None
+
+
 def tela_cadastro(request):
     # verifica se o navegador está enviando dados através de um formulário (POST)
     if request.method == "POST":
-        nome = request.POST.get('nome')
-        email = request.POST.get('email')
-        senha = request.POST.get('senha')
+        nome = request.POST.get('nome', '').strip()
+        email = request.POST.get('email', '').strip()
+        senha = request.POST.get('senha', '')
+
+        erro = _erro_no_cadastro(nome, email, senha)
+        if erro:
+            return render(request, 'core/cadastro.html', {
+                'erro_cadastro': erro,
+                'nome': nome,
+                'email': email,
+            })
 
         # cria e salva um novo registro na tabela usuario, já com a senha criptografada
         novo_usuario = Usuario.objects.create_user(
@@ -532,6 +506,14 @@ def tela_cadastro(request):
     return render(request, 'core/cadastro.html')
 
 
+# compara com o email/senha do admin (hmac.compare_digest nao vaza, pelo tempo de
+# resposta, quantos caracteres estavam certos)
+def _eh_login_do_admin(email, senha):
+    email_certo = hmac.compare_digest((email or '').encode(), settings.ADMIN_LOGIN_EMAIL.encode())
+    senha_certa = hmac.compare_digest((senha or '').encode(), settings.ADMIN_LOGIN_SENHA.encode())
+    return email_certo and senha_certa
+
+
 def tela_login(request):
     if request.method == "POST":
         email = request.POST.get('email')
@@ -540,7 +522,7 @@ def tela_login(request):
         # login do administrador: mesma tela/form, mas com email e senha fixos
         # (definidos em ADMIN_LOGIN_EMAIL / ADMIN_LOGIN_SENHA) em vez de um
         # Usuario cadastrado no banco
-        if email == settings.ADMIN_LOGIN_EMAIL and senha == settings.ADMIN_LOGIN_SENHA:
+        if _eh_login_do_admin(email, senha):
             request.session['admin_logado'] = True
             return redirect('administradores')
 
@@ -569,6 +551,10 @@ def tela_logout(request):
 
 def tela_questionario(request):
     if request.method == "POST":
+        # sem login nao ha perfil pra salvar (e a foto gastaria credito da YouCam a toa)
+        if not request.user.is_authenticated:
+            return redirect('login')
+
         # Pega as respostas do questionário
         idade = _inteiro(request.POST.get('idade'), 0, 0, 120)
         tipo_pele = request.POST.get('tipo_pele')
@@ -622,7 +608,8 @@ def tela_questionario(request):
         if quer_escanear and consentimento_foto:
             foto_usuario = request.FILES.get('foto_rosto')
 
-            if foto_usuario and _foto_valida(foto_usuario):
+            # mesmo limite por hora do scanner: cada analise gasta credito da YouCam
+            if foto_usuario and _foto_valida(foto_usuario) and _passou_limite_scanner(request.user):
                 resultados_ia = comunicar_youcam_api(foto_usuario)
 
         # Processa os resultados somente se a IA retornou dados
@@ -1002,13 +989,13 @@ def scanner_analisar(request):
     resultados_ia = comunicar_youcam_api(foto)
 
     if not resultados_ia:
-     return JsonResponse(
-        {
-            'erro': 'Não foi possível analisar a imagem agora. '
-                    'Tente novamente em instantes.'
-        },
-        status=502
-    )
+        return JsonResponse(
+            {
+                'erro': 'Não foi possível analisar a imagem agora. '
+                        'Tente novamente em instantes.'
+            },
+            status=502
+        )
     resultados_ia = _completar_resultados(resultados_ia)
 
     # sem nota fica None (nota 0 e valida)
@@ -1172,25 +1159,20 @@ def _indicadores_do_perfil(perfil):
     if not isinstance(resultados, (dict, list)) or not _tem_algum_score(resultados):
         return []
 
-    chaves = (
-        ('oleosidade', 'oiliness'),
-        ('hidratacao', 'moisture'),
-        ('acne_poros', None),
-        ('textura', 'texture'),
-        ('manchas', 'age_spot'),
-    )
     notas = {
         chave: _extract_score(resultados, chave)
         for chave in INDICADORES_LIDOS
     }
+    # indicador mostrado na tela -> nota (acne e poros viram uma nota so, pela media)
+    notas_por_titulo = (
+        ('oleosidade', notas['oiliness']),
+        ('hidratacao', notas['moisture']),
+        ('acne_poros', _media_ou_none(notas['acne'], notas['pore'])),
+        ('textura', notas['texture']),
+        ('manchas', notas['age_spot']),
+    )
     valores = []
-    for titulo, indicador in chaves:
-        if indicador == 'acne_poros':
-            nota = _media_ou_none(notas['acne'], notas['pore'])
-        elif indicador is None:
-            nota = None
-        else:
-            nota = notas[indicador]
+    for titulo, nota in notas_por_titulo:
         item = montar_indicador(titulo, nota)
         valores.append({
             **item,
@@ -1507,12 +1489,21 @@ def artigo_form(request, artigo_id=None):
 
     artigo = get_object_or_404(Artigo, id=artigo_id) if artigo_id else Artigo()
 
-    artigo.titulo = request.POST.get('titulo', '').strip()
-    artigo.autor = request.POST.get('autor', '').strip()
-    artigo.ano = request.POST.get('ano') or artigo.ano
+    titulo = request.POST.get('titulo', '').strip()
+    autor = request.POST.get('autor', '').strip()
+    url_leitura = request.POST.get('url_leitura', '').strip()
+    # ano invalido (vazio, texto) mantem o que ja estava; artigo novo precisa de um ano
+    ano = _inteiro(request.POST.get('ano'), artigo.ano, 1900, 2100)
+    if not titulo or not autor or not url_leitura or ano is None:
+        messages.error(request, 'Informe título, autor, ano (entre 1900 e 2100) e o link de leitura do artigo.')
+        return redirect('administradores')
+
+    artigo.titulo = titulo
+    artigo.autor = autor
+    artigo.ano = ano
     artigo.resumo = request.POST.get('resumo', '').strip()
     artigo.url_capa = request.POST.get('url_capa', '').strip()
-    artigo.url_leitura = request.POST.get('url_leitura', '').strip()
+    artigo.url_leitura = url_leitura
     artigo.save()
     return redirect('administradores')
 
@@ -1534,10 +1525,17 @@ def especialista_form(request, especialista_id=None):
 
     especialista = get_object_or_404(Especialista, id=especialista_id) if especialista_id else Especialista()
 
-    especialista.nome = request.POST.get('nome', '').strip()
-    especialista.especialidade = request.POST.get('especialidade', '').strip()
+    nome = request.POST.get('nome', '').strip()
+    especialidade = request.POST.get('especialidade', '').strip()
+    telefone = request.POST.get('telefone_whatsapp', '').strip()
+    if not nome or not especialidade or not telefone:
+        messages.error(request, 'Informe nome, especialidade e WhatsApp do especialista.')
+        return redirect('administradores')
+
+    especialista.nome = nome
+    especialista.especialidade = especialidade
     especialista.crm = request.POST.get('crm', '').strip()
-    especialista.telefone_whatsapp = request.POST.get('telefone_whatsapp', '').strip()
+    especialista.telefone_whatsapp = telefone
     especialista.url_foto = request.POST.get('url_foto', '').strip()
     especialista.save()
     return redirect('administradores')
@@ -1550,8 +1548,9 @@ def especialista_excluir(request, especialista_id):
         especialista.delete()
     return redirect('administradores')
 
+
 # ==========================================================================
-# ÁREA UV - 
+# ÁREA UV - índice ultravioleta da região do usuário (Open-Meteo)
 # ==========================================================================
 
 def indice_uv(request):

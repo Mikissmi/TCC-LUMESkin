@@ -12,7 +12,7 @@ from django.test import Client, TestCase
 from django.utils import timezone
 from django.urls import reverse
 
-from .models import PassoRotinaFeito, PerfilDermatologico, Produto, RegraTratamento, Usuario
+from .models import Artigo, Especialista, PassoRotinaFeito, PerfilDermatologico, Produto, RegraTratamento, Usuario
 from .recomendacao import (
     MAPA_OBJETIVO_PREOCUPACAO, OBJETIVOS, ativo_nas_alergias, extrair_sinais_faciais, faixa_etaria,
     montar_rotina, normalizar_objetivo, pontuar_produto, preocupacoes_de_tratamento,
@@ -1372,3 +1372,124 @@ class RotinaMarcarTests(PerfilBaseTestCase):
         self.assertIs(dados['perfil_dermatologico']['pele_sensivel'], True)
         self.assertIs(dados['perfil_dermatologico']['gestante'], False)
         self.assertEqual(dados['perfil_dermatologico']['tipo_acne'], 'Nodular')
+
+
+# ==========================================================================
+# CADASTRO, LOGIN DO ADMIN, PAINEL ADMINISTRATIVO E INDICADORES DO PERFIL
+# ==========================================================================
+
+class CadastroTests(TestCase):
+    def cadastrar(self, **dados):
+        campos = {'nome': 'Bia Lima', 'email': 'bia@email.com', 'senha': 'senha-segura-123'}
+        campos.update(dados)
+        return self.client.post(reverse('cadastro_view'), campos)
+
+    def test_cadastro_valido_cria_usuario_e_vai_para_o_questionario(self):
+        resposta = self.cadastrar()
+        self.assertRedirects(resposta, reverse('questionario'))
+        self.assertTrue(Usuario.objects.filter(email='bia@email.com').exists())
+
+    def test_email_repetido_mostra_erro_em_vez_de_quebrar(self):
+        self.cadastrar()
+        self.client.logout()
+        resposta = self.cadastrar(nome='Outra Pessoa')
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, 'Já existe uma conta com este e-mail.')
+        self.assertEqual(Usuario.objects.filter(email='bia@email.com').count(), 1)
+
+    def test_senha_fraca_e_recusada(self):
+        resposta = self.cadastrar(senha='12345678')
+        self.assertEqual(resposta.status_code, 200)
+        self.assertIn('erro_cadastro', resposta.context)
+        self.assertFalse(Usuario.objects.exists())
+
+    def test_campos_em_branco_sao_recusados_e_o_que_foi_digitado_volta_no_formulario(self):
+        resposta = self.cadastrar(nome='   ')
+        self.assertContains(resposta, 'Preencha nome, e-mail e senha.')
+        self.assertContains(resposta, 'value="bia@email.com"')
+        self.assertFalse(Usuario.objects.exists())
+
+
+class LoginAdminTests(TestCase):
+    def test_login_com_as_credenciais_do_admin_libera_o_painel(self):
+        resposta = self.client.post(reverse('login'), {
+            'email': settings.ADMIN_LOGIN_EMAIL, 'senha': settings.ADMIN_LOGIN_SENHA})
+        self.assertRedirects(resposta, reverse('administradores'))
+        self.assertEqual(self.client.get(reverse('administradores')).status_code, 200)
+
+    def test_senha_errada_nao_libera_o_painel(self):
+        self.client.post(reverse('login'), {'email': settings.ADMIN_LOGIN_EMAIL, 'senha': 'errada'})
+        resposta = self.client.get(reverse('administradores'))
+        self.assertRedirects(resposta, reverse('login'), fetch_redirect_response=False)
+
+
+class PainelAdminTests(TestCase):
+    def setUp(self):
+        self.client.post(reverse('login'), {
+            'email': settings.ADMIN_LOGIN_EMAIL, 'senha': settings.ADMIN_LOGIN_SENHA})
+
+    def test_cria_artigo_valido(self):
+        self.client.post(reverse('artigo_novo'), {
+            'titulo': 'Fotoproteção', 'autor': 'Silva', 'ano': '2023',
+            'url_leitura': 'https://exemplo.com/artigo'})
+        self.assertEqual(Artigo.objects.get().ano, 2023)
+
+    def test_artigo_sem_ano_valido_nao_quebra_e_nao_salva(self):
+        resposta = self.client.post(reverse('artigo_novo'), {
+            'titulo': 'Fotoproteção', 'autor': 'Silva', 'ano': 'abc',
+            'url_leitura': 'https://exemplo.com/artigo'}, follow=True)
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, 'Informe título, autor, ano')
+        self.assertFalse(Artigo.objects.exists())
+
+    def test_editar_artigo_com_ano_invalido_mantem_o_ano_antigo(self):
+        artigo = Artigo.objects.create(titulo='A', autor='B', ano=2020, url_leitura='https://exemplo.com/a')
+        self.client.post(reverse('artigo_editar', args=[artigo.id]), {
+            'titulo': 'A2', 'autor': 'B', 'ano': '', 'url_leitura': 'https://exemplo.com/a'})
+        artigo.refresh_from_db()
+        self.assertEqual((artigo.titulo, artigo.ano), ('A2', 2020))
+
+    def test_especialista_sem_whatsapp_nao_e_salvo(self):
+        resposta = self.client.post(reverse('especialista_novo'), {
+            'nome': 'Dra. Ana', 'especialidade': 'dermatologista', 'telefone_whatsapp': ''}, follow=True)
+        self.assertContains(resposta, 'Informe nome, especialidade e WhatsApp')
+        self.assertFalse(Especialista.objects.exists())
+
+
+class QuestionarioAnonimoTests(TestCase):
+    def test_enviar_o_questionario_sem_login_manda_para_o_login(self):
+        resposta = self.client.post(reverse('questionario'), respostas_do_questionario())
+        self.assertRedirects(resposta, reverse('login'), fetch_redirect_response=False)
+        self.assertFalse(PerfilDermatologico.objects.exists())
+
+
+class IndicadoresAcnePorosTests(TestCase):
+    def test_acne_e_poros_aparecem_no_perfil_com_a_media_das_notas(self):
+        _, perfil = criar_usuario_com_perfil()
+        perfil.dados_ia = json.dumps({'acne': {'score': 80}, 'pore': {'score': 60}})
+        indicadores = {i['chave']: i for i in _indicadores_do_perfil(perfil)}
+        self.assertEqual(indicadores['acne_poros']['nota'], 70)
+        self.assertEqual(indicadores['acne_poros']['classificacao'], 'Bom')
+
+
+class ImportarProdutosTests(TestCase):
+    def test_importa_o_csv_do_projeto_sem_linhas_cortadas(self):
+        caminho = os.path.join(settings.BASE_DIR, 'core', 'data', '00_produtos_skincare.csv')
+        call_command('import_produtos_csv', caminho, stdout=StringIO())
+        total = Produto.objects.count()
+        self.assertGreater(total, 100)
+        # rodar de novo atualiza, nao duplica
+        call_command('import_produtos_csv', caminho, stdout=StringIO())
+        self.assertEqual(Produto.objects.count(), total)
+
+    def test_linha_cortada_aborta_sem_importar_nada(self):
+        cabecalho = ('id,marca,nome,categoria,tipo_pele,preocupacao,modo_uso,ingrediente_principal,fps,'
+                     'tamanho_ml,preco_brl,avaliacao,num_avaliacoes,fonte,descricao,imagem_url,link_produto,slug\n')
+        completa = '1,M,N,Limpeza,Oleosa,Acne,Manhã,Zinco PCA,,100,,,,F,D,https://x.com/i.jpg,https://x.com/p,m-n\n'
+        cortada = '2,M,N2,Limpeza,Oleosa,Acne,Manhã,Zinco PCA,,100,,,,F,D,https://x.com/i.jpg\n'
+        with tempfile.NamedTemporaryFile('w', suffix='.csv', delete=False, encoding='utf-8') as arquivo:
+            arquivo.write(cabecalho + completa + cortada)
+        self.addCleanup(os.unlink, arquivo.name)
+        with self.assertRaisesMessage(CommandError, 'Linha 3'):
+            call_command('import_produtos_csv', arquivo.name, stdout=StringIO())
+        self.assertEqual(Produto.objects.count(), 0)
