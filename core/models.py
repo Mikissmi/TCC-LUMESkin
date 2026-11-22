@@ -92,7 +92,7 @@ class PerfilDermatologico(models.Model):
     TIPO_ACNE_CHOICES = [(t, t) for t in ['Comedonal', 'Inflamatória', 'Nodular', 'Cística']]
     tipo_acne = models.CharField(max_length=20, choices=TIPO_ACNE_CHOICES, blank=True, default='')
 
-    foto_rosto = models.CharField(max_length=500, blank=True, null=True)
+    url_mapeamento_facial = models.CharField(max_length=500, blank=True, null=True)
     dados_ia = models.TextField(blank=True, null=True)
 
     porcentagem_saude = models.IntegerField()

@@ -697,7 +697,7 @@ def tela_questionario(request):
                     'porcentagem_saude': porcentagem_calculada,
                     'fototipo': pontos_sol + 1,
                     'dados_ia': dados_ia_json,
-                    'foto_rosto': foto_salva,
+                    'url_mapeamento_facial': foto_salva,
                     'sono_horas': sono_horas if sono_horas in dict(PerfilDermatologico.SONO_CHOICES) else 'adequado',
                     'exercicio_frequencia': (
                         exercicio_frequencia
@@ -749,7 +749,7 @@ def tela_questionario(request):
             # Só substitui a análise anterior se houve um novo scan
             if dados_ia_json:
                 perfil.dados_ia = dados_ia_json
-                perfil.foto_rosto = foto_salva
+                perfil.url_mapeamento_facial = foto_salva
 
             perfil.save()
 
@@ -1058,7 +1058,7 @@ def scanner_salvar(request):
         }, status=400)
 
     perfil.dados_ia = ultimo_scan['dados_ia']
-    perfil.foto_rosto = ultimo_scan['foto_rosto']
+    perfil.url_mapeamento_facial = ultimo_scan['foto_rosto']
     perfil.porcentagem_saude = ultimo_scan['porcentagem_saude']
     perfil.save()
 
@@ -1094,7 +1094,7 @@ def tela_scanner(request):
                 ultimo_scan = {
                     'score_geral': round(sum(notas) / len(notas)),
                     'indicadores': indicadores,
-                    'mapeamento_facial': _url_https(perfil.foto_rosto),
+                    'mapeamento_facial': _url_https(perfil.url_mapeamento_facial),
                 }
     return render(request, 'core/scanner.html', {'ultimo_scan': ultimo_scan})
 
@@ -1321,7 +1321,7 @@ def alterar_senha(request):
 @login_required
 def apagar_foto_perfil(request):
     if request.method == 'POST':
-        PerfilDermatologico.objects.filter(usuario=request.user).update(foto_rosto=None)
+        PerfilDermatologico.objects.filter(usuario=request.user).update(url_mapeamento_facial=None)
     return redirect(f"{reverse('perfil')}?aba=privacidade")
 
 
@@ -1350,7 +1350,7 @@ def exportar_dados(request):
             'tipo_acne': perfil.tipo_acne,
             'porcentagem_saude': perfil.porcentagem_saude,
             'fototipo': perfil.fototipo,
-            'foto_rosto': perfil.foto_rosto,
+            'url_mapeamento_facial': perfil.url_mapeamento_facial,
             'analise_ia': analise_ia,
         }
 

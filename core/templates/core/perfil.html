@@ -297,14 +297,14 @@
             <div class="perfil-item">
                 <div>
                     <span class="perfil-item-label">Imagem do último scan</span>
-                    {% if perfil and perfil.foto_rosto %}
-                    <img src="{{ perfil.foto_rosto }}" alt="Imagem do último scan guardada na sua conta" class="privacidade-miniatura">
+                    {% if perfil and perfil.url_mapeamento_facial %}
+                    <img src="{{ perfil.url_mapeamento_facial }}" alt="Imagem do último scan guardada na sua conta" class="privacidade-miniatura">
                     <p>Guardada na sua conta junto com os resultados da análise. Você pode apagá-la quando quiser.</p>
                     {% else %}
                     <p>Nenhuma imagem de scan guardada na sua conta.</p>
                     {% endif %}
                 </div>
-                {% if perfil and perfil.foto_rosto %}
+                {% if perfil and perfil.url_mapeamento_facial %}
                 <form method="POST" action="{% url 'apagar_foto_perfil' %}">
                     {% csrf_token %}
                     <button type="submit" class="btn-perfil-secundario">Apagar imagem</button>

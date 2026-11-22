@@ -21,6 +21,8 @@ python manage.py runserver
 
 Os dois comandos `import_*` carregam o catálogo de produtos e as regras de tratamento; sem eles a página de produtos e a rotina ficam vazias. Rodar de novo apenas atualiza os dados, sem duplicar.
 
+A pasta `banco_de_dados/` traz os scripts SQL (PostgreSQL) para consulta da banca: `01_estrutura.sql` (as 7 tabelas, comentadas, conforme o DER do artigo), `02_dados_produtos.sql` (145 produtos) e `03_dados_regras_tratamento.sql` (1.120 regras). Para criar o banco do sistema, o caminho oficial é `migrate` + os dois comandos `import_*` acima.
+
 ## Configuração (arquivo `.env`)
 
 O arquivo `.env.example` lista todas as variáveis. As principais:

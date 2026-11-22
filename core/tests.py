@@ -42,7 +42,7 @@ def criar_usuario_com_perfil(email='ana@email.com', com_perfil=True):
             usa_maquiagem_diariamente='nao',
             porcentagem_saude=78,
             fototipo=3,
-            foto_rosto='https://exemplo.com/scan.jpg',
+            url_mapeamento_facial='https://exemplo.com/scan.jpg',
             dados_ia=json.dumps({'oiliness': {'score': 90}, 'moisture': {'score': 60}}),
         )
     return usuario, perfil
@@ -476,7 +476,7 @@ class PrivacidadeTests(PerfilBaseTestCase):
         resposta = self.client.post(reverse('apagar_foto_perfil'))
         self.assertRedirects(resposta, f"{reverse('perfil')}?aba=privacidade")
         self.perfil.refresh_from_db()
-        self.assertIsNone(self.perfil.foto_rosto)
+        self.assertIsNone(self.perfil.url_mapeamento_facial)
         # a analise e o score continuam
         self.assertEqual(self.perfil.porcentagem_saude, 78)
         self.assertIsNotNone(self.perfil.dados_ia)
@@ -484,7 +484,7 @@ class PrivacidadeTests(PerfilBaseTestCase):
     def test_apagar_so_aceita_post(self):
         self.client.get(reverse('apagar_foto_perfil'))
         self.perfil.refresh_from_db()
-        self.assertIsNotNone(self.perfil.foto_rosto)
+        self.assertIsNotNone(self.perfil.url_mapeamento_facial)
 
     def test_exportar_dados_baixa_json(self):
         resposta = self.client.get(reverse('exportar_dados'))
