@@ -1,17 +1,10 @@
-# Leitura das notas do JSON da YouCam. Fica num arquivo proprio porque dois
-# modulos precisam dela (views.py e recomendacao.py) e um importar o outro
-# causaria import circular (views ja importa recomendacao).
-
 CHAVES_NOTA = ('ui_score', 'raw_score', 'score', 'value', 'severity')
 
 
-# garante que o valor e um numero (int ou float) e nao um booleano. Se nao for, devolve None
 def _numero(valor):
     return float(valor) if isinstance(valor, (int, float)) and not isinstance(valor, bool) else None
 
 
-# nota de um indicador: numero direto, {"ui_score": 80, ...} ou por regiao ({"whole": {...}, ...})
-# ordem de tentativa: numero puro -> chave de nota (a primeira que existir) -> "whole" (rosto inteiro) -> media das regioes
 def _nota_de(item):
     direto = _numero(item)
     if direto is not None:
@@ -31,9 +24,6 @@ def _nota_de(item):
     return sum(regioes) / len(regioes) if regioes else None
 
 
-# procura a nota de um indicador em qualquer nivel do JSON da YouCam. Aceita:
-# {"oiliness": {"ui_score": 80}}, {"hd_oiliness": {...}}, {"oiliness": 80}
-# [{"type": "oiliness", "ui_score": 80, "raw_score": 78.2, "mask_urls": [...]}]
 def _extract_score(value, key):
     nomes = (key, 'hd_' + key)
     if isinstance(value, dict):

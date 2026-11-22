@@ -11,10 +11,6 @@ MAPA_TIPO_PELE = {
     'mista': 'Mista',
     'normal': 'Normal',
 }
-
-# Objetivos oferecidos nos DOIS formularios (questionario.html e aba "Perfil de pele").
-# A chave e o valor salvo no banco; o texto e o que aparece na tela.
-# Mexeu aqui? Ajuste tambem os <option> do questionario.html e o MAPA abaixo.
 OBJETIVOS = {
     'hidratar': 'Hidratar',
     'controlar oleosidade': 'Controlar oleosidade',
@@ -24,14 +20,11 @@ OBJETIVOS = {
     'melhorar textura': 'Melhorar textura',
 }
 
-# Textos que a aba "Perfil de pele" gravava antes de unificar os valores. Quem ja
-# editou o perfil tem um deles no banco, entao convertemos na leitura (sem mexer nos dados).
 OBJETIVOS_ANTIGOS = {
     'hidratar a pele': 'hidratar',
     'prevenir sinais de idade': 'anti-idade',
 }
 
-# Bate com as chaves de OBJETIVOS
 MAPA_OBJETIVO_PREOCUPACAO = {
     'hidratar': {'Hidratação'},
     'controlar oleosidade': {'Oleosidade'},
@@ -39,8 +32,6 @@ MAPA_OBJETIVO_PREOCUPACAO = {
     'anti-idade': {'Rugas e Linhas Finas', 'Fotoenvelhecimento'},
     'reduzir acne': {'Acne'},
     'melhorar textura': {'Textura Irregular'},
-    # 'outro' não tem preocupação mapeada de propósito: o formulário salva só
-    # a string "outro" e não guarda o texto livre do campo objetivo_outro.
 }
 
 CATEGORIA_POR_PREFERENCIA = {
@@ -48,22 +39,15 @@ CATEGORIA_POR_PREFERENCIA = {
     'gel': {'Limpeza', 'Sérum', 'Tônico', 'Água Micelar', 'Esfoliante'},
 }
 
-
 # ==========================================================================
-# ROTINA DE TRATAMENTO - constantes
-# perfil -> preocupacoes -> regra de tratamento -> ativos seguros -> produtos -> rotina
+# ROTINA DE TRATAMENTO 
 # ==========================================================================
 
-# O dataset de tratamento so tem regras a partir dos 14 anos
 IDADE_MINIMA_TRATAMENTO = 14
 
-# Limite superior de cada faixa do dataset. Acima de 45 anos e a faixa "45+"
-# (o dataset repete o 45 em "37-45" e "45+"; aqui 45 anos ainda fica em "37-45")
 FAIXAS_ETARIAS = [(18, '14-18'), (24, '19-24'), (36, '25-36'), (45, '37-45')]
 FAIXA_MAIS_VELHA = '45+'
 
-# Objetivo do questionario -> preocupacao do dataset de tratamento.
-# "hidratar" nao tem regra de tratamento: a rotina usa so a pontuacao dos produtos.
 MAPA_OBJETIVO_TRATAMENTO = {
     'reduzir acne': 'Acne',
     'reduzir manchas': 'Manchas Escuras',
@@ -72,8 +56,6 @@ MAPA_OBJETIVO_TRATAMENTO = {
     'melhorar textura': 'Cravos Brancos / Cravos Pretos',
 }
 
-# Sinais faciais (de extrair_sinais_faciais) na ordem de prioridade.
-# Hidratacao baixa nao tem regra de tratamento.
 SINAIS_TRATAMENTO = [
     ('acne_presente', 'Acne'),
     ('manchas_presentes', 'Manchas Escuras'),
@@ -81,28 +63,18 @@ SINAIS_TRATAMENTO = [
     ('oleosidade_alta', 'Poros Dilatados'),
 ]
 
-MAX_PREOCUPACOES = 2   # para nao lotar a rotina
-MAX_TRATAMENTOS = 2    # passos de tratamento por periodo
-TIPO_ACNE_PADRAO = 'Comedonal'          # usado quando a pessoa "nao sabe" o tipo (o mais leve)
+MAX_PREOCUPACOES = 2  
+MAX_TRATAMENTOS = 2 
+TIPO_ACNE_PADRAO = 'Comedonal'        
 TIPOS_ACNE_GRAVES = {'Nodular', 'Cística'}
 
-# --- Seguranca dos ativos --------------------------------------------------
-# Limitacao do trabalho: estas regras de seguranca (idade minima, conflitos entre ativos,
-# cuidados na gravidez) seguem referencias gerais e ainda nao foram validadas por um
-# dermatologista. A rotina e apenas apoio e nao substitui avaliacao profissional.
 IDADE_MINIMA_RETINOIDE = 18
-RETINOIDES = {'Retinol', 'Pró-Retinol'}                       # nunca na gravidez nem antes dos 18
-ACIDOS = {'Ácido Salicílico', 'Ácido Glicólico', 'Ácido Lático'}  # na gravidez: "consulte seu medico"
-ATIVOS_SO_NOITE = RETINOIDES                                    # ficam de fora da rotina da manha
-# Pares que nao devem ser usados juntos no mesmo periodo (um grupo contra o outro)
+RETINOIDES = {'Retinol', 'Pró-Retinol'}                      
+ACIDOS = {'Ácido Salicílico', 'Ácido Glicólico', 'Ácido Lático'} 
+ATIVOS_SO_NOITE = RETINOIDES                                  
 CONFLITOS = [(RETINOIDES, {'Vitamina C'} | ACIDOS)]
-
-# Mesmo ativo com nomes diferentes no dataset de tratamento e no catalogo de produtos
 SINONIMOS_ATIVOS = [{'PCA de Zinco', 'Zinco PCA'}]
 
-# --- Produtos ---------------------------------------------------------------
-# Categorias que contam como "tratamento". Hidratante e Limpeza tambem podem
-# trazer o ativo, mas entram nos passos deles (ver escolher_produto).
 CATEGORIAS_TRATAMENTO = {'Sérum', 'Esfoliante', 'Tônico'}
 CATEGORIAS_COM_ATIVO = CATEGORIAS_TRATAMENTO | {'Limpeza', 'Hidratante'}
 
@@ -122,14 +94,12 @@ AVISO_MENOR_DE_14 = (
 
 
 def normalizar_objetivo(objetivo):
-    """Devolve o codigo do objetivo ('reduzir acne'). Texto livre ("Outro") passa sem mudar."""
     texto = (objetivo or '').strip()
     codigo = OBJETIVOS_ANTIGOS.get(texto.lower(), texto.lower())
     return codigo if codigo in OBJETIVOS else texto
 
 
 def rotulo_objetivo(objetivo):
-    """Texto bonito para mostrar na tela ('reduzir acne' -> 'Reduzir acne')."""
     texto = normalizar_objetivo(objetivo)
     return OBJETIVOS.get(texto, texto)
 
@@ -145,7 +115,6 @@ def classificar_indicador(nota):
 
 
 def extrair_sinais_faciais(dados_ia_raw):
-    """Lê o JSON da YouCam salvo em PerfilDermatologico.dados_ia."""
     if not dados_ia_raw:
         return {}
     try:
@@ -153,7 +122,6 @@ def extrair_sinais_faciais(dados_ia_raw):
     except (json.JSONDecodeError, TypeError):
         return {}
 
-    # _extract_score (o mesmo do scanner) acha a nota em qualquer formato do JSON da YouCam
     sinais = {}
     campos = {
         'oleosidade_alta': _extract_score(dados, 'oiliness'),
@@ -197,7 +165,6 @@ def preocupacoes_do_perfil(perfil, sinais_faciais):
 
 
 def pontuar_produto(produto, preocupacoes, categorias_preferidas):
-    """Pontuacao de um produto (usada pela tela de produtos e pela rotina)."""
     pontos = 2 * len(preocupacoes & set(produto.preocupacoes()))
     if produto.categoria in categorias_preferidas:
         pontos += 1
@@ -230,16 +197,14 @@ def recomendar_produtos(perfil, limite=20):
 
 
 # ==========================================================================
-# ROTINA DE TRATAMENTO - funcoes (cada etapa do caminho e uma funcao pequena)
+# ROTINA DE TRATAMENTO 
 # ==========================================================================
 
 def aviso(texto, destaque=False):
-    # destaque=True: o dashboard mostra o aviso em evidencia
     return {'texto': texto, 'destaque': destaque}
 
 
 def sem_acento(texto):
-    """'Ácido Salicílico' -> 'acido salicilico' (para comparar textos digitados pelo usuario)."""
     decomposto = unicodedata.normalize('NFKD', texto or '')
     return ''.join(c for c in decomposto if not unicodedata.combining(c)).lower()
 
@@ -254,10 +219,7 @@ def faixa_etaria(idade):
     return FAIXA_MAIS_VELHA
 
 
-# --- 1. preocupacoes ----------------------------------------------------------
-
 def preocupacoes_de_tratamento(perfil, sinais_faciais):
-    """Ate 2 preocupacoes do dataset: o objetivo primeiro, depois sinais faciais."""
     preocupacoes = []
     do_objetivo = MAPA_OBJETIVO_TRATAMENTO.get(normalizar_objetivo(perfil.objetivo))
     if do_objetivo:
@@ -272,16 +234,13 @@ def preocupacoes_de_tratamento(perfil, sinais_faciais):
 
 
 def tipo_interno_da_preocupacao(perfil, preocupacao):
-    """So a acne tem tipo interno. Quem nao sabe o tipo usa o mais leve (Comedonal)."""
     if preocupacao == 'Acne':
         return perfil.tipo_acne or TIPO_ACNE_PADRAO
     return ''
 
 
-# --- 3. ativos seguros ---------------------------------------------------------
 
 def nomes_do_ativo(ativo):
-    """Todos os nomes conhecidos do ativo ('PCA de Zinco' tambem e 'Zinco PCA')."""
     for grupo in SINONIMOS_ATIVOS:
         if ativo in grupo:
             return grupo
@@ -289,7 +248,6 @@ def nomes_do_ativo(ativo):
 
 
 def ativo_nas_alergias(ativo, alergias):
-    # alergias guarda '0'/'1' (respostas sim/nao do questionario) ou o texto digitado
     texto = sem_acento(alergias).strip()
     if texto in ('', '0', '1'):
         return False
@@ -297,13 +255,11 @@ def ativo_nas_alergias(ativo, alergias):
 
 
 def motivo_ativo_bloqueado(ativo, perfil):
-    """None se o ativo e seguro para o perfil; senao, o motivo em texto."""
     if ativo in RETINOIDES:
         if perfil.gestante:
             return 'não é indicado na gravidez'
         if perfil.idade < IDADE_MINIMA_RETINOIDE:
             return f'não é indicado antes dos {IDADE_MINIMA_RETINOIDE} anos'
-    # abaixo de 14 anos a rotina so tem limpeza, hidratante e protetor, sem ativos fortes
     if perfil.idade < IDADE_MINIMA_TRATAMENTO and ativo in RETINOIDES | ACIDOS:
         return f'não é indicado antes dos {IDADE_MINIMA_TRATAMENTO} anos'
     if ativo_nas_alergias(ativo, perfil.alergias):
@@ -312,15 +268,12 @@ def motivo_ativo_bloqueado(ativo, perfil):
 
 
 def conflito_entre(ativo, outros):
-    """Primeiro ativo de `outros` que nao pode ser usado junto com `ativo` (ou None)."""
     for grupo_a, grupo_b in CONFLITOS:
         for outro in outros:
             if (ativo in grupo_a and outro in grupo_b) or (ativo in grupo_b and outro in grupo_a):
                 return outro
     return None
 
-
-# --- 4. produtos ---------------------------------------------------------------
 
 def tipos_pele_da_rotina(perfil):
     tipos = set(tipos_pele_compativeis(perfil, {}))
@@ -337,7 +290,6 @@ def produto_seguro(produto, perfil, periodo):
 
 
 def produtos_compativeis(produtos, perfil, periodo, categorias, ativo=None):
-    """Produtos da categoria que servem ao tipo de pele, ao periodo (None = qualquer) e sao seguros."""
     tipos = tipos_pele_da_rotina(perfil)
     nomes = nomes_do_ativo(ativo) if ativo else None
     return [
@@ -352,9 +304,6 @@ def produtos_compativeis(produtos, perfil, periodo, categorias, ativo=None):
 
 def escolher_produto(produtos, perfil, periodo, categorias, preocupacoes,
                      ativo=None, ativos_desejados=(), ativos_em_uso=()):
-    """Melhor produto, nesta ordem: 1) sem acido, se estiver gravida, 2) 'Sensível' se a pele e sensivel,
-    3) traz um ativo desejado, 4) cita o tipo de pele da pessoa (e nao so "Todos os tipos"), 5) pontuacao.
-    Nao repete nem conflita com os ativos que ja estao em uso no periodo."""
     em_uso = set().union(*[nomes_do_ativo(a) for a in ativos_em_uso])
     candidatos = [
         p for p in produtos_compativeis(produtos, perfil, periodo, categorias, ativo)
@@ -376,11 +325,7 @@ def escolher_produto(produtos, perfil, periodo, categorias, preocupacoes,
     ))
 
 
-# --- 2. regra de tratamento ---------------------------------------------------
-
 def buscar_regra(perfil, preocupacao, tipo_interno, produtos):
-    """Regra do perfil. O perfil nao tem subtipo, entao pode haver 2 candidatas:
-    fica a que tem mais ativos seguros com produto no catalogo."""
     candidatas = RegraTratamento.objects.filter(
         faixa_etaria=faixa_etaria(perfil.idade),
         tipo_pele=perfil.tipo_pele,
@@ -400,7 +345,6 @@ def buscar_regra(perfil, preocupacao, tipo_interno, produtos):
 
 
 def ativos_do_tratamento(perfil, sinais_faciais, produtos):
-    """Devolve (ativos seguros em ordem de uso, avisos). Sem regra = lista vazia, sem erro."""
     listas = []
     avisos = []
     for preocupacao in preocupacoes_de_tratamento(perfil, sinais_faciais):
@@ -427,7 +371,6 @@ def ativos_do_tratamento(perfil, sinais_faciais, produtos):
                 avisos.append(aviso(f'{ativo} não entrou na sua rotina: {motivo}.'))
         listas.append(seguros)
 
-    # intercala (1o de cada preocupacao, depois o 2o...) para as duas aparecerem
     intercalados = [a for grupo in zip_longest(*listas) for a in grupo if a]
     return list(dict.fromkeys(intercalados)), avisos
 
@@ -435,7 +378,6 @@ def ativos_do_tratamento(perfil, sinais_faciais, produtos):
 # --- 5. montagem ---------------------------------------------------------------
 
 def montar_passo(titulo, horario, produto, descricao_generica, detalhe=''):
-    # mesmas chaves que o dashboard.html le + produto_id para linkar o produto
     descricao = descricao_generica
     if produto:
         descricao = f'{produto}' + (f' ({detalhe})' if detalhe else '')
@@ -451,7 +393,6 @@ def montar_passo(titulo, horario, produto, descricao_generica, detalhe=''):
 
 
 def escolher_tratamentos(produtos, perfil, periodo, ativos, preocupacoes):
-    """Ate 2 pares (ativo, produto) para o periodo. Ativo que conflita com um ja escolhido e pulado."""
     escolhidos = []
     avisos = []
     for ativo in ativos:
@@ -471,24 +412,20 @@ def escolher_tratamentos(produtos, perfil, periodo, ativos, preocupacoes):
 
 
 def montar_periodo(periodo, perfil, produtos, ativos, com_tratamento, preocupacoes):
-    """Passos de um periodo. Devolve (passos, produtos usados, avisos)."""
     horarios = HORARIOS[periodo]
     tipo = perfil.tipo_pele
     avisos = []
 
-    # tratamento primeiro: os ativos que ele usar nao se repetem na limpeza/hidratante
     tratamentos = []
     if com_tratamento:
         tratamentos, avisos = escolher_tratamentos(produtos, perfil, periodo, ativos, preocupacoes)
         if not tratamentos:
-            # nenhum ativo da regra tem produto: melhor produto de tratamento pela pontuacao
             produto = escolher_produto(produtos, perfil, periodo, CATEGORIAS_TRATAMENTO, preocupacoes)
             if produto:
                 tratamentos = [(produto.ingrediente_principal, produto)]
     ativos_em_uso = [a for a, _ in tratamentos]
     restantes = [a for a in ativos if a not in ativos_em_uso]
 
-    # limpeza: de noite, quem usa maquiagem prefere agua micelar (demaquilante)
     categorias_limpeza = {'Limpeza', 'Água Micelar'}
     limpeza = None
     if periodo == 'Noite' and perfil.usa_maquiagem_diariamente == 'sim':
@@ -530,16 +467,14 @@ def montar_periodo(periodo, perfil, produtos, ativos, com_tratamento, preocupaco
 
 
 def montar_rotina(perfil):
-    """Rotina de manha e noite: {'manha': [...], 'noite': [...], 'avisos': [...]}."""
     if perfil is None:
         return {'manha': [], 'noite': [], 'avisos': []}
 
-    produtos = list(Produto.objects.order_by('id'))  # ~125 linhas: uma consulta so
+    produtos = list(Produto.objects.order_by('id'))  
     sinais = extrair_sinais_faciais(perfil.dados_ia)
     preocupacoes = preocupacoes_do_perfil(perfil, sinais)
     avisos = []
 
-    # menor de 14: sem regra de tratamento, so limpeza, hidratante e protetor
     com_tratamento = perfil.idade >= IDADE_MINIMA_TRATAMENTO
     ativos = []
     if com_tratamento:
@@ -564,7 +499,6 @@ def montar_rotina(perfil):
             'Você indicou que tem alergia, mas não descreveu qual. '
             'Descreva no seu perfil para podermos evitar ingredientes.'))
 
-    # sem repetir, avisos em destaque primeiro e o aviso do rotulo sempre por ultimo
     sem_repetir = list({a['texto']: a for a in avisos}.values())
     sem_repetir.sort(key=lambda a: not a['destaque'])
     sem_repetir.append(aviso(AVISO_ROTULO))

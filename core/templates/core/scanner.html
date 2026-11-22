@@ -7,7 +7,6 @@
 
 <div class="scanner-secao">
     <div class="card card-camera">
-        <!-- caixa que aparece enquanto a camera esta fechada -->
         <div class="scanner-lancador" id="scanner-lancador">
             <div class="lancador-icone"><svg class="icone-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
             <h3>Escanear meu rosto</h3>
@@ -17,7 +16,6 @@
             <p class="scanner-status" id="lancador-status" role="status" aria-live="polite"></p>
         </div>
 
-        <!-- janela da camera: tela cheia no celular e pop-up no computador -->
         <div class="scanner-janela" id="scanner-janela" role="dialog" aria-modal="true" aria-labelledby="janela-titulo" hidden>
         <div class="janela-caixa">
             <div class="janela-topo">
@@ -32,7 +30,6 @@
             <div class="guia-oval" id="guia-oval" aria-hidden="true"></div>
             <span class="camera-aviso" id="camera-aviso"></span>
 
-            <!-- aparece quando nao tem camera -->
             <div class="camera-vazia" id="camera-vazia" hidden>
                 <svg class="icone-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>
                 <strong>Câmera indisponível</strong>
@@ -184,23 +181,22 @@
     const CSRF = '{{ csrf_token }}';
 
     const TIPOS_ACEITOS = ['image/jpeg', 'image/png', 'image/webp'];
-    const TAMANHO_MAX_ORIGINAL = 25 * 1024 * 1024; /* foto da galeria, reduzida antes de enviar */
-    const LADO_MAX = 1280;                         /* lado maior da imagem enviada (px) */
-    const TEMPO_LIMITE_MS = 75000;                 /* desiste da analise depois disso */
+    const TAMANHO_MAX_ORIGINAL = 25 * 1024 * 1024; 
+    const LADO_MAX = 1280;                        
+    const TEMPO_LIMITE_MS = 75000;                
     const TEXTO_VAZIO = 'Faça um scan pra ver o resultado.';
     const BOLINHA = '<i><svg class="icone-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="preenchido" cx="12" cy="12" r="6" fill="currentColor" stroke="none"/></svg></i> ';
 
-    /* ---- guia do rosto (detector gratuito que roda no navegador, nao gasta credito da YouCam) ---- */
     const DETECTOR_JS = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs';
     const DETECTOR_WASM = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm';
     const DETECTOR_MODELO = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
-    const ROSTO_MIN = 0.62;    /* largura do rosto / largura da foto. A YouCam exige mais de 0.60 */
-    const ROSTO_MAX = 0.95;    /* acima disso o rosto esta cortado */
-    const CENTRO_MAX_X = 0.14; /* o centro do rosto pode sair no maximo 14% da largura do centro */
-    const CENTRO_MAX_Y = 0.20; /* e 20% da altura */
-    const CONFIRMACOES = 3;    /* leituras seguidas "ideais" antes de ficar verde (evita piscar) */
-    const BLOQUEAR_FORA_DO_IDEAL = true; /* true: o botao de foto so libera no verde. false: o guia so avisa */
-    const DEPURAR = false;     /* true: mostra no console (F12) a largura do rosto, pra ajustar ROSTO_MIN */
+    const ROSTO_MIN = 0.62;    
+    const ROSTO_MAX = 0.95;   
+    const CENTRO_MAX_X = 0.14; 
+    const CENTRO_MAX_Y = 0.20;
+    const CONFIRMACOES = 3;    
+    const BLOQUEAR_FORA_DO_IDEAL = true; 
+    const DEPURAR = false;     
     const TEXTOS_GUIA = {
         livre: 'Encaixe o rosto no oval',
         carregando: 'Preparando o guia...',
@@ -238,18 +234,18 @@
     const lancadorTexto = document.getElementById('lancador-texto');
     const lancadorStatus = document.getElementById('lancador-status');
 
-    let streamAtivo = null;   /* camera ligada */
-    let videoPronto = false;  /* o video ja tem imagem */
-    let fotoPendente = null;  /* foto escolhida antes de marcar o consentimento */
-    let fonteAtual = null;    /* foto da analise em andamento */
-    let controlador = null;   /* AbortController da analise */
+    let streamAtivo = null;   
+    let videoPronto = false;
+    let fotoPendente = null;  
+    let fonteAtual = null;   
+    let controlador = null;  
     let analisando = false;
-    let urlFoto = null;       /* link temporario da foto na tela */
-    let detector = null;      /* detector de rosto */
-    let detectorEstado = 'carregando'; /* carregando | pronto | falhou */
-    let estadoGuia = 'carregando';     /* estado do oval (ver TEXTOS_GUIA) */
+    let urlFoto = null;      
+    let detector = null;     
+    let detectorEstado = 'carregando';
+    let estadoGuia = 'carregando';    
     let confirmacoes = 0;
-    let laco = null;          /* requestAnimationFrame da deteccao */
+    let laco = null;         
     let ultimaDeteccao = 0;
 
     function pegarCsrfToken() {
@@ -260,10 +256,9 @@
 
     function dizer(texto) {
         status.textContent = texto;
-        lancadorStatus.textContent = texto;   /* aparece tambem na caixa de fora, com a camera fechada */
+        lancadorStatus.textContent = texto;  
     }
 
-    /* mensagem com link (so aceita caminho interno, que comeca com "/") */
     function dizerComLink(texto, destino, rotulo) {
         status.textContent = texto + ' ';
         if (typeof destino === 'string' && destino.charAt(0) === '/') {
@@ -279,7 +274,6 @@
         cameraBadge.innerHTML = BOLINHA + texto;
     }
 
-    /* decide o que fica habilitado */
     function atualizarControles() {
         const consentido = consentimento.checked;
         btnCapturar.disabled = !(consentido && streamAtivo && videoPronto && !analisando && guiaLiberada());
@@ -292,7 +286,6 @@
         dica.hidden = consentido;
     }
 
-    /* ---------- camera ---------- */
     function mostrarCameraVazia(motivo) {
         badge('Câmera indisponível', true);
         cameraVaziaTexto.textContent = motivo;
@@ -342,7 +335,6 @@
         atualizarControles();
     }
 
-    /* desliga a camera (apaga a luz e libera o dispositivo) */
     function pararCamera() {
         if (streamAtivo) {
             streamAtivo.getTracks().forEach(faixa => faixa.stop());
@@ -360,7 +352,6 @@
         atualizarControles();
     });
 
-    /* ---------- guia do rosto ---------- */
     function estadoInicialGuia() {
         if (detectorEstado === 'falhou') return 'livre';
         return detectorEstado === 'pronto' ? 'procurando' : 'carregando';
@@ -382,8 +373,6 @@
         atualizarControles();
     }
 
-    /* parte do video que aparece na tela (o video usa object-fit: cover, entao as bordas ficam cortadas).
-       a foto enviada e recortada nesta mesma area: o que a pessoa ve e o que a YouCam recebe */
     function recorteVisivel() {
         const vw = video.videoWidth, vh = video.videoHeight;
         const cw = video.clientWidth, ch = video.clientHeight;
@@ -410,7 +399,7 @@
         }
         const caixa = rostos
             .map(d => d.boundingBox)
-            .sort((a, b) => b.width * b.height - a.width * a.height)[0];   /* o maior rosto */
+            .sort((a, b) => b.width * b.height - a.width * a.height)[0];   
         const razao = caixa.width / rec.sw;
         const dx = ((caixa.originX + caixa.width / 2) - (rec.sx + rec.sw / 2)) / rec.sw;
         const dy = ((caixa.originY + caixa.height / 2) - (rec.sy + rec.sh / 2)) / rec.sh;
@@ -437,7 +426,7 @@
             laco = requestAnimationFrame(passo);
             if (!streamAtivo || !videoPronto || video.readyState < 2) return;
             const agora = performance.now();
-            if (agora - ultimaDeteccao < 120) return;   /* ~8 leituras por segundo bastam */
+            if (agora - ultimaDeteccao < 120) return;   
             ultimaDeteccao = agora;
             avaliarRosto();
         };
@@ -453,7 +442,7 @@
     async function carregarDetector() {
         const limite = setTimeout(() => {
             if (detectorEstado === 'carregando') {
-                detectorEstado = 'falhou';   /* sem o detector, o oval fica fixo e a foto nao e bloqueada */
+                detectorEstado = 'falhou';   
                 if (streamAtivo) atualizarGuia('livre', true);
                 atualizarControles();
             }
@@ -478,7 +467,6 @@
         atualizarControles();
     }
 
-    /* ---------- janela da camera (tela cheia no celular, pop-up no computador) ---------- */
     function abrirJanela() {
         janela.hidden = false;
         document.body.classList.add('scanner-aberto');
@@ -490,13 +478,12 @@
     }
 
     function fecharCamera() {
-        if (analisando) return;   /* nao fecha no meio da analise */
+        if (analisando) return;  
         pararCamera();
         esconderFoto();
         fecharJanela();
     }
 
-    /* ---------- foto na tela ---------- */
     function mostrarFoto(arquivoOuBlob) {
         if (urlFoto) URL.revokeObjectURL(urlFoto);
         urlFoto = URL.createObjectURL(arquivoOuBlob);
@@ -519,7 +506,6 @@
         aviso.hidden = !streamAtivo;
     }
 
-    /* reduz a imagem e converte pra jpeg (upload mais leve) */
     function desenharReduzido(fonte, largura, altura) {
         const escala = Math.min(1, LADO_MAX / Math.max(largura, altura));
         canvas.width = Math.round(largura * escala);
@@ -528,7 +514,6 @@
         return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
     }
 
-    /* recorta so a parte do video que aparece na tela e converte pra jpeg */
     function desenharRecorte(fonte, rec) {
         const escala = Math.min(1, LADO_MAX / Math.max(rec.sw, rec.sh));
         canvas.width = Math.round(rec.sw * escala);
@@ -553,7 +538,6 @@
         return blob;
     }
 
-    /* ---------- resultados ---------- */
     function normalizar(texto) {
         return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
@@ -591,7 +575,6 @@
             card.querySelector('.indicador-descricao').textContent = indicador.descricao;
 
             if (indicador.nota === null || indicador.nota === undefined) {
-                /* a youcam nao mediu este indicador */
                 selo.textContent = 'Indisponível';
                 selo.className = 'badge-indicador';
                 card.querySelector('.barra-preenchida').style.width = '0%';
@@ -605,7 +588,6 @@
             barra.setAttribute('aria-valuenow', indicador.nota);
         });
 
-        /* imagem montada pelo DOM, so com link https */
         if (typeof dados.mapeamento_facial === 'string' && dados.mapeamento_facial.indexOf('https://') === 0) {
             const imagem = document.createElement('img');
             imagem.alt = 'Mapeamento facial';
@@ -616,7 +598,6 @@
         }
     }
 
-    /* ---------- analise ---------- */
     function cancelarAnalise() {
         if (controlador) {
             controlador.abort();
@@ -644,7 +625,7 @@
             return;
         }
 
-        cancelarAnalise();   /* descarta analise anterior, se houver */
+        cancelarAnalise();  
         limparResultados();
         fotoPendente = null;
         fonteAtual = fonte;
@@ -710,11 +691,9 @@
         }
     }
 
-    /* ---------- eventos ---------- */
     consentimento.addEventListener('change', () => {
         atualizarControles();
         if (consentimento.checked) {
-            /* escolheu a foto antes de consentir: analisa agora */
             if (fotoPendente && !analisando) enviarParaAnalise(fotoPendente);
         } else if (analisando) {
             cancelarAnalise();
@@ -758,7 +737,7 @@
 
     inputGaleria.addEventListener('change', () => {
         const arquivo = inputGaleria.files[0];
-        inputGaleria.value = '';   /* deixa escolher o mesmo arquivo de novo */
+        inputGaleria.value = '';  
         if (!arquivo) return;
 
         if (TIPOS_ACEITOS.indexOf(arquivo.type) === -1) {
@@ -784,16 +763,14 @@
         fonteAtual = null;
         esconderFoto();
         dizer('');
-        iniciarCamera();   /* liga a camera de novo */
+        iniciarCamera(); 
     });
 
-    /* ao sair da pagina: desliga a camera e cancela a analise */
     window.addEventListener('pagehide', () => {
         cancelarAnalise();
         pararCamera();
     });
 
-    /* ultimo scan salvo no perfil (feito no questionario): mostra o resultado ao abrir a pagina */
     const guardado = JSON.parse(document.getElementById('ultimo-scan').textContent);
     if (guardado) {
         preencherResultados(guardado);

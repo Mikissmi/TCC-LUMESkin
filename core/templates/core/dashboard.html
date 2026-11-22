@@ -35,7 +35,7 @@
                 <span class="fototipo-numero">{{ fototipo.romano }}</span>
                 <small>escala Fitzpatrick</small>
             </div>
-            <!-- barra de 6 tons: o da pessoa tem contorno roxo (o aria-label diz o mesmo para quem nao enxerga cores) -->
+
             <ul class="fototipo-escala" role="img" aria-label="Fototipo {{ fototipo.romano }} de VI na escala Fitzpatrick">
                 {% for tom in fototipo.tons %}
                 <li{% if tom.atual %} class="atual"{% endif %} style="background-color: {{ tom.cor }}"></li>
@@ -66,7 +66,6 @@
             </div>
         </div>
 
-        <!-- cada passo e clicavel: marca/desmarca como feito de hoje (salvo no banco por rotina_marcar) -->
         <ul class="rotina-lista" id="rotina-lista" data-url-marcar="{% url 'rotina_marcar' %}" data-csrf="{{ csrf_token }}">
             {% for item in rotina_manha %}
             <li class="rotina-item {{ item.class }}">
@@ -116,7 +115,6 @@
             </small>
         </aside>
 
-    <!-- nota fixa, fora do card: pequena e discreta -->
     <p class="rotina-nota" role="note">{{ aviso_rotulo }}<br>Esta rotina não substitui a avaliação de um dermatologista.</p>
 
     <script>
@@ -132,8 +130,6 @@
             const botoes = document.querySelectorAll('.escolha .btn');
             let periodoAtual = 'manha';
 
-            /* Tres estados (mesma regra do servidor, em views._preparar_passos):
-               feito = verde com check; o primeiro nao feito = "proximo passo" (azul, com botao); os demais = neutros */
             function recalcular(periodo) {
                 let proximoDefinido = false;
                 rotinas[periodo].forEach(item => {
@@ -156,14 +152,13 @@
                 const li = document.createElement('li');
                 li.className = `rotina-item ${item.class}`;
 
-                /* bolinha = botao (teclado e leitor de tela); o clique em qualquer parte do passo, menos no link, tambem marca */
                 const status = document.createElement('button');
                 status.type = 'button';
                 status.className = 'status';
                 status.setAttribute('aria-pressed', item.feito ? 'true' : 'false');
                 status.setAttribute('aria-label', `${item.feito ? 'Desmarcar' : 'Marcar'} ${item.title} como feito`);
                 if (item.icon) {
-                    /* check em texto: o Font Awesome nao e carregado nesta pagina */
+
                     const check = document.createElement('span');
                     check.textContent = '\u2713';
                     check.setAttribute('aria-hidden', 'true');
@@ -179,7 +174,7 @@
                     descricao.append('Pr\u00f3ximo passo \u00b7 ');
                 }
                 if (item.url) {
-                    /* produto do catalogo: o texto vira link para a tela de detalhe */
+
                     const link = document.createElement('a');
                     link.href = item.url;
                     link.textContent = item.description;
@@ -200,13 +195,12 @@
 
                 li.addEventListener('click', (evento) => {
                     if (evento.target.closest('a')) { return; }
-                    /* detail === 0: o "clique" veio do teclado (Enter/Espaco) - so ai devolvemos o foco */
+
                     alternarFeito(item, indice, evento.detail === 0);
                 });
                 return li;
             }
 
-            /* "2 de 4 passos concluidos" e a barra de progresso do periodo mostrado */
             function atualizarResumo(periodo) {
                 const itens = rotinas[periodo];
                 const feitos = itens.filter(item => item.feito).length;
@@ -220,11 +214,11 @@
             function renderizarRotina(periodo, indiceFoco) {
                 periodoAtual = periodo;
                 recalcular(periodo);
-                listaRotina.innerHTML = ''; // string vazia, sem risco - so limpa a lista
+                listaRotina.innerHTML = '';
                 rotinas[periodo].forEach((item, indice) => listaRotina.appendChild(criarItemRotina(item, indice)));
                 atualizarResumo(periodo);
                 if (indiceFoco !== undefined) {
-                    /* quem usa teclado nao perde o lugar quando a lista e redesenhada */
+
                     listaRotina.children[indiceFoco].querySelector('.status').focus();
                 }
             }
@@ -268,7 +262,7 @@
                 const periodo = periodoAtual;
                 item.salvando = true;
                 erroRotina.hidden = true;
-                item.feito = !item.feito;                       /* mostra na hora */
+                item.feito = !item.feito;
                 renderizarRotina(periodo, comFoco ? indice : undefined);
                 try {
                     const resposta = await fetch(listaRotina.dataset.urlMarcar, {
@@ -283,7 +277,7 @@
                     });
                     if (!resposta.ok) { throw new Error('HTTP ' + resposta.status); }
                 } catch (erro) {
-                    item.feito = !item.feito;                   /* nao salvou: volta ao estado anterior */
+                    item.feito = !item.feito;
                     erroRotina.hidden = false;
                     if (periodoAtual === periodo) { renderizarRotina(periodo); } else { recalcular(periodo); }
                 } finally {
@@ -315,4 +309,3 @@
     </div>
     {% endif %}
 {% endblock %}
-

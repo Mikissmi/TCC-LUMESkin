@@ -49,7 +49,6 @@
 
     <div class="perfil-conteudo">
 
-        <!-- ================= RESUMO DA PELE ================= -->
         <div class="perfil-painel" data-painel="resumo" role="tabpanel" {% if aba_ativa != 'resumo' %}hidden{% endif %}>
             <h3>Resumo da pele</h3>
 
@@ -98,7 +97,6 @@
             {% endif %}
         </div>
 
-        <!-- ================= DADOS PESSOAIS ================= -->
         <div class="perfil-painel" data-painel="dados" role="tabpanel" {% if aba_ativa != 'dados' %}hidden{% endif %}>
             <h3>Dados pessoais</h3>
 
@@ -134,7 +132,6 @@
             </form>
         </div>
 
-        <!-- ================= PERFIL DE PELE ================= -->
         <div class="perfil-painel" data-painel="pele" role="tabpanel" {% if aba_ativa != 'pele' %}hidden{% endif %}>
             <h3>Perfil de pele</h3>
 
@@ -165,13 +162,12 @@
 
                 <div class="campo-embutido">
                     <label for="alergias">Alergias e ingredientes a evitar</label>
-                    <!-- sem JS e um campo de texto separado por virgulas; com JS vira etiquetas removiveis -->
+
                     <div class="campo-etiquetas" data-etiquetas>
                         <input type="text" id="alergias" name="alergias" value="{{ alergias_lista|join:', ' }}" placeholder="Ex.: fragrância, parabenos (separe por vírgula)" maxlength="255">
                     </div>
                 </div>
 
-                <!-- aparece so com o objetivo "Reduzir acne" (js abaixo). "Não sei" = vazio -->
                 <div class="campo-embutido" id="campo-tipo-acne" {% if objetivo_atual != 'reduzir acne' %}hidden{% endif %}>
                     <label for="tipo_acne">Tipo de acne</label>
                     <select id="tipo_acne" name="tipo_acne">
@@ -238,7 +234,6 @@
             {% endif %}
         </div>
 
-        <!-- ================= SEGURANÇA ================= -->
         <div class="perfil-painel" data-painel="seguranca" role="tabpanel" {% if aba_ativa != 'seguranca' %}hidden{% endif %}>
             <h3>Segurança</h3>
 
@@ -274,7 +269,6 @@
             </form>
         </div>
 
-        <!-- ================= PRIVACIDADE E DADOS ================= -->
         <div class="perfil-painel" data-painel="privacidade" role="tabpanel" {% if aba_ativa != 'privacidade' %}hidden{% endif %}>
             <h3>Privacidade e dados</h3>
 
@@ -331,7 +325,6 @@
     </div>
 </div>
 
-<!-- confirmacao de exclusao: pede a senha e a palavra EXCLUIR -->
 <dialog id="dialogo-excluir-conta" class="dialogo-perfil" aria-labelledby="titulo-excluir-conta">
     <form method="POST" action="{% url 'excluir_conta' %}" class="perfil-form-embutido">
         {% csrf_token %}
@@ -368,7 +361,6 @@
         paineis.forEach(function (painel) {
             painel.hidden = painel.getAttribute('data-painel') !== nome;
         });
-        // guarda a aba na URL (um F5 volta pra mesma aba)
         history.replaceState(null, '', '?aba=' + nome);
     }
     window.mudarAba = mudarAba;
@@ -377,7 +369,6 @@
         aba.addEventListener('click', function () { mudarAba(aba.getAttribute('data-tab')); });
     });
 
-    // avisa quando o formulario tem alteracoes nao salvas
     document.querySelectorAll('form[data-aviso-alteracoes]').forEach(function (form) {
         var aviso = form.querySelector('.aviso-alteracoes');
         function mostrar() { aviso.hidden = false; }
@@ -385,12 +376,10 @@
         form.addEventListener('change', mostrar);
         form.addEventListener('reset', function () {
             aviso.hidden = true;
-            // o reset do navegador roda depois deste evento; redesenha as etiquetas em seguida
             setTimeout(function () { form.dispatchEvent(new CustomEvent('formulario-resetado')); }, 0);
         });
     });
 
-    // alergias como etiquetas removiveis (o campo de texto continua sendo o que vai no POST)
     document.querySelectorAll('[data-etiquetas]').forEach(function (caixa) {
         var campo = caixa.querySelector('input[name="alergias"]');
         var rotulo = document.querySelector('label[for="' + campo.id + '"]');
@@ -458,7 +447,6 @@
         });
         entrada.addEventListener('blur', adicionar);
 
-        // (Enter nesse campo vira etiqueta: o keydown acima ja impede o envio do formulario)
         caixa.appendChild(entrada);
         form.addEventListener('formulario-resetado', function () { lerCampo(); desenhar(); });
 
@@ -466,7 +454,6 @@
         desenhar();
     });
 
-    // tipo de acne so aparece quando o objetivo e "Reduzir acne" (fora disso volta para "Não sei")
     var selectObjetivo = document.getElementById('campo-objetivo');
     var campoTipoAcne = document.getElementById('campo-tipo-acne');
     if (selectObjetivo && campoTipoAcne) {
@@ -477,7 +464,6 @@
         });
     }
 
-    // janela de confirmacao da exclusao de conta
     var dialogo = document.getElementById('dialogo-excluir-conta');
     var abrir = document.getElementById('abrir-excluir-conta');
     var cancelar = document.getElementById('cancelar-excluir-conta');

@@ -15,10 +15,10 @@
         <div class="logo-area">
                 <img src="{% static 'core/images/LogoLUMESkin.png' %}" class="LUME-Skin_Logo">
         </div>
-        
+
         <h1 class="main-titulo">Sua jornada para uma <span class="highlight">pele bem cuidada</span> começa aqui.</h1>
         <p class="subtitulo">Análise inteligente por IA, recomendações personalizadas e monitoramento contínuo para o seu skincare.</p>
-        
+
         <div class="cards-conteiner">
             <div class="card-scanner">
                 <div class="icone-scanner"><i class="fa-solid fa-expand"></i></div>
@@ -95,7 +95,7 @@
                 <input type="email" name="email" placeholder="seu@email.com" value="{{ email|default:'' }}" required>
             </div>
         </div>
-        
+
         <div class="input-caixa">
             <div class="label-senha">
                 <label>Senha</label>
@@ -105,7 +105,7 @@
                 <input type="password" name="senha" placeholder="••••••••" required>
             </div>
         </div>
-        
+
         <button type="submit" class="botao">Cadastrar e Iniciar &nbsp;</button>
     </form>
 </div>
@@ -118,16 +118,13 @@
 </div>
 
 <script>
-// alterna entre login e cadastro
 document.addEventListener('DOMContentLoaded', function(){
     const tabs = document.querySelectorAll('.tab-btn');
     tabs.forEach(btn=>{
         btn.addEventListener('click', ()=>{
-            // ativa botão
             tabs.forEach(b=>b.classList.remove('active'));
             btn.classList.add('active');
 
-            // mostra formulário alvo
             const targetId = btn.getAttribute('data-target');
             if(!targetId) return;
             const toShow = document.getElementById(targetId);

@@ -47,9 +47,6 @@ logger = logging.getLogger(__name__)
 # ACESSO DO ADMIN - decorator que protege as telas administrativas
 # ==========================================================================
 
-# substitui o @login_required nas telas de administradores: aqui o acesso
-# nao depende de um Usuario cadastrado, so da flag de sessao setada no
-# login com o email/senha fixos do admin (ver tela_login)
 def admin_required(view_func):
     @wraps(view_func)
     def view_wrapper(request, *args, **kwargs):
@@ -96,18 +93,12 @@ def _youcam_error(response, etapa):
 # LEITURA DO RESULTADO DA YOUCAM - extrai notas e imagens do json
 # ==========================================================================
 
-# o json muda de formato conforme o recurso (e o plano), entao nao da pra
-# apontar um caminho fixo: as funcoes abaixo procuram o valor em qualquer nivel
 SUFIXOS_IMAGEM = ('.png', '.jpg', '.jpeg', '.webp')
 INDICADORES_LIDOS = ('oiliness', 'moisture', 'acne', 'pore', 'texture', 'age_spot')
 
-
-# corta a URL no ? para ver so o nome do arquivo (URLs assinadas tem parametros)
 def _caminho_da_url(valor):
     return valor.split('?', 1)[0].lower() if isinstance(valor, str) else ''
 
-
-# procura uma URL de IMAGEM em qualquer nivel do JSON (ignora .zip/.json)
 def _extract_url(value):
     if isinstance(value, str):
         if value.startswith('https://') and _caminho_da_url(value).endswith(SUFIXOS_IMAGEM):
@@ -135,7 +126,6 @@ def _tem_algum_score(resultados):
     return any(_extract_score(resultados, chave) is not None for chave in INDICADORES_LIDOS)
 
 
-# URLs https de arquivos .zip em qualquer nivel do JSON
 def _achar_zips(value):
     achados = []
     if isinstance(value, str):
@@ -150,7 +140,6 @@ def _achar_zips(value):
     return achados
 
 
-# baixa o zip de resultados da YouCam e le o score_info.json dentro dele (ate 20 MB)
 def _ler_score_info_do_zip(url):
     try:
         resposta = requests.get(url, timeout=30)
@@ -167,7 +156,6 @@ def _ler_score_info_do_zip(url):
     return None
 
 
-# garante um dict e, se os scores nao vierem no JSON, busca-os no .zip de resultados
 def _completar_resultados(resultados):
     if not isinstance(resultados, dict):
         resultados = {'output': resultados}
@@ -180,7 +168,6 @@ def _completar_resultados(resultados):
     return resultados
 
 
-# mostra (e, em DEBUG, grava em arquivo) a resposta crua quando nenhum score foi reconhecido
 def _guardar_resposta_para_diagnostico(resultados):
     texto = json.dumps(resultados, ensure_ascii=False, indent=2, default=str)
     logger.warning('[YouCam] Nenhum score reconhecido na resposta. Resposta recebida:')
@@ -198,9 +185,7 @@ def _guardar_resposta_para_diagnostico(resultados):
 # FLUXO COMPLETO DA ANÁLISE - criar a tarefa, esperar e devolver os resultados
 # ==========================================================================
 
-# cria a tarefa de analise com os recursos `acoes` e espera o resultado.
-# Devolve (resultados, motivo). motivo: 'ok', 'recusada' (a YouCam rejeitou a tarefa),
-# 'erro_na_tarefa', 'sem_task_id', 'sem_resultados' ou 'tempo_esgotado'
+# cria a tarefa de analise com os recursos `acoes` e espera o resultado
 def _analisar_na_youcam(headers, file_id, acoes):
     task_payload = {
         'src_file_id': file_id,
@@ -228,7 +213,6 @@ def _analisar_na_youcam(headers, file_id, acoes):
         logger.warning(f'[YouCam] Tarefa criada sem task_id: {resposta_task.text}')
         return None, 'sem_task_id'
 
-    # Consulta o resultado. A API é assíncrona.
     for tentativa in range(30):
         time.sleep(2)
 
@@ -254,7 +238,6 @@ def _analisar_na_youcam(headers, file_id, acoes):
                 logger.warning(f'[YouCam] Tarefa concluída, mas sem results: {payload}')
                 return None, 'sem_resultados'
 
-            # Guarda a URL do resultado, caso exista, para o mapeamento facial.
             if isinstance(resultados, dict):
                 resultado_url = _extract_url(resultados)
                 if resultado_url and 'result_image_url' not in resultados:
@@ -270,17 +253,10 @@ def _analisar_na_youcam(headers, file_id, acoes):
     return None, 'tempo_esgotado'
 
 
-# envia uma imagem local para a YouCam. Passos:
-# 1- File API -> recebe file_id + URL assinada
-# 2- PUT da imagem na URL assinada
-# 3- cria a tarefa Skin Analysis v2.1 usando src_file_id
-# 4- faz polling ate success/error
-# Devolve o dict de resultados ou None se algo falhar.
 def comunicar_youcam_api(foto_arquivo):
     try:
         headers = _youcam_headers()
 
-        # Lê a imagem uma única vez e mantém os bytes disponíveis para o PUT.
         foto_arquivo.seek(0)
         conteudo = foto_arquivo.read()
         if not conteudo:
@@ -291,7 +267,6 @@ def comunicar_youcam_api(foto_arquivo):
         if content_type == 'image/jpg':
             content_type = 'image/jpeg'
 
-        # 1. Solicita URL de upload e file_id.
         file_payload = {
             'files': [{
                 'content_type': content_type,
@@ -326,7 +301,6 @@ def comunicar_youcam_api(foto_arquivo):
             logger.warning(f'[YouCam] File API não retornou file_id/upload URL: {file_info}')
             return None
 
-        # 2. Envia a imagem para a URL assinada.
         upload_headers = dict(upload_request.get('headers') or {})
         upload_headers['Content-Type'] = content_type
         upload_headers['Content-Length'] = str(len(conteudo))
@@ -342,9 +316,6 @@ def comunicar_youcam_api(foto_arquivo):
             _youcam_error(resposta_upload, 'Upload da imagem')
             return None
 
-        # 3 e 4. Cria a tarefa e espera o resultado. Primeiro pede todos os recursos que o
-        # scanner mostra; se a YouCam recusar (plano ou nome de recurso), repete so com os
-        # basicos para a analise nao parar de funcionar.
         resultados, motivo = _analisar_na_youcam(headers, file_id, YOUCAM_ACOES_COMPLETAS)
 
         if resultados is None and motivo in ('recusada', 'erro_na_tarefa'):
@@ -367,15 +338,11 @@ def comunicar_youcam_api(foto_arquivo):
 # SCORE DE SAÚDE DA PELE - calculo feito so com as respostas do questionario
 # ==========================================================================
 
-# score de saude (0 a 100): media ponderada das respostas do questionario.
-# cada resposta vira uma nota e os pesos somam 1.0, entao o resultado
-# tambem fica entre 0 e 100. se a resposta vier invalida, o .get() usa 70
 PESO_FOTOTIPO = 0.40
 PESO_TIPO_PELE = 0.30
 PESO_MAQUIAGEM = 0.15
 PESO_ALERGIA = 0.15
 
-# Nota de 0 a 100 pra cada resposta possivel
 NOTAS_FOTOTIPO = {
     1: 20,   # sempre queima, nunca bronzeia == pouca protecao natural contra UV
     2: 45,   # sempre queima, bronzeia pouco
@@ -422,8 +389,6 @@ def calcular_porcentagem_saude(tipo_pele, fototipo, usa_maquiagem, tem_alergia):
 
 TAMANHO_MAX_FOTO = 5 * 1024 * 1024  # 5 MB (mesmo limite do formulario)
 
-
-# descobre o tipo REAL da imagem pelos primeiros bytes (nao confia no que o navegador informa)
 def _tipo_imagem(arquivo):
     arquivo.seek(0)
     inicio = arquivo.read(12)
@@ -436,8 +401,6 @@ def _tipo_imagem(arquivo):
         return 'image/webp'
     return None
 
-
-# True se for JPG/PNG/WebP de ate 5 MB. Ajusta o content_type para o tipo real da imagem
 def _foto_valida(arquivo):
     if arquivo.size > TAMANHO_MAX_FOTO:
         return False
@@ -447,8 +410,6 @@ def _foto_valida(arquivo):
     arquivo.content_type = tipo
     return True
 
-
-# converte para int sem estourar erro 500 quando o valor vem vazio, texto ou fora da faixa
 def _inteiro(valor, padrao=0, minimo=None, maximo=None):
     try:
         numero = int(valor)
@@ -458,13 +419,12 @@ def _inteiro(valor, padrao=0, minimo=None, maximo=None):
         return padrao
     return numero
 
-
 # ==========================================================================
 # AUTENTICAÇÃO - cadastro, login e logout
 # ==========================================================================
 
 def _erro_no_cadastro(nome, email, senha):
-    # None se os dados servem para criar a conta; senao, a mensagem pro usuario
+    
     if not nome or not email or not senha:
         return 'Preencha nome, e-mail e senha.'
     if Usuario.objects.filter(email__iexact=email).exists():
@@ -477,7 +437,7 @@ def _erro_no_cadastro(nome, email, senha):
 
 
 def tela_cadastro(request):
-    # verifica se o navegador está enviando dados através de um formulário (POST)
+    
     if request.method == "POST":
         nome = request.POST.get('nome', '').strip()
         email = request.POST.get('email', '').strip()
@@ -491,23 +451,17 @@ def tela_cadastro(request):
                 'email': email,
             })
 
-        # cria e salva um novo registro na tabela usuario, já com a senha criptografada
         novo_usuario = Usuario.objects.create_user(
             email=email,
             nome_usuario=nome,
             password=senha,
         )
 
-        # faz o login automático e manda o usuário para a tela do questionário
         auth_login(request, novo_usuario)
         return redirect('questionario')
 
-    # se a requisição NÃO for POST, exibe a tela com o formulário de cadastro limpo.
     return render(request, 'core/cadastro.html')
 
-
-# compara com o email/senha do admin (hmac.compare_digest nao vaza, pelo tempo de
-# resposta, quantos caracteres estavam certos)
 def _eh_login_do_admin(email, senha):
     email_certo = hmac.compare_digest((email or '').encode(), settings.ADMIN_LOGIN_EMAIL.encode())
     senha_certa = hmac.compare_digest((senha or '').encode(), settings.ADMIN_LOGIN_SENHA.encode())
@@ -519,9 +473,6 @@ def tela_login(request):
         email = request.POST.get('email')
         senha = request.POST.get('senha')
 
-        # login do administrador: mesma tela/form, mas com email e senha fixos
-        # (definidos em ADMIN_LOGIN_EMAIL / ADMIN_LOGIN_SENHA) em vez de um
-        # Usuario cadastrado no banco
         if _eh_login_do_admin(email, senha):
             request.session['admin_logado'] = True
             return redirect('administradores')
@@ -538,20 +489,16 @@ def tela_login(request):
 
 
 def tela_logout(request):
-    # so desloga por POST (evita logout por link)
     if request.method == "POST":
         auth_logout(request)
     return redirect('login')
-
 
 # ==========================================================================
 # QUESTIONÁRIO E DASHBOARD - coleta das respostas, calculo do score e tela inicial
 # ==========================================================================
 
-
 def tela_questionario(request):
     if request.method == "POST":
-        # sem login nao ha perfil pra salvar (e a foto gastaria credito da YouCam a toa)
         if not request.user.is_authenticated:
             return redirect('login')
 
@@ -595,7 +542,6 @@ def tela_questionario(request):
         gestante = request.POST.get('gestante')
         tipo_acne = request.POST.get('tipo_acne')
 
-        # Calcula a porcentagem usando as respostas do questionário
         porcentagem_regras = calcular_porcentagem_saude(
             tipo_pele=tipo_pele,
             fototipo=pontos_sol + 1,
@@ -604,21 +550,17 @@ def tela_questionario(request):
         )
         porcentagem_calculada = porcentagem_regras
 
-        # Faz a análise facial somente com consentimento
         if quer_escanear and consentimento_foto:
             foto_usuario = request.FILES.get('foto_rosto')
 
-            # mesmo limite por hora do scanner: cada analise gasta credito da YouCam
             if foto_usuario and _foto_valida(foto_usuario) and _passou_limite_scanner(request.user):
                 resultados_ia = comunicar_youcam_api(foto_usuario)
 
-        # Processa os resultados somente se a IA retornou dados
         if resultados_ia:
             resultados_ia = _completar_resultados(resultados_ia)
             dados_ia_json = json.dumps(resultados_ia)
             foto_salva = _url_https(_extract_url(resultados_ia))
 
-            # Monta os indicadores para a tela do scanner
             indicadores = [
                 montar_indicador(
                     'oleosidade',
@@ -667,7 +609,6 @@ def tela_questionario(request):
 
             redirecionar_para_scanner = True
 
-            # A IA contribui com 50% do score, usando os dados disponíveis
             porcentagem_ia = _media_ou_none(
                 _extract_score(resultados_ia, 'acne'),
                 _extract_score(resultados_ia, 'pore'),
@@ -679,7 +620,6 @@ def tela_questionario(request):
                     (porcentagem_ia + porcentagem_regras) / 2
                 )
 
-        # Salva ou atualiza o perfil
         if request.user.is_authenticated:
             perfil, _ = PerfilDermatologico.objects.get_or_create(
                 usuario=request.user,
@@ -746,14 +686,12 @@ def tela_questionario(request):
             elif objective and objective != 'reduzir acne':
                 perfil.tipo_acne = ''
 
-            # Só substitui a análise anterior se houve um novo scan
             if dados_ia_json:
                 perfil.dados_ia = dados_ia_json
                 perfil.url_mapeamento_facial = foto_salva
 
             perfil.save()
 
-            # Redireciona conforme o fluxo realizado
             if redirecionar_para_scanner:
                 return redirect('scanner')
 
@@ -925,7 +863,6 @@ DESCRICOES_INDICADOR = {
 
 
 def montar_indicador(chave, nota):
-    # sem nota = a youcam nao mediu esse indicador nessa foto
     if nota is None:
         return {
             'chave': chave,
@@ -941,18 +878,15 @@ def montar_indicador(chave, nota):
 
 
 def _media_ou_none(*notas):
-    # media das notas que existem (None se nao houver nenhuma)
     validas = [nota for nota in notas if nota is not None]
     return sum(validas) / len(validas) if validas else None
 
 
 def _url_https(valor):
-    # so aceita https (o link vai pro src da imagem)
     return valor if isinstance(valor, str) and valor.startswith('https://') else None
 
 
 def _passou_limite_scanner(usuario):
-    # cada analise gasta credito da youcam, entao limita a 3 por usuario por hora (usa o cache)
     chave = f'scanner_analises_{usuario.pk}'
     cache.add(chave, 0, 3600)
     try:
@@ -964,15 +898,12 @@ def _passou_limite_scanner(usuario):
 
 
 def scanner_analisar(request):
-    # recebe a foto do scanner e devolve a analise em json
     if request.method != 'POST':
         return JsonResponse({'erro': 'Método não permitido.'}, status=405)
 
-    # sem @login_required porque o js espera json, nao um redirect
     if not request.user.is_authenticated:
         return JsonResponse({'erro': 'Faça login para usar o scanner.'}, status=401)
 
-    # foto do rosto e dado sensivel: so com consentimento
     if request.POST.get('consentimento') != '1':
         return JsonResponse({'erro': 'É preciso aceitar o consentimento para analisar a foto.'}, status=400)
 
@@ -1022,7 +953,6 @@ def scanner_analisar(request):
     score_geral = round(sum(notas_disponiveis) / len(notas_disponiveis))
     mapeamento_facial = _url_https(_extract_url(resultados_ia))
 
-    # guarda o resultado na sessao ate o usuario confirmar o salvamento
     request.session['ultimo_scan'] = {
         'dados_ia': json.dumps(resultados_ia),
         'foto_rosto': mapeamento_facial,
@@ -1038,7 +968,6 @@ def scanner_analisar(request):
 
 
 def scanner_salvar(request):
-    # salva o ultimo resultado do scanner no perfil do usuario
     if request.method != 'POST':
         return JsonResponse({'erro': 'Método não permitido.'}, status=405)
 
@@ -1049,7 +978,6 @@ def scanner_salvar(request):
     if not ultimo_scan:
         return JsonResponse({'erro': 'Faça um scan antes de salvar o check-in.'}, status=400)
 
-    # sem perfil nao salva: precisa responder o questionario antes
     perfil = PerfilDermatologico.objects.filter(usuario=request.user).first()
     if not perfil:
         return JsonResponse({
@@ -1067,7 +995,6 @@ def scanner_salvar(request):
 
 
 def tela_scanner(request):
-    # se o usuario ja fez um scan (no questionario), mostra o ultimo resultado salvo no perfil
     ultimo_scan = None
     if request.user.is_authenticated:
         perfil = PerfilDermatologico.objects.filter(usuario=request.user).first()
@@ -1163,7 +1090,6 @@ def _indicadores_do_perfil(perfil):
         chave: _extract_score(resultados, chave)
         for chave in INDICADORES_LIDOS
     }
-    # indicador mostrado na tela -> nota (acne e poros viram uma nota so, pela media)
     notas_por_titulo = (
         ('oleosidade', notas['oiliness']),
         ('hidratacao', notas['moisture']),
@@ -1224,8 +1150,6 @@ def tela_perfil(request):
 
 @login_required
 def editar_perfil(request):
-    # o formulario de edicao fica embutido direto na aba "Preferencias da Conta"
-    # de core/perfil.html, entao essa view so processa o POST e volta pra la
     perfil = PerfilDermatologico.objects.filter(usuario=request.user).first()
     if not perfil:
         return redirect('questionario')
@@ -1482,8 +1406,6 @@ def tela_administradores(request):
 
 @admin_required
 def artigo_form(request, artigo_id=None):
-    # os formularios de criar/editar artigo ficam embutidos direto em
-    # core/administradores.html, entao essa view so processa o POST
     if request.method != 'POST':
         return redirect('administradores')
 
@@ -1554,8 +1476,8 @@ def especialista_excluir(request, especialista_id):
 # ==========================================================================
 
 def indice_uv(request):
-    # O Vercel informa a localização aproximada (pelo IP) nestes cabeçalhos.
-    # Se não vierem, usa Porto Alegre como reserva.
+    # O Vercel informa a localização aproximada (pelo IP)
+    # Se não vierem, usa Porto Alegre como reserva
     meta = request.META
     try:
         lat = float(meta.get("HTTP_X_VERCEL_IP_LATITUDE", "-30.03"))

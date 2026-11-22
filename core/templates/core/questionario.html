@@ -13,7 +13,6 @@
             <h1>Questionário Dermatológico</h1>
             <p>Responda com sinceridade para personalizarmos sua rotina.</p>
 
-            <!-- barra de progresso (preenchida pelo js no fim da pagina) -->
             <div class="progresso-questionario" role="progressbar" aria-label="Progresso do questionário"
                  aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progresso">
                 <div class="progresso-topo">
@@ -28,13 +27,11 @@
             <form method="POST" action="{% url 'questionario' %}" enctype="multipart/form-data" class="questionario-form" id="questionario-form">
                 {% csrf_token %}
 
-                <!-- linha 1 -->
                 <div class="form-bloco" data-pergunta>
                     <label class="pergunta" for="idade">1. Qual a sua idade?</label>
                     <input type="number" name="idade" id="idade" min="10" max="120" required>
                 </div>
 
-                <!-- linha 2: perguntas 2 e 2.1 lado a lado -->
                 <div class="form-bloco bloco-meio" data-pergunta>
                     <label class="pergunta" for="tipo_pele">2. Qual o seu tipo de pele predominante?</label>
                     <select name="tipo_pele" id="tipo_pele" required>
@@ -56,7 +53,6 @@
                     </fieldset>
                 </div>
 
-                <!-- linha 3 -->
                 <div class="form-bloco" data-pergunta>
                     <label class="pergunta" for="objetivo">3. Qual é o seu principal objetivo com o skincare?</label>
                     <select name="objetivo" id="objetivo" required>
@@ -69,11 +65,8 @@
                         <option value="melhorar textura">Melhorar Textura</option>
                         <option value="outro">Outro</option>
                     </select>
-                    <!-- aparece so com "Outro" (js) -->
                     <input type="text" name="objetivo_outro" id="objetivo_outro" placeholder="Especifique..."
                            aria-label="Especifique seu objetivo" hidden>
-                    <!-- NOVO: aparece so com "Reduzir Acne" (js). "Não sei" tem valor "nao-sei" para a barra de
-                         progresso contar como respondido; a view trata qualquer valor desconhecido como "não sei" -->
                     <div id="bloco-tipo-acne" hidden>
                         <label for="tipo_acne" class="pergunta pergunta-sub">3.1. Qual tipo de acne você tem?</label>
                         <select name="tipo_acne" id="tipo_acne">
@@ -86,7 +79,6 @@
                     </div>
                 </div>
 
-                <!-- linha 4 -->
                 <div class="form-bloco bloco-meio" data-pergunta>
                     <fieldset>
                         <legend class="pergunta">4. Você tem histórico de alergias na pele?</legend>
@@ -95,12 +87,10 @@
                             <label><input type="radio" name="alergias" value="1" required> Sim</label>
                         </div>
                     </fieldset>
-                    <!-- aparece so com "Sim" (js) -->
                     <input type="text" name="descricaoalergia" id="descricaoalergia" placeholder="Descreva as alergias..."
                            aria-label="Descreva suas alergias" hidden>
                 </div>
 
-                <!-- NOVO: pergunta 4.1 -->
                 <div class="form-bloco bloco-meio" data-pergunta>
                     <fieldset>
                         <legend class="pergunta pergunta-sub">4.1. Sua pele é sensível? (arde, fica vermelha ou coça com facilidade ao usar produtos)</legend>
@@ -111,7 +101,6 @@
                     </fieldset>
                 </div>
 
-                <!-- NOVO: pergunta 4.2 -->
                 <div class="form-bloco bloco-meio" data-pergunta>
                     <fieldset>
                         <legend class="pergunta pergunta-sub">4.2. Você está grávida? (alguns ativos não são indicados na gravidez)</legend>
@@ -132,7 +121,6 @@
                     </fieldset>
                 </div>
 
-                <!-- linha 5: escala de Fitzpatrick (6 fototipos) -->
                 <div class="form-bloco" data-pergunta>
                     <fieldset>
                         <legend class="pergunta">6. Como sua pele reage ao sol?</legend>
@@ -147,7 +135,6 @@
                     </fieldset>
                 </div>
 
-                <!-- linha 6 -->
                 <div class="form-bloco" data-pergunta>
                     <label class="pergunta" for="sono_horas">7. Em média, quantas horas você dorme por noite?</label>
                     <select name="sono_horas" id="sono_horas" required>
@@ -159,7 +146,6 @@
                     </select>
                 </div>
 
-                <!-- linha 7 -->
                 <div class="form-bloco" data-pergunta>
                     <label class="pergunta" for="exercicio_frequencia">8. Com que frequência você pratica atividade física?</label>
                     <select name="exercicio_frequencia" id="exercicio_frequencia" required>
@@ -171,7 +157,6 @@
                     </select>
                 </div>
 
-                <!-- linha 8 -->
                 <div class="form-bloco bloco-meio" data-pergunta>
                     <fieldset>
                         <legend class="pergunta">9. Com que frequência você usa protetor solar no rosto?</legend>
@@ -194,7 +179,6 @@
                     </fieldset>
                 </div>
 
-                <!-- linha 9: opcional, nao conta na barra de progresso -->
                 <div class="form-bloco">
                     <fieldset>
                         <legend class="pergunta">11. Deseja realizar um escaneamento facial com IA para uma análise mais precisa? (Opcional)</legend>
@@ -204,7 +188,6 @@
                         </div>
                     </fieldset>
 
-                    <!-- upload e consentimento aparecem so com "Sim" (js) -->
                     <div id="bloco-upload-foto" class="bloco-upload-foto" hidden>
                    <label class="consentimento" for="consentimento-foto">
                    <input type="checkbox" name="consentimento_foto" value="1" id="consentimento-foto">
@@ -222,7 +205,6 @@
 
                        <button type="button" class="btn" id="btn-abrir-camera" disabled>Tirar foto agora</button>
 
-                       <!-- janela da camera: tela cheia no celular e pop-up no computador (mesmo visual do scanner) -->
                        <div class="scanner-janela" id="camera-area" role="dialog" aria-modal="true" aria-labelledby="janela-titulo" hidden>
                         <div class="janela-caixa">
                             <div class="janela-topo">
@@ -290,7 +272,6 @@
         const inputFoto = document.getElementById('input-foto');
         const consentimentoFoto = document.getElementById('consentimento-foto');
 
-        /* foto: validacao e preview */
         const TIPOS_FOTO = ['image/jpeg', 'image/png', 'image/webp'];
         const TAMANHO_MAX_FOTO = 5 * 1024 * 1024; /* 5 MB */
 
@@ -312,7 +293,6 @@
             fotoErro.hidden = !mensagem;
         }
 
-        /* limpa o input, o preview e o erro */
         function limparFoto() {
             if (urlPreview) {
                 URL.revokeObjectURL(urlPreview);
@@ -354,7 +334,6 @@
             fotoPreview.hidden = false;
         });
 
-        /* imagem corrompida: o navegador nao consegue mostrar */
         fotoPreviewImg.addEventListener('error', function () {
             if (!fotoPreviewImg.getAttribute('src')) { return; }
             limparFoto();
@@ -366,18 +345,17 @@
             inputFoto.focus();
         });
 
-        /* camera: janela com guia do rosto (igual ao scanner). a foto vai para o mesmo input de arquivo */
         const DETECTOR_JS = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs';
         const DETECTOR_WASM = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm';
         const DETECTOR_MODELO = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
-        const ROSTO_MIN = 0.62;    /* largura do rosto / largura da foto. A YouCam exige mais de 0.60 */
-        const ROSTO_MAX = 0.95;    /* acima disso o rosto esta cortado */
-        const CENTRO_MAX_X = 0.14; /* o centro do rosto pode sair no maximo 14% da largura do centro */
-        const CENTRO_MAX_Y = 0.20; /* e 20% da altura */
-        const CONFIRMACOES = 3;    /* leituras seguidas "ideais" antes de ficar verde (evita piscar) */
-        const BLOQUEAR_FORA_DO_IDEAL = true; /* true: o botao de foto so libera no verde. false: o guia so avisa */
-        const DEPURAR = false;     /* true: mostra no console (F12) a largura do rosto, pra ajustar ROSTO_MIN */
-        const LADO_MAX = 1280;     /* lado maior da imagem enviada (px) */
+        const ROSTO_MIN = 0.62;    
+        const ROSTO_MAX = 0.95;   
+        const CENTRO_MAX_X = 0.14; 
+        const CENTRO_MAX_Y = 0.20; 
+        const CONFIRMACOES = 3;   
+        const BLOQUEAR_FORA_DO_IDEAL = true; 
+        const DEPURAR = false;    
+        const LADO_MAX = 1280;     
         const TEXTOS_GUIA = {
             livre: 'Encaixe o rosto no oval',
             carregando: 'Preparando o guia...',
@@ -399,7 +377,7 @@
         let streamCamera = null;
         let videoPronto = false;
         let detector = null;
-        let detectorEstado = 'ocioso';      /* ocioso | carregando | pronto | falhou */
+        let detectorEstado = 'ocioso';     
         let estadoGuia = 'carregando';
         let confirmacoes = 0;
         let laco = null;
@@ -430,8 +408,6 @@
             atualizarBotaoCapturar();
         }
 
-        /* parte do video que aparece na tela (object-fit: cover corta as bordas).
-           a foto enviada e recortada nesta mesma area: o que a pessoa ve e o que a YouCam recebe */
         function recorteVisivel() {
             const vw = cameraVideo.videoWidth, vh = cameraVideo.videoHeight;
             const cw = cameraVideo.clientWidth, ch = cameraVideo.clientHeight;
@@ -458,7 +434,7 @@
             }
             const caixa = rostos
                 .map(function (d) { return d.boundingBox; })
-                .sort(function (a, b) { return b.width * b.height - a.width * a.height; })[0];   /* o maior rosto */
+                .sort(function (a, b) { return b.width * b.height - a.width * a.height; })[0]; 
             const razao = caixa.width / rec.sw;
             const dx = ((caixa.originX + caixa.width / 2) - (rec.sx + rec.sw / 2)) / rec.sw;
             const dy = ((caixa.originY + caixa.height / 2) - (rec.sy + rec.sh / 2)) / rec.sh;
@@ -485,7 +461,7 @@
                 laco = requestAnimationFrame(passo);
                 if (!streamCamera || !videoPronto || cameraVideo.readyState < 2) { return; }
                 const agora = performance.now();
-                if (agora - ultimaDeteccao < 120) { return; }   /* ~8 leituras por segundo bastam */
+                if (agora - ultimaDeteccao < 120) { return; }   
                 ultimaDeteccao = agora;
                 avaliarRosto();
             }
@@ -498,13 +474,12 @@
             confirmacoes = 0;
         }
 
-        /* baixa o detector (gratuito, roda no navegador) so uma vez e so quando a pessoa vai usar a camera */
         async function garantirDetector() {
             if (detectorEstado !== 'ocioso') { return; }
             detectorEstado = 'carregando';
             const limite = setTimeout(function () {
                 if (detectorEstado === 'carregando') {
-                    detectorEstado = 'falhou';   /* sem o detector, o oval fica fixo e a foto nao e bloqueada */
+                    detectorEstado = 'falhou';  
                     if (streamCamera) { atualizarGuia('livre', true); }
                     atualizarBotaoCapturar();
                 }
@@ -582,7 +557,6 @@
                 const dt = new DataTransfer();
                 dt.items.add(arquivo);
                 inputFoto.files = dt.files;
-                /* dispara o seu "change": ele valida o tamanho e mostra o preview */
                 inputFoto.dispatchEvent(new Event('change'));
                 pararCamera();
             }, 'image/jpeg', 0.9);
@@ -593,7 +567,6 @@
             if (evento.key === 'Escape' && !cameraArea.hidden) { pararCamera(); }
         });
 
-        /* mostra ou esconde um campo (so e obrigatorio enquanto aparece) */
         function alternarTexto(campo, mostrar) {
             campo.hidden = !mostrar;
             campo.required = mostrar;
@@ -602,19 +575,15 @@
         }
 
         function atualizarCamposCondicionais() {
-            /* pergunta 3: "Outro" */
             alternarTexto(objetivoOutro, selectObjetivo.value === 'outro');
 
-            /* NOVO - pergunta 3.1: so para "Reduzir Acne" (fora disso volta para "Não sei") */
             const eAcne = selectObjetivo.value === 'reduzir acne';
             blocoTipoAcne.hidden = !eAcne;
             if (!eAcne) { selectTipoAcne.value = 'nao-sei'; }
 
-            /* pergunta 4: "Sim" */
             const alergia = form.querySelector('[name="alergias"]:checked');
             alternarTexto(descricaoAlergia, !!alergia && alergia.value === '1');
 
-            /* pergunta 11: "Sim" pede foto e consentimento */
             const escanear = document.getElementById('scan-sim').checked;
             blocoUpload.hidden = !escanear;
             inputFoto.required = escanear;
@@ -623,7 +592,6 @@
             consentimentoFoto.checked = false;
         }
 
-            /* a foto (arquivo ou camera) so e liberada depois do consentimento */
             const consentiu = escanear && consentimentoFoto.checked;
             inputFoto.disabled = !consentiu;
             btnAbrirCamera.disabled = !consentiu;
@@ -634,8 +602,6 @@
             }
         }
 
-        /* barra de progresso: conta os cards [data-pergunta] respondidos
-           (select/numero com valor e radio marcado). texto livre e a pergunta 11 nao contam */
         const blocos = Array.from(form.querySelectorAll('.form-bloco[data-pergunta]'));
         const barra = document.getElementById('progresso-barra');
         const texto = document.getElementById('progresso-texto');
@@ -678,7 +644,6 @@
         form.addEventListener('input', atualizarProgresso);
         form.addEventListener('change', atualizarTudo);
 
-        /* ao carregar: o navegador pode restaurar respostas, entao sincroniza tudo */
         atualizarTudo();
     })();
     </script>
