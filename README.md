@@ -1,12 +1,36 @@
-# TCC - LUME Skin
+# LUME Skin
 
-Repositório do Trabalho de Conclusão de Curso de Técnico em Desenvolvimento de Sistemas do IFSul – Campus Sapucaia do Sul, desenvolvido pelas alunas Mariana e Caroline para a obtenção do diploma.
+Trabalho de Conclusão de Curso do Técnico em Desenvolvimento de Sistemas, IFSul – Câmpus Sapucaia do Sul.
 
-O LUME Skin é um aplicativo web (Django) que monta uma rotina de skincare personalizada a partir de um questionário e, opcionalmente, de uma análise facial por inteligência artificial (YouCam). Ele também recomenda produtos, lista artigos científicos e especialistas, e mostra o índice UV da região.
+Autoras: Mariana Garibaldi  e Caroline Berghahn 
+Orientação: Mateus Raeder e Stefanie Merker
+Site publicado: https://lumeskin-eight.vercel.app/
 
-## Executar localmente
+## Sobre o projeto
 
-Com Python 3.12 ou superior instalado, abra o PowerShell na pasta do projeto e execute:
+O LUME Skin é um site que monta uma rotina de skincare para a pessoa. Ela responde um questionário sobre a pele e os hábitos e, se quiser, tira uma foto do rosto para uma análise por inteligência artificial. Com isso o sistema mostra uma rotina de manhã e outra de noite, sugere produtos, calcula uma pontuação de saúde da pele e mostra o índice UV da cidade.
+
+A ideia nasceu de um projeto que fizemos no segundo ano do curso e que refizemos para o TCC. O artigo entregue à banca explica a pesquisa, os requisitos e a avaliação com usuários. Este repositório é o código do protótipo.
+
+## O que o sistema faz
+
+- Cadastro, login e logout de usuários.
+- Questionário dermatológico com 11 perguntas (tipo de pele, objetivo, alergias, sensibilidade, gravidez, reação ao sol, sono, exercício, protetor solar, preferência de produto).
+- Análise facial opcional pela API da YouCam, só depois de o usuário aceitar o termo de consentimento. A foto não fica guardada, só o resultado e o link da imagem de mapeamento.
+- Dashboard com a rotina da manhã e da noite, onde dá para marcar cada passo como feito.
+- Catálogo de produtos com filtro por categoria e página de detalhe.
+- Artigos científicos e contatos de especialistas.
+- Índice UV da região, pela API Open-Meteo.
+- Perfil do usuário: editar dados e respostas, trocar senha, apagar a imagem do scan, exportar os dados em JSON e excluir a conta.
+- Painel do administrador (`/administradores/`) para cadastrar, editar e excluir artigos e especialistas.
+
+## Tecnologias
+
+Python 3.12+ e Django 6, HTML, CSS e JavaScript puro no front, SQLite no computador local e PostgreSQL quando publicado, WhiteNoise para os arquivos estáticos e Vercel para a hospedagem. Serviços externos: YouCam API (análise de pele) e Open-Meteo (índice UV).
+
+## Como rodar no seu computador
+
+Precisa do Python 3.12 ou mais novo. No PowerShell, dentro da pasta do projeto:
 
 ```powershell
 py -3 -m venv .venv
@@ -19,32 +43,54 @@ python manage.py import_tratamento_csv core/data/tratamento_skincare.csv
 python manage.py runserver
 ```
 
-Os dois comandos `import_*` carregam o catálogo de produtos e as regras de tratamento; sem eles a página de produtos e a rotina ficam vazias. Rodar de novo apenas atualiza os dados, sem duplicar.
+Depois é só abrir http://127.0.0.1:8000.
 
-A pasta `banco_de_dados/` traz os scripts SQL (PostgreSQL) para consulta da banca: `01_estrutura.sql` (as 7 tabelas, comentadas, conforme o DER do artigo), `02_dados_produtos.sql` (145 produtos) e `03_dados_regras_tratamento.sql` (1.120 regras). Para criar o banco do sistema, o caminho oficial é `migrate` + os dois comandos `import_*` acima.
+Os dois comandos `import_*` carregam os 145 produtos e as 1.120 regras de tratamento. Sem eles a página de produtos e a rotina ficam vazias. Dá para rodar de novo sem duplicar nada.
 
-## Configuração (arquivo `.env`)
+## Arquivo .env
 
-O arquivo `.env.example` lista todas as variáveis. As principais:
+O `.env.example` mostra todas as variáveis. As que importam:
 
 | Variável | Para que serve |
 | --- | --- |
-| `SECRET_KEY` | Chave secreta do Django (obrigatória em produção). |
-| `DEBUG` | `True` em desenvolvimento, `False` em produção. |
-| `YOUCAM_API_KEY` | Chave da API YouCam; sem ela o scanner de pele não funciona. |
-| `ADMIN_LOGIN_EMAIL` / `ADMIN_LOGIN_SENHA` | Login do painel `/administradores/` (artigos e especialistas). |
-| `DATABASE_URL` ou `DB_*` | PostgreSQL. Sem configuração, usa SQLite local (`db.sqlite3`). |
+| `SECRET_KEY` | chave secreta do Django |
+| `DEBUG` | `True` para desenvolver, `False` quando publicado |
+| `YOUCAM_API_KEY` | chave da YouCam. Sem ela o scanner não funciona |
+| `ADMIN_LOGIN_EMAIL` e `ADMIN_LOGIN_SENHA` | login do painel do administrador |
+| `DATABASE_URL` | endereço do PostgreSQL. Sem isso o projeto usa o SQLite local |
 
-## Testes
+O login do administrador não é um cadastro: é um e-mail e uma senha definidos nessas variáveis, usados na mesma tela de login dos usuários.
 
-```powershell
-python manage.py test
+O scanner tem um limite de 3 análises por hora por usuário, porque cada análise gasta créditos da YouCam.
+
+## Banco de dados
+
+O banco é criado pelo próprio Django com `python manage.py migrate`. Para quem quiser só ler a estrutura, a pasta `banco_de_dados/` tem os scripts SQL (PostgreSQL):
+
+- `01_estrutura.sql`: as 7 tabelas, com comentários
+- `02_dados_produtos.sql`: os produtos
+- `03_dados_regras_tratamento.sql`: as regras de tratamento
+
+## Organização do código
+
+```
+configuracao/     configurações do Django e rotas principais
+core/
+  models.py       tabelas do banco
+  views.py        telas e lógica das páginas
+  recomendacao.py monta a rotina e escolhe os produtos
+  youcam_utils.py leitura dos resultados da YouCam
+  templates/      páginas HTML
+  static/         CSS e imagens
+  data/           CSVs de produtos e de regras de tratamento
+  management/commands/   comandos que importam os CSVs
+  tests.py        testes
 ```
 
-## Publicação (Vercel)
+## Publicação
 
-O `build_files.sh` roda `collectstatic` e `migrate`. As variáveis acima devem ser cadastradas em *Environment Variables* no painel do Vercel.
+O site fica na Vercel. O `build_files.sh` roda o `collectstatic` e o `migrate`. As variáveis do `.env` são cadastradas em *Environment Variables* no painel da Vercel.
 
 ## Aviso
 
-A rotina e as recomendações são apenas apoio e não substituem a avaliação de um dermatologista.
+O LUME Skin é um apoio ao cuidado com a pele e não substitui a avaliação de um dermatologista.
