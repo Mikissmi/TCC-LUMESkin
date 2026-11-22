@@ -8,9 +8,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'configuracao.settings')
 
 application = get_wsgi_application()
 
-
-# Prepara o banco sozinho quando o site sobe no Vercel:
-# cria as tabelas e, se nao houver produtos, importa o CSV
 def _preparar_banco():
     from django.core.management import call_command
     from core.models import Produto
@@ -19,7 +16,6 @@ def _preparar_banco():
     if not Produto.objects.exists():
         csv_path = Path(__file__).resolve().parent.parent / 'core' / 'data' / 'produtos_skincare.csv'
         call_command('import_produtos_csv', str(csv_path))
-
 
 try:
     _preparar_banco()

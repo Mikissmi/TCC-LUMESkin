@@ -5,7 +5,6 @@ from django.db import transaction
 
 from core.models import RegraTratamento
 
-# colunas que o CSV precisa ter ("Concentrações" existe no arquivo, mas é ignorada)
 COLUNAS = [
     'Faixa_Etária', 'Tipo_de_Pele', 'Subtipo_de_Pele', 'Sensibilidade',
     'Preocupação', 'Tipo_Interno', 'Ingredientes', 'Efeitos',
@@ -23,7 +22,6 @@ class Command(BaseCommand):
         criadas = 0
         atualizadas = 0
 
-        # utf-8-sig: o arquivo vem com BOM, que senão grudaria no nome da 1ª coluna
         try:
             arquivo = open(csv_path, encoding='utf-8-sig')
         except FileNotFoundError:
@@ -35,9 +33,8 @@ class Command(BaseCommand):
             if faltando:
                 raise CommandError(f'Colunas que faltam no CSV: {", ".join(faltando)}')
 
-            # tudo ou nada: se uma linha der erro, nenhuma regra fica pela metade no banco
             with transaction.atomic():
-                for numero, linha in enumerate(leitor, start=2):  # linha 1 é o cabeçalho
+                for numero, linha in enumerate(leitor, start=2):
                     sensibilidade = linha['Sensibilidade'].strip().lower()
                     if sensibilidade not in ('sim', 'não'):
                         raise CommandError(f'Linha {numero}: Sensibilidade deve ser Sim ou Não.')

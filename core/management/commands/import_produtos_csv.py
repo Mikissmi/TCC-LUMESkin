@@ -13,7 +13,6 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('csv_path', type=str)
 
-    # tudo ou nada: se uma linha der erro, nenhum produto fica pela metade no banco
     @transaction.atomic
     def handle(self, *args, **options):
         csv_path = options['csv_path']
@@ -27,8 +26,7 @@ class Command(BaseCommand):
 
         with arquivo:
             leitor = csv.DictReader(arquivo)
-            for numero, linha in enumerate(leitor, start=2):  # linha 1 é o cabeçalho
-                # linha cortada: o DictReader preenche as colunas que faltam com None
+            for numero, linha in enumerate(leitor, start=2):
                 if None in linha.values() or None in linha:
                     raise CommandError(f'Linha {numero}: o número de colunas não bate com o cabeçalho.')
                 defaults = {
