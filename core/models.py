@@ -78,6 +78,7 @@ class PerfilDermatologico(models.Model):
     ]
     exercicio_frequencia = models.CharField(max_length=10, choices=EXERCICIO_CHOICES, default='1-2x')
 
+    sensibilidade = models.BooleanField(default=False)
     gestante = models.BooleanField(default=False)
 
     TIPO_ACNE_CHOICES = [(t, t) for t in ['Comedonal', 'Inflamatória', 'Nodular', 'Cística']]
